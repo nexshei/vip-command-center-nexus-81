@@ -8,6 +8,9 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import LoginForm from "@/components/auth/LoginForm";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import Dashboard from "@/pages/Dashboard";
+import Bookings from "@/pages/Bookings";
+import Clients from "@/pages/Clients";
+import Subscriptions from "@/pages/Subscriptions";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
@@ -34,6 +37,17 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <DashboardLayout>{children}</DashboardLayout>;
 };
 
+const ComingSoonPage = ({ title, description }: { title: string; description: string }) => (
+  <div className="p-6">
+    <h1 className="text-2xl font-serif text-vip-black">{title}</h1>
+    <p className="text-vip-gold/80 mt-2">{description}</p>
+    <div className="mt-8 text-center text-vip-gold/60">
+      <p>Feature under development</p>
+      <p className="text-sm mt-2">Coming soon...</p>
+    </div>
+  </div>
+);
+
 const AppRoutes = () => {
   const { user } = useAuth();
   
@@ -47,90 +61,81 @@ const AppRoutes = () => {
       } />
       <Route path="/bookings" element={
         <ProtectedRoute>
-          <div className="p-6">
-            <h1 className="text-2xl font-serif text-vip-navy">Bookings & Events</h1>
-            <p className="text-vip-steel mt-2">Manage VIP appointments and protocol events</p>
-          </div>
+          <Bookings />
         </ProtectedRoute>
       } />
       <Route path="/clients" element={
         <ProtectedRoute>
-          <div className="p-6">
-            <h1 className="text-2xl font-serif text-vip-navy">Client Management</h1>
-            <p className="text-vip-steel mt-2">VIP client profiles and relationship management</p>
-          </div>
+          <Clients />
         </ProtectedRoute>
       } />
       <Route path="/subscriptions" element={
         <ProtectedRoute>
-          <div className="p-6">
-            <h1 className="text-2xl font-serif text-vip-navy">VIP Subscriptions</h1>
-            <p className="text-vip-steel mt-2">Manage premium memberships and services</p>
-          </div>
+          <Subscriptions />
         </ProtectedRoute>
       } />
       <Route path="/careers" element={
         <ProtectedRoute>
-          <div className="p-6">
-            <h1 className="text-2xl font-serif text-vip-navy">Career Portal</h1>
-            <p className="text-vip-steel mt-2">Recruitment and staff management</p>
-          </div>
+          <ComingSoonPage 
+            title="Career Portal" 
+            description="Recruitment and staff management" 
+          />
         </ProtectedRoute>
       } />
       <Route path="/communications" element={
         <ProtectedRoute>
-          <div className="p-6">
-            <h1 className="text-2xl font-serif text-vip-navy">Communications</h1>
-            <p className="text-vip-steel mt-2">Client communications and campaigns</p>
-          </div>
+          <ComingSoonPage 
+            title="Communications" 
+            description="Client communications and campaigns" 
+          />
         </ProtectedRoute>
       } />
       <Route path="/analytics" element={
         <ProtectedRoute>
-          <div className="p-6">
-            <h1 className="text-2xl font-serif text-vip-navy">Analytics & Reports</h1>
-            <p className="text-vip-steel mt-2">Performance metrics and business intelligence</p>
-          </div>
+          <ComingSoonPage 
+            title="Analytics & Reports" 
+            description="Performance metrics and business intelligence" 
+          />
         </ProtectedRoute>
       } />
       <Route path="/audit" element={
         <ProtectedRoute>
-          <div className="p-6">
-            <h1 className="text-2xl font-serif text-vip-navy">Audit & Security</h1>
-            <p className="text-vip-steel mt-2">System logs and security monitoring</p>
-          </div>
+          <ComingSoonPage 
+            title="Audit & Security" 
+            description="System logs and security monitoring" 
+          />
         </ProtectedRoute>
       } />
       <Route path="/settings" element={
         <ProtectedRoute>
-          <div className="p-6">
-            <h1 className="text-2xl font-serif text-vip-navy">System Settings</h1>
-            <p className="text-vip-steel mt-2">Platform configuration and preferences</p>
-          </div>
+          <ComingSoonPage 
+            title="System Settings" 
+            description="Platform configuration and preferences" 
+          />
         </ProtectedRoute>
       } />
       <Route path="/services" element={
         <ProtectedRoute>
-          <div className="p-6">
-            <h1 className="text-2xl font-serif text-vip-navy">Protocol Services</h1>
-            <p className="text-vip-steel mt-2">Service templates and protocol management</p>
-          </div>
+          <ComingSoonPage 
+            title="Protocol Services" 
+            description="Service templates and protocol management" 
+          />
         </ProtectedRoute>
       } />
       <Route path="/staff" element={
         <ProtectedRoute>
-          <div className="p-6">
-            <h1 className="text-2xl font-serif text-vip-navy">Staff Management</h1>
-            <p className="text-vip-steel mt-2">Team coordination and assignments</p>
-          </div>
+          <ComingSoonPage 
+            title="Staff Management" 
+            description="Team coordination and assignments" 
+          />
         </ProtectedRoute>
       } />
       <Route path="/reports" element={
         <ProtectedRoute>
-          <div className="p-6">
-            <h1 className="text-2xl font-serif text-vip-navy">Reports</h1>
-            <p className="text-vip-steel mt-2">Generate and export service reports</p>
-          </div>
+          <ComingSoonPage 
+            title="Reports" 
+            description="Generate and export service reports" 
+          />
         </ProtectedRoute>
       } />
       <Route path="*" element={<NotFound />} />

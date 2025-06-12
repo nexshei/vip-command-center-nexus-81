@@ -14,7 +14,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -131,12 +131,12 @@ const VipSidebar = () => {
   const menuItems = user?.role === 'super_admin' ? superAdminMenuItems : protocolAdminMenuItems;
 
   const handleNavigation = (url: string) => {
-    if (url === '/dashboard') {
-      navigate(url);
-    } else {
-      // For now, show a placeholder for other pages
-      alert(`Navigation to ${url} - Feature coming soon!`);
-    }
+    navigate(url);
+  };
+
+  const handleNotifications = () => {
+    // Handle notifications - for now show an alert
+    alert('Notifications panel - Feature coming soon!');
   };
 
   return (
@@ -146,13 +146,13 @@ const VipSidebar = () => {
           <div className="relative">
             <img 
               src="/lovable-uploads/af24075c-d7ee-41bc-a3d3-d50d1b766753.png" 
-              alt="Sir Ole VVIP Protocol" 
+              alt="Sir Dennis Olele VVIP Protocol" 
               className="h-10 w-10 object-contain animate-pulse-gold"
             />
           </div>
           <div>
-            <h2 className="text-lg font-serif font-bold text-vip-gold">Sir Ole VVIP</h2>
-            <p className="text-xs text-vip-gold/70">Protocol Dashboard</p>
+            <h2 className="text-lg font-serif font-bold text-vip-gold">Sir Dennis Olele</h2>
+            <p className="text-xs text-vip-gold/70">VVIP Protocol Dashboard</p>
           </div>
         </div>
       </SidebarHeader>
@@ -190,7 +190,10 @@ const VipSidebar = () => {
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
               <SidebarMenuItem>
-                <SidebarMenuButton className="hover:bg-vip-gold/10 hover:text-vip-gold-light transition-all duration-200 rounded-lg text-vip-gold/80">
+                <SidebarMenuButton 
+                  className="hover:bg-vip-gold/10 hover:text-vip-gold-light transition-all duration-200 rounded-lg text-vip-gold/80"
+                  onClick={handleNotifications}
+                >
                   <Bell className="h-5 w-5" />
                   <span>Notifications</span>
                   <Badge className="ml-auto bg-vip-red text-white text-xs">3</Badge>
@@ -213,14 +216,13 @@ const VipSidebar = () => {
       <SidebarFooter className="p-4 border-t border-vip-gold/20">
         <div className="flex items-center space-x-3 p-3 rounded-lg vip-glass border border-vip-gold/20">
           <Avatar className="h-10 w-10 border-2 border-vip-gold">
-            <AvatarImage src={user?.avatar} />
             <AvatarFallback className="bg-vip-gold text-black font-bold">
-              {user?.name?.split(' ').map(n => n[0]).join('') || 'VIP'}
+              DO
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-vip-gold truncate">
-              {user?.name}
+              Sir Dennis Olele
             </p>
             <p className="text-xs text-vip-gold/70 truncate">
               {user?.email}

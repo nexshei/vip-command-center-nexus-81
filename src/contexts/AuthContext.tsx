@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export type UserRole = 'super_admin' | 'protocol_admin';
@@ -32,6 +31,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Mock users for demo
+  const mockUsers = {
+    'super@sirole.com': {
+      id: '1',
+      email: 'super@sirole.com',
+      name: 'Sir Dennis Olele',
+      role: 'super_admin' as const,
+      avatar: null
+    },
+    'protocol@sirole.com': {
+      id: '2', 
+      email: 'protocol@sirole.com',
+      name: 'Sir Dennis Olele',
+      role: 'protocol_admin' as const,
+      avatar: null
+    }
+  };
+
   useEffect(() => {
     // Check for stored user session
     const storedUser = localStorage.getItem('vip_admin_user');
@@ -47,23 +64,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     // Mock users for demo
-    const mockUsers: Record<string, User> = {
-      'super@sirole.com': {
-        id: '1',
-        name: 'Sir Oliver Wellington',
-        email: 'super@sirole.com',
-        role: 'super_admin',
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face'
-      },
-      'protocol@sirole.com': {
-        id: '2',
-        name: 'Victoria Pemberton',
-        email: 'protocol@sirole.com',
-        role: 'protocol_admin',
-        avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face'
-      }
-    };
-
     const user = mockUsers[email];
     if (!user || password !== 'vip123') {
       throw new Error('Invalid credentials');
