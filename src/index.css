@@ -3,79 +3,76 @@
 @tailwind components;
 @tailwind utilities;
 
-/* VIP Theme Design System */
+/* VIP Theme Design System - Sir Ole VVIP Protocol */
 @layer base {
   :root {
-    /* VIP Theme Colors */
-    --vip-navy: #1C4E80;
-    --vip-charcoal: #202020;
-    --vip-gold: #C49C59;
-    --vip-copper: #EA6A47;
-    --vip-light-bg: #F8F9FA;
-    --vip-steel: #7E909A;
-    --vip-success: #2E8B57;
+    /* Sir Ole VVIP Brand Colors */
+    --vip-black: #000000;
+    --vip-gold: #D4AF37;
+    --vip-gold-light: #F4E4BC;
+    --vip-gold-dark: #B8941F;
+    --vip-red: #DC143C;
+    --vip-shield-border: #C9B037;
+    
+    /* iOS 26 Inspired Colors */
+    --ios-blue: #007AFF;
+    --ios-orange: #FF9500;
+    --ios-green: #4CD964;
+    --ios-red: #FF3B30;
+    --ios-purple: #5856D6;
+    --ios-pink: #FFD3E0;
+    
+    /* Background & Glass Effects */
+    --bg-primary: #000000;
+    --bg-secondary: #1a1a1a;
+    --bg-tertiary: #2a2a2a;
+    --glass-overlay: rgba(212, 175, 55, 0.1);
+    --glass-border: rgba(212, 175, 55, 0.2);
+    
+    /* Neutrals */
+    --neutral-light: #F7F7F7;
+    --neutral-medium: #D6CEC3;
+    --neutral-dark: #BDBEC2;
     
     /* shadcn variables adapted for VIP theme */
-    --background: 248 249 250; /* #F8F9FA */
-    --foreground: 32 32 32; /* #202020 */
+    --background: 0 0 0; /* Black */
+    --foreground: 212 175 55; /* Gold */
 
-    --card: 255 255 255;
-    --card-foreground: 32 32 32;
+    --card: 26 26 26;
+    --card-foreground: 212 175 55;
 
-    --popover: 255 255 255;
-    --popover-foreground: 32 32 32;
+    --popover: 0 0 0;
+    --popover-foreground: 212 175 55;
 
-    --primary: 28 78 128; /* VIP Navy */
-    --primary-foreground: 255 255 255;
+    --primary: 212 175 55; /* VIP Gold */
+    --primary-foreground: 0 0 0;
 
-    --secondary: 196 156 89; /* VIP Gold */
-    --secondary-foreground: 255 255 255;
+    --secondary: 42 42 42; /* Dark Gray */
+    --secondary-foreground: 212 175 55;
 
-    --muted: 241 245 249;
-    --muted-foreground: 126 144 154;
+    --muted: 26 26 26;
+    --muted-foreground: 184 148 31;
 
-    --accent: 234 106 71; /* VIP Copper */
+    --accent: 220 20 60; /* VIP Red */
     --accent-foreground: 255 255 255;
 
-    --destructive: 239 68 68;
+    --destructive: 255 59 48; /* iOS Red */
     --destructive-foreground: 255 255 255;
 
-    --border: 226 232 240;
-    --input: 226 232 240;
-    --ring: 28 78 128;
+    --border: 42 42 42;
+    --input: 42 42 42;
+    --ring: 212 175 55;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
-    --sidebar-background: 28 78 128;
-    --sidebar-foreground: 255 255 255;
-    --sidebar-primary: 196 156 89;
-    --sidebar-primary-foreground: 255 255 255;
-    --sidebar-accent: 234 106 71;
+    --sidebar-background: 0 0 0;
+    --sidebar-foreground: 212 175 55;
+    --sidebar-primary: 212 175 55;
+    --sidebar-primary-foreground: 0 0 0;
+    --sidebar-accent: 220 20 60;
     --sidebar-accent-foreground: 255 255 255;
-    --sidebar-border: 22 63 102;
-    --sidebar-ring: 196 156 89;
-  }
-
-  .dark {
-    --background: 32 32 32;
-    --foreground: 248 249 250;
-    --card: 39 39 42;
-    --card-foreground: 248 249 250;
-    --popover: 39 39 42;
-    --popover-foreground: 248 249 250;
-    --primary: 28 78 128;
-    --primary-foreground: 255 255 255;
-    --secondary: 196 156 89;
-    --secondary-foreground: 255 255 255;
-    --muted: 39 39 42;
-    --muted-foreground: 126 144 154;
-    --accent: 234 106 71;
-    --accent-foreground: 255 255 255;
-    --destructive: 239 68 68;
-    --destructive-foreground: 255 255 255;
-    --border: 63 63 70;
-    --input: 63 63 70;
-    --ring: 196 156 89;
+    --sidebar-border: 42 42 42;
+    --sidebar-ring: 212 175 55;
   }
 }
 
@@ -84,32 +81,45 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-vip-black text-vip-gold font-sans antialiased;
+    background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
   }
 }
 
 /* VIP Custom Styles */
 @layer utilities {
   .vip-gradient {
-    background: linear-gradient(135deg, #1C4E80 0%, #2563EB 100%);
+    background: linear-gradient(135deg, #000000 0%, #D4AF37 100%);
   }
   
   .vip-gold-gradient {
-    background: linear-gradient(135deg, #C49C59 0%, #F59E0B 100%);
+    background: linear-gradient(135deg, #D4AF37 0%, #F4E4BC 100%);
   }
   
-  .vip-copper-gradient {
-    background: linear-gradient(135deg, #EA6A47 0%, #F97316 100%);
+  .vip-red-gradient {
+    background: linear-gradient(135deg, #DC143C 0%, #FF6B6B 100%);
   }
   
   .vip-glass {
-    backdrop-filter: blur(10px);
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(20px);
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+  
+  .vip-glass-dark {
+    backdrop-filter: blur(20px);
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    box-shadow: 0 8px 32px rgba(212, 175, 55, 0.1);
   }
   
   .vip-shadow {
-    box-shadow: 0 20px 25px -5px rgba(28, 78, 128, 0.1), 0 10px 10px -5px rgba(28, 78, 128, 0.04);
+    box-shadow: 0 20px 25px -5px rgba(212, 175, 55, 0.1), 0 10px 10px -5px rgba(212, 175, 55, 0.04);
+  }
+  
+  .vip-glow {
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
   }
   
   .vip-hover-lift {
@@ -117,8 +127,68 @@
   }
   
   .vip-hover-lift:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 25px 50px -12px rgba(28, 78, 128, 0.25);
+    transform: translateY(-4px);
+    box-shadow: 0 25px 50px -12px rgba(212, 175, 55, 0.25);
+  }
+
+  .vip-black {
+    color: #000000;
+  }
+
+  .vip-gold {
+    color: #D4AF37;
+  }
+
+  .vip-red {
+    color: #DC143C;
+  }
+
+  .bg-vip-black {
+    background-color: #000000;
+  }
+
+  .bg-vip-gold {
+    background-color: #D4AF37;
+  }
+
+  .bg-vip-red {
+    background-color: #DC143C;
+  }
+
+  .border-vip-gold {
+    border-color: #D4AF37;
+  }
+
+  .ios-blue {
+    color: #007AFF;
+  }
+
+  .ios-green {
+    color: #4CD964;
+  }
+
+  .ios-orange {
+    color: #FF9500;
+  }
+
+  .ios-red {
+    color: #FF3B30;
+  }
+
+  .bg-ios-blue {
+    background-color: #007AFF;
+  }
+
+  .bg-ios-green {
+    background-color: #4CD964;
+  }
+
+  .bg-ios-orange {
+    background-color: #FF9500;
+  }
+
+  .bg-ios-red {
+    background-color: #FF3B30;
   }
 }
 
@@ -147,10 +217,19 @@
 
 @keyframes pulse-gold {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(196, 156, 89, 0.7);
+    box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7);
   }
   50% {
-    box-shadow: 0 0 0 10px rgba(196, 156, 89, 0);
+    box-shadow: 0 0 0 20px rgba(212, 175, 55, 0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
   }
 }
 
@@ -163,5 +242,11 @@
 }
 
 .animate-pulse-gold {
-  animation: pulse-gold 2s infinite;
+  animation: pulse-gold 3s infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.3), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
 }

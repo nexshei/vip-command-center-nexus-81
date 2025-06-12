@@ -20,14 +20,31 @@ export default {
 		},
 		extend: {
 			colors: {
-				// VIP Theme Colors
-				'vip-navy': '#1C4E80',
-				'vip-charcoal': '#202020',
-				'vip-gold': '#C49C59',
-				'vip-copper': '#EA6A47',
-				'vip-light': '#F8F9FA',
-				'vip-steel': '#7E909A',
-				'vip-success': '#2E8B57',
+				// Sir Ole VVIP Brand Colors
+				'vip-black': '#000000',
+				'vip-gold': '#D4AF37',
+				'vip-gold-light': '#F4E4BC',
+				'vip-gold-dark': '#B8941F',
+				'vip-red': '#DC143C',
+				'vip-shield-border': '#C9B037',
+				
+				// iOS 26 Inspired Colors
+				'ios-blue': '#007AFF',
+				'ios-orange': '#FF9500',
+				'ios-green': '#4CD964',
+				'ios-red': '#FF3B30',
+				'ios-purple': '#5856D6',
+				'ios-pink': '#FFD3E0',
+				
+				// Background & Glass Effects
+				'bg-primary': '#000000',
+				'bg-secondary': '#1a1a1a',
+				'bg-tertiary': '#2a2a2a',
+				
+				// Neutrals
+				'neutral-light': '#F7F7F7',
+				'neutral-medium': '#D6CEC3',
+				'neutral-dark': '#BDBEC2',
 				
 				// shadcn integration
 				border: 'hsl(var(--border))',
@@ -84,6 +101,9 @@ export default {
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
 			},
+			backdropBlur: {
+				xs: '2px',
+			},
 			keyframes: {
 				'accordion-down': {
 					from: { height: '0' },
@@ -102,8 +122,12 @@ export default {
 					'100%': { transform: 'translateX(0)' }
 				},
 				'pulse-gold': {
-					'0%, 100%': { boxShadow: '0 0 0 0 rgba(196, 156, 89, 0.7)' },
-					'50%': { boxShadow: '0 0 0 10px rgba(196, 156, 89, 0)' }
+					'0%, 100%': { boxShadow: '0 0 0 0 rgba(212, 175, 55, 0.7)' },
+					'50%': { boxShadow: '0 0 0 20px rgba(212, 175, 55, 0)' }
+				},
+				'shimmer': {
+					'0%': { backgroundPosition: '-200% 0' },
+					'100%': { backgroundPosition: '200% 0' }
 				}
 			},
 			animation: {
@@ -111,7 +135,8 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in': 'fade-in 0.6s ease-out',
 				'slide-in-right': 'slide-in-right 0.3s ease-out',
-				'pulse-gold': 'pulse-gold 2s infinite'
+				'pulse-gold': 'pulse-gold 3s infinite',
+				'shimmer': 'shimmer 2s infinite'
 			}
 		}
 	},

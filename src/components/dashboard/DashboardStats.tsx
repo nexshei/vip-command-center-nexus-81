@@ -31,19 +31,21 @@ const StatCard: React.FC<StatCardProps> = ({
   description 
 }) => {
   const changeColor = {
-    positive: 'text-vip-success',
-    negative: 'text-red-500',
-    neutral: 'text-vip-steel'
+    positive: 'ios-green',
+    negative: 'ios-red',
+    neutral: 'text-vip-gold/70'
   }[changeType];
 
   return (
-    <Card className="vip-hover-lift border-0 vip-shadow">
+    <Card className="vip-hover-lift border-vip-gold/20 vip-glass-dark vip-glow">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-vip-steel">{title}</CardTitle>
-        <Icon className="h-5 w-5 text-vip-gold" />
+        <CardTitle className="text-sm font-medium text-vip-gold/80">{title}</CardTitle>
+        <div className="p-2 rounded-lg bg-vip-gold/10">
+          <Icon className="h-5 w-5 text-vip-gold" />
+        </div>
       </CardHeader>
       <CardContent>
-        <div className="text-3xl font-bold text-vip-navy mb-1">{value}</div>
+        <div className="text-3xl font-bold text-vip-gold mb-1">{value}</div>
         {change && (
           <div className={`text-sm ${changeColor} flex items-center`}>
             <TrendingUp className="h-3 w-3 mr-1" />
@@ -51,7 +53,7 @@ const StatCard: React.FC<StatCardProps> = ({
           </div>
         )}
         {description && (
-          <p className="text-xs text-vip-steel mt-2">{description}</p>
+          <p className="text-xs text-vip-gold/60 mt-2">{description}</p>
         )}
       </CardContent>
     </Card>
@@ -86,7 +88,7 @@ const DashboardStats = () => {
     },
     {
       title: "Revenue",
-      value: "£89.2K",
+      value: "KSH 8.9M",
       change: "+15% from last month",
       changeType: "positive" as const,
       icon: TrendingUp,
@@ -102,6 +104,7 @@ const DashboardStats = () => {
       client: "Lord Pemberton",
       time: "2 minutes ago",
       status: "confirmed",
+      amount: "KSH 250,000",
       icon: CheckCircle
     },
     {
@@ -111,6 +114,7 @@ const DashboardStats = () => {
       client: "Embassy of Monaco",
       time: "15 minutes ago",
       status: "pending",
+      amount: "KSH 500,000",
       icon: AlertCircle
     },
     {
@@ -120,6 +124,7 @@ const DashboardStats = () => {
       client: "Royal Danish Consulate",
       time: "1 hour ago",
       status: "completed",
+      amount: "KSH 750,000",
       icon: CheckCircle
     },
     {
@@ -129,17 +134,18 @@ const DashboardStats = () => {
       client: "Sir Wellington Estate",
       time: "3 hours from now",
       status: "scheduled",
+      amount: "KSH 320,000",
       icon: Clock
     }
   ];
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'confirmed': return 'bg-vip-success text-white';
-      case 'pending': return 'bg-vip-copper text-white';
-      case 'completed': return 'bg-vip-navy text-white';
-      case 'scheduled': return 'bg-vip-gold text-white';
-      default: return 'bg-vip-steel text-white';
+      case 'confirmed': return 'bg-ios-green text-black';
+      case 'pending': return 'bg-ios-orange text-black';
+      case 'completed': return 'bg-ios-blue text-white';
+      case 'scheduled': return 'bg-vip-gold text-black';
+      default: return 'bg-neutral-dark text-black';
     }
   };
 
@@ -155,9 +161,9 @@ const DashboardStats = () => {
       </div>
 
       {/* Recent Activity */}
-      <Card className="border-0 vip-shadow">
+      <Card className="border-vip-gold/20 vip-glass-dark vip-glow">
         <CardHeader>
-          <CardTitle className="text-xl font-serif text-vip-navy flex items-center">
+          <CardTitle className="text-xl font-serif text-vip-gold flex items-center">
             <Clock className="h-5 w-5 mr-2 text-vip-gold" />
             Recent Activity
           </CardTitle>
@@ -166,21 +172,22 @@ const DashboardStats = () => {
           {recentActivity.map((activity, index) => (
             <div 
               key={activity.id} 
-              className="flex items-center space-x-4 p-4 rounded-lg hover:bg-vip-light/50 transition-colors animate-fade-in-up"
+              className="flex items-center space-x-4 p-4 rounded-lg hover:bg-vip-gold/5 transition-all duration-300 border border-vip-gold/10 vip-hover-lift animate-fade-in-up"
               style={{ animationDelay: `${(index + 4) * 0.1}s` }}
             >
-              <div className="flex-shrink-0">
+              <div className="flex-shrink-0 p-2 rounded-lg bg-vip-gold/10">
                 <activity.icon className="h-5 w-5 text-vip-gold" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-vip-navy">{activity.title}</p>
-                <p className="text-xs text-vip-steel">{activity.client}</p>
+                <p className="text-sm font-medium text-vip-gold">{activity.title}</p>
+                <p className="text-xs text-vip-gold/70">{activity.client}</p>
+                <p className="text-xs font-semibold text-vip-gold mt-1">{activity.amount}</p>
               </div>
               <div className="flex items-center space-x-2">
                 <Badge className={getStatusColor(activity.status)}>
                   {activity.status}
                 </Badge>
-                <span className="text-xs text-vip-steel">{activity.time}</span>
+                <span className="text-xs text-vip-gold/60">{activity.time}</span>
               </div>
             </div>
           ))}

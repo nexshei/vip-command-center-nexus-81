@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Sidebar,
   SidebarContent,
@@ -14,6 +15,7 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Crown,
@@ -37,6 +39,8 @@ import {
 
 const VipSidebar = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const superAdminMenuItems = [
     {
@@ -126,24 +130,36 @@ const VipSidebar = () => {
 
   const menuItems = user?.role === 'super_admin' ? superAdminMenuItems : protocolAdminMenuItems;
 
+  const handleNavigation = (url: string) => {
+    if (url === '/dashboard') {
+      navigate(url);
+    } else {
+      // For now, show a placeholder for other pages
+      alert(`Navigation to ${url} - Feature coming soon!`);
+    }
+  };
+
   return (
-    <Sidebar className="border-r border-sidebar-border/20">
-      <SidebarHeader className="p-6 border-b border-sidebar-border/20">
+    <Sidebar className="border-r border-vip-gold/20 vip-glass-dark">
+      <SidebarHeader className="p-6 border-b border-vip-gold/20">
         <div className="flex items-center space-x-3">
           <div className="relative">
-            <Crown className="h-8 w-8 text-sidebar-primary" />
-            <div className="absolute -top-1 -right-1 w-3 h-3 bg-sidebar-accent rounded-full animate-pulse"></div>
+            <img 
+              src="/lovable-uploads/af24075c-d7ee-41bc-a3d3-d50d1b766753.png" 
+              alt="Sir Ole VVIP Protocol" 
+              className="h-10 w-10 object-contain animate-pulse-gold"
+            />
           </div>
           <div>
-            <h2 className="text-lg font-serif font-bold text-sidebar-foreground">Sir Ole VVIP</h2>
-            <p className="text-xs text-sidebar-foreground/70">Protocol Dashboard</p>
+            <h2 className="text-lg font-serif font-bold text-vip-gold">Sir Ole VVIP</h2>
+            <p className="text-xs text-vip-gold/70">Protocol Dashboard</p>
           </div>
         </div>
       </SidebarHeader>
 
       <SidebarContent className="px-4">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/80 font-medium mb-3">
+          <SidebarGroupLabel className="text-vip-gold/80 font-medium mb-3">
             {user?.role === 'super_admin' ? 'Super Admin' : 'Protocol Admin'}
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -151,13 +167,15 @@ const VipSidebar = () => {
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
-                    asChild 
-                    className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all duration-200 rounded-lg"
+                    className={`hover:bg-vip-gold/10 hover:text-vip-gold-light transition-all duration-200 rounded-lg ${
+                      location.pathname === item.url ? 'bg-vip-gold/20 text-vip-gold' : 'text-vip-gold/80'
+                    }`}
+                    onClick={() => handleNavigation(item.url)}
                   >
-                    <a href={item.url} className="flex items-center space-x-3 p-3">
+                    <div className="flex items-center space-x-3 p-3 w-full">
                       <item.icon className="h-5 w-5" />
                       <span className="font-medium">{item.title}</span>
-                    </a>
+                    </div>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -166,19 +184,23 @@ const VipSidebar = () => {
         </SidebarGroup>
 
         <SidebarGroup className="mt-8">
-          <SidebarGroupLabel className="text-sidebar-foreground/80 font-medium mb-3">
+          <SidebarGroupLabel className="text-vip-gold/80 font-medium mb-3">
             Quick Actions
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
               <SidebarMenuItem>
-                <SidebarMenuButton className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all duration-200 rounded-lg">
+                <SidebarMenuButton className="hover:bg-vip-gold/10 hover:text-vip-gold-light transition-all duration-200 rounded-lg text-vip-gold/80">
                   <Bell className="h-5 w-5" />
                   <span>Notifications</span>
+                  <Badge className="ml-auto bg-vip-red text-white text-xs">3</Badge>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all duration-200 rounded-lg">
+                <SidebarMenuButton 
+                  className="hover:bg-vip-gold/10 hover:text-vip-gold-light transition-all duration-200 rounded-lg text-vip-gold/80"
+                  onClick={() => handleNavigation('/bookings')}
+                >
                   <Zap className="h-5 w-5" />
                   <span>Quick Book</span>
                 </SidebarMenuButton>
@@ -188,19 +210,19 @@ const VipSidebar = () => {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t border-sidebar-border/20">
-        <div className="flex items-center space-x-3 p-3 rounded-lg bg-sidebar-accent/10">
-          <Avatar className="h-10 w-10 border-2 border-sidebar-primary">
+      <SidebarFooter className="p-4 border-t border-vip-gold/20">
+        <div className="flex items-center space-x-3 p-3 rounded-lg vip-glass border border-vip-gold/20">
+          <Avatar className="h-10 w-10 border-2 border-vip-gold">
             <AvatarImage src={user?.avatar} />
-            <AvatarFallback className="bg-sidebar-primary text-sidebar-primary-foreground font-bold">
+            <AvatarFallback className="bg-vip-gold text-black font-bold">
               {user?.name?.split(' ').map(n => n[0]).join('') || 'VIP'}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-sidebar-foreground truncate">
+            <p className="text-sm font-medium text-vip-gold truncate">
               {user?.name}
             </p>
-            <p className="text-xs text-sidebar-foreground/70 truncate">
+            <p className="text-xs text-vip-gold/70 truncate">
               {user?.email}
             </p>
           </div>
@@ -209,7 +231,7 @@ const VipSidebar = () => {
         <Button 
           onClick={logout}
           variant="ghost" 
-          className="w-full justify-start text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent/20 mt-2"
+          className="w-full justify-start text-vip-gold/80 hover:text-vip-gold hover:bg-vip-gold/10 mt-2"
         >
           <LogOut className="h-4 w-4 mr-2" />
           Sign Out

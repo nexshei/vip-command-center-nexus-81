@@ -4,9 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar, Clock, MapPin, Crown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const VipCalendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const navigate = useNavigate();
 
   const upcomingEvents = [
     {
@@ -18,7 +20,8 @@ const VipCalendar = () => {
       location: "Mayfair Suite",
       type: "diplomatic",
       priority: "high",
-      date: "Today"
+      date: "Today",
+      value: "KSH 750,000"
     },
     {
       id: 2,
@@ -29,7 +32,8 @@ const VipCalendar = () => {
       location: "Executive Boardroom",
       type: "corporate",
       priority: "medium",
-      date: "Today"
+      date: "Today",
+      value: "KSH 500,000"
     },
     {
       id: 3,
@@ -40,7 +44,8 @@ const VipCalendar = () => {
       location: "Private Office",
       type: "consultation",
       priority: "high",
-      date: "Tomorrow"
+      date: "Tomorrow",
+      value: "KSH 320,000"
     },
     {
       id: 4,
@@ -51,43 +56,44 @@ const VipCalendar = () => {
       location: "Training Centre",
       type: "training",
       priority: "low",
-      date: "Tomorrow"
+      date: "Tomorrow",
+      value: "KSH 150,000"
     }
   ];
 
   const getEventTypeColor = (type: string) => {
     switch (type) {
-      case 'diplomatic': return 'bg-vip-navy text-white';
-      case 'corporate': return 'bg-vip-gold text-white';
-      case 'consultation': return 'bg-vip-copper text-white';
-      case 'training': return 'bg-vip-steel text-white';
-      default: return 'bg-gray-500 text-white';
+      case 'diplomatic': return 'bg-ios-blue text-white';
+      case 'corporate': return 'bg-vip-gold text-black';
+      case 'consultation': return 'bg-ios-purple text-white';
+      case 'training': return 'bg-ios-green text-black';
+      default: return 'bg-neutral-dark text-black';
     }
   };
 
   const getPriorityIcon = (priority: string) => {
-    if (priority === 'high') return <Crown className="h-4 w-4" />;
+    if (priority === 'high') return <Crown className="h-4 w-4 text-vip-gold animate-pulse" />;
     return null;
   };
 
   return (
-    <Card className="border-0 vip-shadow">
+    <Card className="border-vip-gold/20 vip-glass-dark vip-glow">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-xl font-serif text-vip-navy flex items-center">
+        <CardTitle className="text-xl font-serif text-vip-gold flex items-center">
           <Calendar className="h-5 w-5 mr-2 text-vip-gold" />
           VIP Schedule
         </CardTitle>
         <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="sm" className="text-vip-navy">
+          <Button variant="ghost" size="sm" className="text-vip-gold hover:bg-vip-gold/10">
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="text-sm font-medium text-vip-steel">
+          <span className="text-sm font-medium text-vip-gold">
             {currentDate.toLocaleDateString('en-GB', { 
               month: 'long', 
               year: 'numeric' 
             })}
           </span>
-          <Button variant="ghost" size="sm" className="text-vip-navy">
+          <Button variant="ghost" size="sm" className="text-vip-gold hover:bg-vip-gold/10">
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
@@ -96,28 +102,30 @@ const VipCalendar = () => {
         {upcomingEvents.map((event, index) => (
           <div 
             key={event.id}
-            className="flex items-start space-x-4 p-4 rounded-lg border border-gray-100 hover:bg-vip-light/30 transition-colors vip-hover-lift animate-fade-in-up"
+            className="flex items-start space-x-4 p-4 rounded-lg border border-vip-gold/20 hover:bg-vip-gold/5 transition-all duration-300 vip-hover-lift animate-fade-in-up cursor-pointer group"
             style={{ animationDelay: `${index * 0.1}s` }}
+            onClick={() => navigate('/bookings')}
           >
             <div className="flex-shrink-0 mt-1">
-              <div className="w-3 h-3 rounded-full bg-vip-gold"></div>
+              <div className="w-3 h-3 rounded-full bg-vip-gold animate-pulse"></div>
             </div>
             
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between mb-2">
                 <div>
-                  <h4 className="text-sm font-semibold text-vip-navy flex items-center">
+                  <h4 className="text-sm font-semibold text-vip-gold flex items-center group-hover:text-vip-gold-light transition-colors">
                     {event.title}
                     {getPriorityIcon(event.priority)}
                   </h4>
-                  <p className="text-xs text-vip-steel">{event.client}</p>
+                  <p className="text-xs text-vip-gold/70">{event.client}</p>
+                  <p className="text-xs font-semibold text-vip-gold mt-1">{event.value}</p>
                 </div>
                 <Badge className={getEventTypeColor(event.type)}>
                   {event.type}
                 </Badge>
               </div>
               
-              <div className="flex items-center space-x-4 text-xs text-vip-steel">
+              <div className="flex items-center space-x-4 text-xs text-vip-gold/60">
                 <div className="flex items-center">
                   <Clock className="h-3 w-3 mr-1" />
                   {event.time} ({event.duration})
@@ -131,8 +139,8 @@ const VipCalendar = () => {
               <div className="mt-2">
                 <span className={`text-xs px-2 py-1 rounded-full ${
                   event.date === 'Today' 
-                    ? 'bg-vip-copper/20 text-vip-copper' 
-                    : 'bg-vip-steel/20 text-vip-steel'
+                    ? 'bg-vip-red/20 text-vip-red' 
+                    : 'bg-vip-gold/20 text-vip-gold'
                 }`}>
                   {event.date}
                 </span>
@@ -141,10 +149,11 @@ const VipCalendar = () => {
           </div>
         ))}
         
-        <div className="pt-4 border-t">
+        <div className="pt-4 border-t border-vip-gold/20">
           <Button 
             variant="outline" 
-            className="w-full border-vip-gold text-vip-gold hover:bg-vip-gold hover:text-white"
+            className="w-full border-vip-gold text-vip-gold hover:bg-vip-gold hover:text-black vip-glass"
+            onClick={() => navigate('/bookings')}
           >
             View Full Calendar
           </Button>
