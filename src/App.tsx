@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,6 +12,8 @@ import Clients from "@/pages/Clients";
 import Subscriptions from "@/pages/Subscriptions";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import Analytics from "@/pages/Analytics";
+import Communications from "@/pages/Communications";
 
 const queryClient = new QueryClient();
 
@@ -74,27 +75,21 @@ const AppRoutes = () => {
           <Subscriptions />
         </ProtectedRoute>
       } />
+      <Route path="/communications" element={
+        <ProtectedRoute>
+          <Communications />
+        </ProtectedRoute>
+      } />
+      <Route path="/analytics" element={
+        <ProtectedRoute>
+          <Analytics />
+        </ProtectedRoute>
+      } />
       <Route path="/careers" element={
         <ProtectedRoute>
           <ComingSoonPage 
             title="Career Portal" 
             description="Recruitment and staff management" 
-          />
-        </ProtectedRoute>
-      } />
-      <Route path="/communications" element={
-        <ProtectedRoute>
-          <ComingSoonPage 
-            title="Communications" 
-            description="Client communications and campaigns" 
-          />
-        </ProtectedRoute>
-      } />
-      <Route path="/analytics" element={
-        <ProtectedRoute>
-          <ComingSoonPage 
-            title="Analytics & Reports" 
-            description="Performance metrics and business intelligence" 
           />
         </ProtectedRoute>
       } />

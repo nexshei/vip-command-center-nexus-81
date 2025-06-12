@@ -2,19 +2,15 @@
 import React from 'react';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import VipSidebar from './VipSidebar';
-import { Bell, Search, Menu } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Search, Menu } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { NotificationPanel } from '@/components/notifications/NotificationPanel';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
-  const handleNotifications = () => {
-    alert('Notifications panel - Feature coming soon!');
-  };
-
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-white">
@@ -51,17 +47,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               </div>
               
               <div className="flex items-center space-x-4">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="relative text-vip-gold hover:text-vip-gold-light hover:bg-vip-gold/10"
-                  onClick={handleNotifications}
-                >
-                  <Bell className="h-5 w-5" />
-                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-vip-red rounded-full text-[10px] flex items-center justify-center text-white animate-pulse">
-                    3
-                  </span>
-                </Button>
+                <NotificationPanel />
               </div>
             </div>
           </header>

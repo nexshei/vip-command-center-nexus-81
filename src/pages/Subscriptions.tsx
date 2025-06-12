@@ -3,6 +3,7 @@ import React from 'react';
 import { CreditCard, Plus, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { NewPlanModal } from '@/components/modals/NewPlanModal';
 
 const Subscriptions = () => {
   return (
@@ -12,10 +13,7 @@ const Subscriptions = () => {
           <h1 className="text-3xl font-serif font-bold text-vip-black">VIP Subscriptions</h1>
           <p className="text-vip-gold/80 mt-2">Manage premium memberships and services</p>
         </div>
-        <Button className="bg-vip-gold text-white hover:bg-vip-gold-dark">
-          <Plus className="h-4 w-4 mr-2" />
-          New Plan
-        </Button>
+        <NewPlanModal />
       </div>
 
       <div className="grid gap-6 md:grid-cols-4">
@@ -60,21 +58,42 @@ const Subscriptions = () => {
         </Card>
       </div>
 
-      <Card className="vip-glass border-vip-gold/20">
-        <CardHeader>
-          <CardTitle className="flex items-center text-vip-black">
-            <CreditCard className="h-5 w-5 mr-2 text-vip-gold" />
-            Subscription Management
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-12 text-vip-gold/60">
-            <TrendingUp className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>Subscription management portal coming soon...</p>
-            <p className="text-sm mt-2">Feature under development</p>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {/* Sample subscription plans */}
+        {[
+          { name: 'VVIP Elite', price: 'KSH 50,000', duration: 'Monthly', subscribers: 45, color: 'bg-vip-red' },
+          { name: 'VIP Premium', price: 'KSH 25,000', duration: 'Monthly', subscribers: 89, color: 'bg-vip-gold' },
+          { name: 'Premium Plus', price: 'KSH 15,000', duration: 'Monthly', subscribers: 100, color: 'bg-ios-blue' },
+        ].map((plan, index) => (
+          <Card key={index} className="vip-glass border-vip-gold/20 hover:border-vip-gold/40 transition-colors">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span className="text-vip-black">{plan.name}</span>
+                <span className={`px-2 py-1 rounded-full text-xs text-white ${plan.color}`}>
+                  {plan.subscribers} subscribers
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <div className="text-2xl font-bold text-vip-black">{plan.price}</div>
+                  <div className="text-sm text-vip-gold/60">per {plan.duration.toLowerCase()}</div>
+                </div>
+                <div className="space-y-2">
+                  <div className="text-sm text-vip-gold/80">• Priority booking access</div>
+                  <div className="text-sm text-vip-gold/80">• Dedicated concierge service</div>
+                  <div className="text-sm text-vip-gold/80">• 24/7 support hotline</div>
+                  <div className="text-sm text-vip-gold/80">• Exclusive event invitations</div>
+                </div>
+                <Button variant="outline" className="w-full border-vip-gold text-vip-gold hover:bg-vip-gold hover:text-white">
+                  Manage Plan
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 };

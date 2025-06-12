@@ -3,6 +3,7 @@ import React from 'react';
 import { Users, Plus, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { AddClientModal } from '@/components/modals/AddClientModal';
 
 const Clients = () => {
   return (
@@ -12,10 +13,7 @@ const Clients = () => {
           <h1 className="text-3xl font-serif font-bold text-vip-black">Client Management</h1>
           <p className="text-vip-gold/80 mt-2">VIP client profiles and relationship management</p>
         </div>
-        <Button className="bg-vip-gold text-white hover:bg-vip-gold-dark">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Client
-        </Button>
+        <AddClientModal />
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
@@ -58,10 +56,38 @@ const Clients = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-12 text-vip-gold/60">
-            <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>Client management system coming soon...</p>
-            <p className="text-sm mt-2">Feature under development</p>
+          <div className="space-y-4">
+            {/* Sample clients */}
+            {[
+              { id: 1, name: 'Hon. Peter Maina', tier: 'VVIP', company: 'Government Official', lastVisit: '2 days ago' },
+              { id: 2, name: 'Dr. Sarah Wanjiku', tier: 'VIP', company: 'Nairobi Hospital', lastVisit: '1 week ago' },
+              { id: 3, name: 'Mr. James Kimani', tier: 'Premium', company: 'Safaricom PLC', lastVisit: '3 days ago' },
+              { id: 4, name: 'Ms. Grace Mutua', tier: 'VIP', company: 'KCB Bank', lastVisit: '5 days ago' },
+            ].map((client) => (
+              <div key={client.id} className="flex items-center justify-between p-4 border border-vip-gold/20 rounded-lg vip-glass-light hover:bg-vip-gold/5 transition-colors">
+                <div className="flex items-center space-x-4">
+                  <div className="w-10 h-10 bg-vip-gold/20 rounded-full flex items-center justify-center">
+                    <span className="text-vip-gold font-semibold text-sm">
+                      {client.name.split(' ').map(n => n[0]).join('')}
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-vip-black">{client.name}</h3>
+                    <p className="text-sm text-vip-gold/80">{client.company}</p>
+                    <p className="text-xs text-vip-gold/60">Last visit: {client.lastVisit}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    client.tier === 'VVIP' ? 'bg-vip-red text-white' :
+                    client.tier === 'VIP' ? 'bg-vip-gold text-black' :
+                    'bg-ios-blue text-white'
+                  }`}>
+                    {client.tier}
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
