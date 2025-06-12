@@ -17,8 +17,11 @@ const Index = () => {
           <div className="animate-fade-in-up">
             <div className="flex items-center justify-center mb-6">
               <div className="relative">
-                <Crown className="h-20 w-20 text-vip-gold" />
-                <div className="absolute -top-2 -right-2 w-6 h-6 bg-vip-copper rounded-full animate-pulse-gold"></div>
+                <img 
+                  src="/lovable-uploads/60f33973-4d25-45cd-ab56-8d36ade1a7b1.png" 
+                  alt="Sir Ole VVIP Protocol Logo" 
+                  className="h-32 w-32 object-contain"
+                />
               </div>
             </div>
             <h1 className="text-5xl md:text-7xl font-serif font-bold mb-4">

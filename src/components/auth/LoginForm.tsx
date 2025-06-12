@@ -55,12 +55,15 @@ const LoginForm = () => {
         <CardHeader className="text-center space-y-4">
           <div className="flex items-center justify-center mb-4">
             <div className="relative">
-              <Crown className="h-12 w-12 text-vip-gold" />
-              <div className="absolute -top-1 -right-1 w-4 h-4 bg-vip-copper rounded-full animate-pulse-gold"></div>
+              <img 
+                src="/lovable-uploads/60f33973-4d25-45cd-ab56-8d36ade1a7b1.png" 
+                alt="Sir Ole VVIP Protocol Logo" 
+                className="h-16 w-16 object-contain"
+              />
             </div>
           </div>
-          <CardTitle className="text-2xl font-serif text-vip-navy">VIP Admin Portal</CardTitle>
-          <CardDescription className="text-vip-steel">
+          <CardTitle className="text-2xl font-serif text-vip-black">VIP Admin Portal</CardTitle>
+          <CardDescription className="text-vip-black/70">
             Access the Sir Ole VVIP Protocol Dashboard
           </CardDescription>
         </CardHeader>
@@ -68,32 +71,32 @@ const LoginForm = () => {
         <CardContent className="space-y-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-vip-charcoal font-medium">Email Address</Label>
+              <Label htmlFor="email" className="text-vip-black font-medium">Email Address</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-vip-steel" />
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-vip-black/60" />
                 <Input
                   id="email"
                   type="email"
                   placeholder="admin@sirole.com"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="pl-10 border-vip-steel/30 focus:border-vip-gold"
+                  className="pl-10 border-vip-gold/30 focus:border-vip-gold text-vip-black"
                   required
                 />
               </div>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-vip-charcoal font-medium">Password</Label>
+              <Label htmlFor="password" className="text-vip-black font-medium">Password</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-vip-steel" />
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-vip-black/60" />
                 <Input
                   id="password"
                   type="password"
                   placeholder="Enter your password"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="pl-10 border-vip-steel/30 focus:border-vip-gold"
+                  className="pl-10 border-vip-gold/30 focus:border-vip-gold text-vip-black"
                   required
                 />
               </div>
@@ -111,10 +114,10 @@ const LoginForm = () => {
           <div className="space-y-3">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-vip-steel/30" />
+                <span className="w-full border-t border-vip-gold/30" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-vip-steel">Demo Accounts</span>
+                <span className="bg-card px-2 text-vip-black/60">Demo Accounts</span>
               </div>
             </div>
             
@@ -122,14 +125,14 @@ const LoginForm = () => {
               <Button
                 variant="outline"
                 onClick={() => handleDemoLogin('super')}
-                className="text-vip-navy border-vip-navy/30 hover:bg-vip-navy hover:text-white text-sm"
+                className="text-vip-black border-vip-gold/30 hover:bg-vip-gold hover:text-white text-sm"
               >
                 Super Admin
               </Button>
               <Button
                 variant="outline"
                 onClick={() => handleDemoLogin('protocol')}
-                className="text-vip-copper border-vip-copper/30 hover:bg-vip-copper hover:text-white text-sm"
+                className="text-vip-black border-vip-gold/30 hover:bg-vip-gold hover:text-white text-sm"
               >
                 Protocol Admin
               </Button>
