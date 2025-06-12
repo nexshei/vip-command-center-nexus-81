@@ -14,8 +14,7 @@
     --vip-red: #DC143C;
     --vip-shield-border: #C9B037;
     
-    /* iOS 26 Inspired Colors */
-    --ios-blue: #007AFF;
+    /* iOS Inspired Colors (Updated - No Blue) */
     --ios-orange: #FF9500;
     --ios-green: #4CD964;
     --ios-red: #FF3B30;
@@ -23,9 +22,9 @@
     --ios-pink: #FFD3E0;
     
     /* Background & Glass Effects */
-    --bg-primary: #000000;
-    --bg-secondary: #1a1a1a;
-    --bg-tertiary: #2a2a2a;
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #F8F9FA;
+    --bg-tertiary: #FFFFFF;
     --glass-overlay: rgba(212, 175, 55, 0.1);
     --glass-border: rgba(212, 175, 55, 0.2);
     
@@ -35,43 +34,43 @@
     --neutral-dark: #BDBEC2;
     
     /* shadcn variables adapted for VIP theme */
-    --background: 0 0 0; /* Black */
-    --foreground: 212 175 55; /* Gold */
+    --background: 255 255 255; /* White */
+    --foreground: 0 0 0; /* Black */
 
-    --card: 26 26 26;
-    --card-foreground: 212 175 55;
+    --card: 255 255 255;
+    --card-foreground: 0 0 0;
 
-    --popover: 0 0 0;
-    --popover-foreground: 212 175 55;
+    --popover: 255 255 255;
+    --popover-foreground: 0 0 0;
 
     --primary: 212 175 55; /* VIP Gold */
-    --primary-foreground: 0 0 0;
+    --primary-foreground: 255 255 255;
 
-    --secondary: 42 42 42; /* Dark Gray */
-    --secondary-foreground: 212 175 55;
+    --secondary: 248 249 250; /* Light Gray */
+    --secondary-foreground: 0 0 0;
 
-    --muted: 26 26 26;
-    --muted-foreground: 184 148 31;
+    --muted: 248 249 250;
+    --muted-foreground: 107 114 126;
 
-    --accent: 220 20 60; /* VIP Red */
+    --accent: 212 175 55; /* VIP Gold */
     --accent-foreground: 255 255 255;
 
     --destructive: 255 59 48; /* iOS Red */
     --destructive-foreground: 255 255 255;
 
-    --border: 42 42 42;
-    --input: 42 42 42;
+    --border: 229 229 229;
+    --input: 255 255 255;
     --ring: 212 175 55;
 
-    --radius: 1rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 0 0 0;
-    --sidebar-foreground: 212 175 55;
+    --sidebar-background: 255 255 255;
+    --sidebar-foreground: 0 0 0;
     --sidebar-primary: 212 175 55;
-    --sidebar-primary-foreground: 0 0 0;
-    --sidebar-accent: 220 20 60;
+    --sidebar-primary-foreground: 255 255 255;
+    --sidebar-accent: 212 175 55;
     --sidebar-accent-foreground: 255 255 255;
-    --sidebar-border: 42 42 42;
+    --sidebar-border: 229 229 229;
     --sidebar-ring: 212 175 55;
   }
 }
@@ -81,8 +80,8 @@
     @apply border-border;
   }
   body {
-    @apply bg-vip-black text-vip-gold font-sans antialiased;
-    background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+    @apply bg-white text-vip-black font-sans antialiased;
+    background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%);
   }
 }
 
@@ -102,20 +101,26 @@
   
   .vip-glass {
     backdrop-filter: blur(20px);
-    background: rgba(212, 175, 55, 0.1);
+    background: rgba(255, 255, 255, 0.95);
     border: 1px solid rgba(212, 175, 55, 0.2);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   }
   
   .vip-glass-dark {
     backdrop-filter: blur(20px);
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(255, 255, 255, 0.98);
     border: 1px solid rgba(212, 175, 55, 0.3);
     box-shadow: 0 8px 32px rgba(212, 175, 55, 0.1);
   }
   
+  .vip-glass-light {
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(212, 175, 55, 0.15);
+  }
+  
   .vip-shadow {
-    box-shadow: 0 20px 25px -5px rgba(212, 175, 55, 0.1), 0 10px 10px -5px rgba(212, 175, 55, 0.04);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   }
   
   .vip-glow {
@@ -127,8 +132,8 @@
   }
   
   .vip-hover-lift:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 25px 50px -12px rgba(212, 175, 55, 0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
   }
 
   .vip-black {
@@ -159,36 +164,49 @@
     border-color: #D4AF37;
   }
 
-  .ios-blue {
-    color: #007AFF;
+  .ios-orange {
+    color: #FF9500;
   }
 
   .ios-green {
     color: #4CD964;
   }
 
-  .ios-orange {
-    color: #FF9500;
-  }
-
   .ios-red {
     color: #FF3B30;
-  }
-
-  .bg-ios-blue {
-    background-color: #007AFF;
-  }
-
-  .bg-ios-green {
-    background-color: #4CD964;
   }
 
   .bg-ios-orange {
     background-color: #FF9500;
   }
 
+  .bg-ios-green {
+    background-color: #4CD964;
+  }
+
   .bg-ios-red {
     background-color: #FF3B30;
+  }
+
+  /* Professional form styling */
+  .form-container {
+    @apply bg-white border border-vip-gold/20 rounded-lg shadow-sm;
+  }
+
+  .form-field {
+    @apply border-vip-gold/30 bg-white text-vip-black focus:border-vip-gold focus:ring-vip-gold/20;
+  }
+
+  .form-label {
+    @apply text-sm font-medium text-vip-black;
+  }
+
+  .btn-primary {
+    @apply bg-vip-gold text-white hover:bg-vip-gold-dark shadow-sm transition-all duration-200;
+  }
+
+  .btn-secondary {
+    @apply border-vip-gold/30 text-vip-black bg-white hover:bg-vip-gold/10 transition-all duration-200;
   }
 }
 
