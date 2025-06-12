@@ -4,7 +4,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Filter } from 'lucide-react';
 
 export const FilterModal = () => {
@@ -20,64 +19,71 @@ export const FilterModal = () => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="border-vip-gold text-vip-gold hover:bg-vip-gold hover:text-white">
+        <Button variant="outline" className="border-vip-gold text-vip-gold hover:bg-vip-gold hover:text-vip-black font-medium">
           <Filter className="h-4 w-4 mr-2" />
           Filter
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] vip-glass border-vip-gold/20">
-        <DialogHeader>
-          <DialogTitle className="text-vip-black">Filter Options</DialogTitle>
+      <DialogContent className="sm:max-w-[425px] bg-white border border-neutral-medium shadow-2xl">
+        <DialogHeader className="pb-4 border-b border-neutral-medium">
+          <DialogTitle className="text-2xl font-serif font-bold text-vip-black">Filter Options</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="status" className="text-vip-black">Status</Label>
+        <div className="space-y-6 pt-4">
+          <div className="space-y-2">
+            <Label htmlFor="status" className="text-vip-black font-medium text-sm">Status</Label>
             <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select status" />
+              <SelectTrigger className="bg-neutral-light border-neutral-medium text-vip-black focus:border-vip-gold focus:ring-vip-gold/20">
+                <SelectValue placeholder="Select status" className="text-gray-500" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
+              <SelectContent className="bg-white border-neutral-medium">
+                <SelectItem value="active" className="text-vip-black hover:bg-neutral-light">Active</SelectItem>
+                <SelectItem value="pending" className="text-vip-black hover:bg-neutral-light">Pending</SelectItem>
+                <SelectItem value="completed" className="text-vip-black hover:bg-neutral-light">Completed</SelectItem>
+                <SelectItem value="cancelled" className="text-vip-black hover:bg-neutral-light">Cancelled</SelectItem>
               </SelectContent>
             </Select>
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="dateRange" className="text-vip-black">Date Range</Label>
+          <div className="space-y-2">
+            <Label htmlFor="dateRange" className="text-vip-black font-medium text-sm">Date Range</Label>
             <Select value={dateRange} onValueChange={setDateRange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select date range" />
+              <SelectTrigger className="bg-neutral-light border-neutral-medium text-vip-black focus:border-vip-gold focus:ring-vip-gold/20">
+                <SelectValue placeholder="Select date range" className="text-gray-500" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="today">Today</SelectItem>
-                <SelectItem value="week">This Week</SelectItem>
-                <SelectItem value="month">This Month</SelectItem>
-                <SelectItem value="quarter">This Quarter</SelectItem>
+              <SelectContent className="bg-white border-neutral-medium">
+                <SelectItem value="today" className="text-vip-black hover:bg-neutral-light">Today</SelectItem>
+                <SelectItem value="week" className="text-vip-black hover:bg-neutral-light">This Week</SelectItem>
+                <SelectItem value="month" className="text-vip-black hover:bg-neutral-light">This Month</SelectItem>
+                <SelectItem value="quarter" className="text-vip-black hover:bg-neutral-light">This Quarter</SelectItem>
               </SelectContent>
             </Select>
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="clientType" className="text-vip-black">Client Type</Label>
+          <div className="space-y-2">
+            <Label htmlFor="clientType" className="text-vip-black font-medium text-sm">Client Type</Label>
             <Select value={clientType} onValueChange={setClientType}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select client type" />
+              <SelectTrigger className="bg-neutral-light border-neutral-medium text-vip-black focus:border-vip-gold focus:ring-vip-gold/20">
+                <SelectValue placeholder="Select client type" className="text-gray-500" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="vip">VIP</SelectItem>
-                <SelectItem value="premium">Premium</SelectItem>
-                <SelectItem value="standard">Standard</SelectItem>
-                <SelectItem value="corporate">Corporate</SelectItem>
+              <SelectContent className="bg-white border-neutral-medium">
+                <SelectItem value="vip" className="text-vip-black hover:bg-neutral-light">VIP</SelectItem>
+                <SelectItem value="premium" className="text-vip-black hover:bg-neutral-light">Premium</SelectItem>
+                <SelectItem value="standard" className="text-vip-black hover:bg-neutral-light">Standard</SelectItem>
+                <SelectItem value="corporate" className="text-vip-black hover:bg-neutral-light">Corporate</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={() => { setStatus(''); setDateRange(''); setClientType(''); }}>
+        <div className="flex justify-end gap-3 pt-6 border-t border-neutral-medium">
+          <Button 
+            variant="outline" 
+            className="border-neutral-medium text-vip-black hover:bg-neutral-light"
+            onClick={() => { setStatus(''); setDateRange(''); setClientType(''); }}
+          >
             Clear
           </Button>
-          <Button onClick={handleApplyFilter} className="bg-vip-gold text-white hover:bg-vip-gold-dark">
+          <Button 
+            onClick={handleApplyFilter} 
+            className="bg-vip-gold text-vip-black hover:bg-vip-gold-dark font-medium"
+          >
             Apply Filters
           </Button>
         </div>

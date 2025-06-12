@@ -36,73 +36,79 @@ export const AddClientModal = () => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="bg-vip-gold text-white hover:bg-vip-gold-dark">
+        <Button className="bg-vip-gold text-vip-black hover:bg-vip-gold-dark font-medium">
           <Plus className="h-4 w-4 mr-2" />
           Add Client
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px] vip-glass border-vip-gold/20">
-        <DialogHeader>
-          <DialogTitle className="text-vip-black">Add New VIP Client</DialogTitle>
+      <DialogContent className="sm:max-w-[500px] bg-white border border-neutral-medium shadow-2xl">
+        <DialogHeader className="pb-4 border-b border-neutral-medium">
+          <DialogTitle className="text-2xl font-serif font-bold text-vip-black">Add New VIP Client</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid gap-2">
-            <Label htmlFor="name" className="text-vip-black">Full Name</Label>
+        <form onSubmit={handleSubmit} className="space-y-6 pt-4">
+          <div className="space-y-2">
+            <Label htmlFor="name" className="text-vip-black font-medium text-sm">Full Name</Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter full name"
+              className="bg-neutral-light border-neutral-medium text-vip-black placeholder:text-gray-500 focus:border-vip-gold focus:ring-vip-gold/20"
               required
             />
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="email" className="text-vip-black">Email</Label>
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-vip-black font-medium text-sm">Email</Label>
             <Input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter email address"
+              className="bg-neutral-light border-neutral-medium text-vip-black placeholder:text-gray-500 focus:border-vip-gold focus:ring-vip-gold/20"
               required
             />
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="phone" className="text-vip-black">Phone</Label>
+          <div className="space-y-2">
+            <Label htmlFor="phone" className="text-vip-black font-medium text-sm">Phone</Label>
             <Input
               id="phone"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="Enter phone number"
+              className="bg-neutral-light border-neutral-medium text-vip-black placeholder:text-gray-500 focus:border-vip-gold focus:ring-vip-gold/20"
               required
             />
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="tier" className="text-vip-black">Client Tier</Label>
+          <div className="space-y-2">
+            <Label htmlFor="tier" className="text-vip-black font-medium text-sm">Client Tier</Label>
             <Select value={tier} onValueChange={setTier} required>
-              <SelectTrigger>
-                <SelectValue placeholder="Select tier" />
+              <SelectTrigger className="bg-neutral-light border-neutral-medium text-vip-black focus:border-vip-gold focus:ring-vip-gold/20">
+                <SelectValue placeholder="Select tier" className="text-gray-500" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="vvip">VVIP</SelectItem>
-                <SelectItem value="vip">VIP</SelectItem>
-                <SelectItem value="premium">Premium</SelectItem>
-                <SelectItem value="standard">Standard</SelectItem>
+              <SelectContent className="bg-white border-neutral-medium">
+                <SelectItem value="vvip" className="text-vip-black hover:bg-neutral-light">VVIP</SelectItem>
+                <SelectItem value="vip" className="text-vip-black hover:bg-neutral-light">VIP</SelectItem>
+                <SelectItem value="premium" className="text-vip-black hover:bg-neutral-light">Premium</SelectItem>
+                <SelectItem value="standard" className="text-vip-black hover:bg-neutral-light">Standard</SelectItem>
               </SelectContent>
             </Select>
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="company" className="text-vip-black">Company (Optional)</Label>
+          <div className="space-y-2">
+            <Label htmlFor="company" className="text-vip-black font-medium text-sm">Company (Optional)</Label>
             <Input
               id="company"
               value={company}
               onChange={(e) => setCompany(e.target.value)}
               placeholder="Enter company name"
+              className="bg-neutral-light border-neutral-medium text-vip-black placeholder:text-gray-500 focus:border-vip-gold focus:ring-vip-gold/20"
             />
           </div>
-          <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline">Cancel</Button>
-            <Button type="submit" className="bg-vip-gold text-white hover:bg-vip-gold-dark">
+          <div className="flex justify-end gap-3 pt-4 border-t border-neutral-medium">
+            <Button type="button" variant="outline" className="border-neutral-medium text-vip-black hover:bg-neutral-light">
+              Cancel
+            </Button>
+            <Button type="submit" className="bg-vip-gold text-vip-black hover:bg-vip-gold-dark font-medium">
               Add Client
             </Button>
           </div>
