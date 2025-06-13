@@ -9,6 +9,7 @@ import { Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export const AddClientModal = () => {
+  const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -25,16 +26,26 @@ export const AddClientModal = () => {
       description: `${name} has been added to your VIP client database.`,
     });
 
-    // Reset form
+    // Reset form and close modal
     setName('');
     setEmail('');
     setPhone('');
     setTier('');
     setCompany('');
+    setIsOpen(false);
+  };
+
+  const handleCancel = () => {
+    setName('');
+    setEmail('');
+    setPhone('');
+    setTier('');
+    setCompany('');
+    setIsOpen(false);
   };
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button className="bg-vip-gold text-white hover:bg-vip-gold-dark">
           <Plus className="h-4 w-4 mr-2" />
@@ -43,66 +54,95 @@ export const AddClientModal = () => {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px] vip-glass border-vip-gold/20">
         <DialogHeader>
-          <DialogTitle className="text-vip-black">Add New VIP Client</DialogTitle>
+          <DialogTitle className="text-vip-black text-xl font-semibold">Add New VIP Client</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid gap-2">
-            <Label htmlFor="name" className="text-vip-black">Full Name</Label>
+        <form onSubmit={handleSubmit} className="space-y-6 mt-4">
+          <div className="space-y-2">
+            <Label htmlFor="name" className="text-sm font-medium text-vip-black">
+              Full Name *
+            </Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter full name"
+              className="w-full border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
               required
             />
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="email" className="text-vip-black">Email</Label>
+          
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-sm font-medium text-vip-black">
+              Email Address *
+            </Label>
             <Input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter email address"
+              className="w-full border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
               required
             />
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="phone" className="text-vip-black">Phone</Label>
+          
+          <div className="space-y-2">
+            <Label htmlFor="phone" className="text-sm font-medium text-vip-black">
+              Phone Number *
+            </Label>
             <Input
               id="phone"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="Enter phone number"
+              className="w-full border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
               required
             />
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="tier" className="text-vip-black">Client Tier</Label>
+          
+          <div className="space-y-2">
+            <Label htmlFor="tier" className="text-sm font-medium text-vip-black">
+              Client Tier *
+            </Label>
             <Select value={tier} onValueChange={setTier} required>
-              <SelectTrigger>
-                <SelectValue placeholder="Select tier" />
+              <SelectTrigger className="w-full border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black">
+                <SelectValue placeholder="Select client tier" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="vvip">VVIP</SelectItem>
-                <SelectItem value="vip">VIP</SelectItem>
-                <SelectItem value="premium">Premium</SelectItem>
-                <SelectItem value="standard">Standard</SelectItem>
+              <SelectContent className="bg-white border-vip-gold/30">
+                <SelectItem value="vvip" className="hover:bg-vip-gold/10">VVIP</SelectItem>
+                <SelectItem value="vip" className="hover:bg-vip-gold/10">VIP</SelectItem>
+                <SelectItem value="premium" className="hover:bg-vip-gold/10">Premium</SelectItem>
+                <SelectItem value="standard" className="hover:bg-vip-gold/10">Standard</SelectItem>
               </SelectContent>
             </Select>
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="company" className="text-vip-black">Company (Optional)</Label>
+          
+          <div className="space-y-2">
+            <Label htmlFor="company" className="text-sm font-medium text-vip-black">
+              Company/Organization
+            </Label>
             <Input
               id="company"
               value={company}
               onChange={(e) => setCompany(e.target.value)}
-              placeholder="Enter company name"
+              placeholder="Enter company or organization"
+              className="w-full border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
             />
           </div>
-          <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline">Cancel</Button>
-            <Button type="submit" className="bg-vip-gold text-white hover:bg-vip-gold-dark">
+          
+          <div className="flex justify-end gap-3 pt-6 border-t border-vip-gold/20">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={handleCancel}
+              className="px-6 border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="submit" 
+              className="px-6 bg-vip-gold text-white hover:bg-vip-gold-dark"
+            >
               Add Client
             </Button>
           </div>

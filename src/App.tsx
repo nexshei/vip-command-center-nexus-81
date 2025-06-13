@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -43,9 +42,11 @@ const ComingSoonPage = ({ title, description }: { title: string; description: st
   <div className="p-6">
     <h1 className="text-2xl font-serif text-vip-black">{title}</h1>
     <p className="text-vip-gold/80 mt-2">{description}</p>
-    <div className="mt-8 text-center text-vip-gold/60">
-      <p>Feature under development</p>
-      <p className="text-sm mt-2">Coming soon...</p>
+    <div className="mt-16 text-center">
+      <div className="inline-block p-8 vip-glass border border-vip-gold/20 rounded-lg">
+        <h2 className="text-xl font-semibold text-vip-gold mb-2">Feature under development</h2>
+        <p className="text-vip-gold/70">Coming soon...</p>
+      </div>
     </div>
   </div>
 );
