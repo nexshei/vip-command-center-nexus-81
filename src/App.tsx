@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -49,6 +50,44 @@ const ComingSoonPage = ({ title, description }: { title: string; description: st
   </div>
 );
 
+const ProfilePage = () => (
+  <div className="p-6 max-w-4xl mx-auto">
+    <h1 className="text-3xl font-serif font-bold text-vip-black mb-6">Admin Profile</h1>
+    <div className="vip-glass border border-vip-gold/20 rounded-lg p-6">
+      <div className="space-y-6">
+        <div className="flex items-center space-x-4">
+          <div className="w-20 h-20 bg-vip-gold/20 rounded-full flex items-center justify-center">
+            <span className="text-2xl font-bold text-vip-gold">DO</span>
+          </div>
+          <div>
+            <h2 className="text-2xl font-semibold text-vip-black">Sir Dennis Olele</h2>
+            <p className="text-vip-gold/80">Super Administrator</p>
+            <p className="text-sm text-vip-gold/60">admin@sirolele.com</p>
+          </div>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-vip-gold/80">Full Name</label>
+            <p className="text-vip-black">Sir Dennis Olele</p>
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-vip-gold/80">Role</label>
+            <p className="text-vip-black">Super Administrator</p>
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-vip-gold/80">Email</label>
+            <p className="text-vip-black">admin@sirolele.com</p>
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-vip-gold/80">Phone</label>
+            <p className="text-vip-black">+254 700 000 000</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
 const AppRoutes = () => {
   const { user } = useAuth();
   
@@ -58,6 +97,22 @@ const AppRoutes = () => {
       <Route path="/dashboard" element={
         <ProtectedRoute>
           <Dashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/create-booking" element={
+        <ProtectedRoute>
+          <ComingSoonPage 
+            title="Create Booking" 
+            description="Create new VIP bookings and appointments" 
+          />
+        </ProtectedRoute>
+      } />
+      <Route path="/generate-quote" element={
+        <ProtectedRoute>
+          <ComingSoonPage 
+            title="Generate Quote" 
+            description="Create custom quotes for VIP services" 
+          />
         </ProtectedRoute>
       } />
       <Route path="/bookings" element={
@@ -70,6 +125,22 @@ const AppRoutes = () => {
           <Clients />
         </ProtectedRoute>
       } />
+      <Route path="/inventory" element={
+        <ProtectedRoute>
+          <ComingSoonPage 
+            title="Inventory Management" 
+            description="Manage supplies and resources" 
+          />
+        </ProtectedRoute>
+      } />
+      <Route path="/staff" element={
+        <ProtectedRoute>
+          <ComingSoonPage 
+            title="Staff Management" 
+            description="Team coordination and assignments" 
+          />
+        </ProtectedRoute>
+      } />
       <Route path="/subscriptions" element={
         <ProtectedRoute>
           <Subscriptions />
@@ -78,6 +149,14 @@ const AppRoutes = () => {
       <Route path="/communications" element={
         <ProtectedRoute>
           <Communications />
+        </ProtectedRoute>
+      } />
+      <Route path="/email" element={
+        <ProtectedRoute>
+          <ComingSoonPage 
+            title="Email Management" 
+            description="Advanced email campaigns and automation" 
+          />
         </ProtectedRoute>
       } />
       <Route path="/analytics" element={
@@ -93,44 +172,9 @@ const AppRoutes = () => {
           />
         </ProtectedRoute>
       } />
-      <Route path="/audit" element={
+      <Route path="/profile" element={
         <ProtectedRoute>
-          <ComingSoonPage 
-            title="Audit & Security" 
-            description="System logs and security monitoring" 
-          />
-        </ProtectedRoute>
-      } />
-      <Route path="/settings" element={
-        <ProtectedRoute>
-          <ComingSoonPage 
-            title="System Settings" 
-            description="Platform configuration and preferences" 
-          />
-        </ProtectedRoute>
-      } />
-      <Route path="/services" element={
-        <ProtectedRoute>
-          <ComingSoonPage 
-            title="Protocol Services" 
-            description="Service templates and protocol management" 
-          />
-        </ProtectedRoute>
-      } />
-      <Route path="/staff" element={
-        <ProtectedRoute>
-          <ComingSoonPage 
-            title="Staff Management" 
-            description="Team coordination and assignments" 
-          />
-        </ProtectedRoute>
-      } />
-      <Route path="/reports" element={
-        <ProtectedRoute>
-          <ComingSoonPage 
-            title="Reports" 
-            description="Generate and export service reports" 
-          />
+          <ProfilePage />
         </ProtectedRoute>
       } />
       <Route path="*" element={<NotFound />} />

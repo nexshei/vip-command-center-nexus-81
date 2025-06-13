@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Users, Plus, Search, Package, Bell, Calendar, FileText, User } from 'lucide-react';
+import { Users, Plus, Package, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -27,65 +27,6 @@ const Clients = () => {
           <p className="text-vip-gold/80 mt-2">VIP client profiles and relationship management</p>
         </div>
         <AddClientModal />
-      </div>
-
-      {/* Quick Actions Grid */}
-      <div className="grid gap-6 md:grid-cols-4">
-        <Card className="vip-glass border-vip-gold/20 hover:border-vip-gold/40 transition-colors cursor-pointer">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80 flex items-center">
-              <Calendar className="h-4 w-4 mr-2" />
-              Quick Book
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-lg font-bold text-vip-black mb-2">Create Booking</div>
-            <Button size="sm" className="w-full bg-vip-gold text-white hover:bg-vip-gold-dark">
-              New Booking
-            </Button>
-          </CardContent>
-        </Card>
-        
-        <Card className="vip-glass border-vip-gold/20 hover:border-vip-gold/40 transition-colors cursor-pointer">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80 flex items-center">
-              <FileText className="h-4 w-4 mr-2" />
-              Client Quotes
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-lg font-bold text-vip-black mb-2">Generate Quote</div>
-            <Button size="sm" className="w-full bg-vip-gold text-white hover:bg-vip-gold-dark">
-              Create Quote
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card className="vip-glass border-vip-gold/20">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80 flex items-center">
-              <Bell className="h-4 w-4 mr-2" />
-              Notifications
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-lg font-bold text-vip-black mb-2">Coming Soon!</div>
-            <p className="text-xs text-vip-gold/60">Feature under development</p>
-          </CardContent>
-        </Card>
-
-        <Card className="vip-glass border-vip-gold/20">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80 flex items-center">
-              <Users className="h-4 w-4 mr-2" />
-              Career Portal
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-lg font-bold text-vip-black mb-2">Recruitment</div>
-            <p className="text-xs text-vip-gold/60">Staff management coming soon...</p>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Client Statistics */}

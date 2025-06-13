@@ -24,9 +24,7 @@ import {
   Users,
   MessageSquare,
   Briefcase,
-  Settings,
   BarChart3,
-  Shield,
   Bell,
   LogOut,
   Star,
@@ -34,7 +32,10 @@ import {
   CreditCard,
   UserCheck,
   FileText,
-  Zap
+  Zap,
+  Plus,
+  Package,
+  User
 } from 'lucide-react';
 
 const VipSidebar = () => {
@@ -49,6 +50,16 @@ const VipSidebar = () => {
       icon: LayoutDashboard,
     },
     {
+      title: "Create Booking",
+      url: "/create-booking",
+      icon: Plus,
+    },
+    {
+      title: "Generate Quote",
+      url: "/generate-quote",
+      icon: FileText,
+    },
+    {
       title: "Bookings & Events",
       url: "/bookings",
       icon: Calendar,
@@ -57,6 +68,16 @@ const VipSidebar = () => {
       title: "Client Management",
       url: "/clients",
       icon: Users,
+    },
+    {
+      title: "Inventory",
+      url: "/inventory", 
+      icon: Package,
+    },
+    {
+      title: "Staff",
+      url: "/staff",
+      icon: UserCheck,
     },
     {
       title: "VIP Subscriptions",
@@ -74,19 +95,14 @@ const VipSidebar = () => {
       icon: MessageSquare,
     },
     {
+      title: "Email",
+      url: "/email",
+      icon: Mail,
+    },
+    {
       title: "Analytics & Reports",
       url: "/analytics",
       icon: BarChart3,
-    },
-    {
-      title: "Audit & Security",
-      url: "/audit",
-      icon: Shield,
-    },
-    {
-      title: "System Settings",
-      url: "/settings",
-      icon: Settings,
     },
   ];
 
@@ -97,19 +113,34 @@ const VipSidebar = () => {
       icon: LayoutDashboard,
     },
     {
+      title: "Create Booking",
+      url: "/create-booking",
+      icon: Plus,
+    },
+    {
+      title: "Generate Quote",
+      url: "/generate-quote",
+      icon: FileText,
+    },
+    {
       title: "Bookings & Events",
       url: "/bookings",
       icon: Calendar,
     },
     {
-      title: "Client Profiles",
+      title: "Client Management",
       url: "/clients",
       icon: Users,
     },
     {
-      title: "Protocol Services",
-      url: "/services",
-      icon: Star,
+      title: "Inventory",
+      url: "/inventory",
+      icon: Package,
+    },
+    {
+      title: "Staff",
+      url: "/staff",
+      icon: UserCheck,
     },
     {
       title: "Communications",
@@ -117,14 +148,9 @@ const VipSidebar = () => {
       icon: Mail,
     },
     {
-      title: "Staff Management",
-      url: "/staff",
-      icon: UserCheck,
-    },
-    {
-      title: "Reports",
-      url: "/reports",
-      icon: FileText,
+      title: "Analytics & Reports",
+      url: "/analytics",
+      icon: BarChart3,
     },
   ];
 
@@ -132,11 +158,6 @@ const VipSidebar = () => {
 
   const handleNavigation = (url: string) => {
     navigate(url);
-  };
-
-  const handleNotifications = () => {
-    // Handle notifications - for now show an alert
-    alert('Notifications panel - Feature coming soon!');
   };
 
   return (
@@ -179,35 +200,6 @@ const VipSidebar = () => {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup className="mt-8">
-          <SidebarGroupLabel className="text-vip-gold/80 font-medium mb-3">
-            Quick Actions
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
-              <SidebarMenuItem>
-                <SidebarMenuButton 
-                  className="hover:bg-vip-gold/10 hover:text-vip-gold-light transition-all duration-200 rounded-lg text-vip-gold/80"
-                  onClick={handleNotifications}
-                >
-                  <Bell className="h-5 w-5" />
-                  <span>Notifications</span>
-                  <Badge className="ml-auto bg-vip-red text-white text-xs">3</Badge>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton 
-                  className="hover:bg-vip-gold/10 hover:text-vip-gold-light transition-all duration-200 rounded-lg text-vip-gold/80"
-                  onClick={() => handleNavigation('/bookings')}
-                >
-                  <Zap className="h-5 w-5" />
-                  <span>Quick Book</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
