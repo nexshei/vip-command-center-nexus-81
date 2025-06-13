@@ -36,27 +36,18 @@ const Index = () => {
           <div className="grid md:grid-cols-3 gap-6 my-12 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
             <div className="vip-glass rounded-2xl p-6 vip-hover-lift">
               <Shield className="h-8 w-8 text-vip-gold mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-3">Secure Access</h3>
-              <p className="text-sm opacity-90 leading-relaxed">
-                Advanced role-based authentication system with enterprise-grade security protocols 
-                to protect your VIP operations and sensitive client data.
-              </p>
+              <h3 className="text-lg font-semibold mb-2">Secure Access</h3>
+              <p className="text-sm opacity-80">Role-based authentication with enterprise-grade security</p>
             </div>
             <div className="vip-glass rounded-2xl p-6 vip-hover-lift">
               <Star className="h-8 w-8 text-vip-gold mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-3">VIP Excellence</h3>
-              <p className="text-sm opacity-90 leading-relaxed">
-                Comprehensive luxury service management platform designed to maintain 
-                premium protocol standards and deliver exceptional client experiences.
-              </p>
+              <h3 className="text-lg font-semibold mb-2">VIP Excellence</h3>
+              <p className="text-sm opacity-80">Luxury service management with premium protocol standards</p>
             </div>
             <div className="vip-glass rounded-2xl p-6 vip-hover-lift">
               <Zap className="h-8 w-8 text-vip-gold mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-3">Intelligent Analytics</h3>
-              <p className="text-sm opacity-90 leading-relaxed">
-                Powerful real-time insights dashboard with comprehensive reporting suite 
-                for data-driven decision making and performance optimization.
-              </p>
+              <h3 className="text-lg font-semibold mb-2">Intelligent Analytics</h3>
+              <p className="text-sm opacity-80">Real-time insights and comprehensive reporting suite</p>
             </div>
           </div>
 
