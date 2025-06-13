@@ -14,6 +14,12 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Analytics from "@/pages/Analytics";
 import Communications from "@/pages/Communications";
+import CreateBooking from "@/pages/CreateBooking";
+import GenerateQuote from "@/pages/GenerateQuote";
+import Inventory from "@/pages/Inventory";
+import Staff from "@/pages/Staff";
+import CareerPortal from "@/pages/CareerPortal";
+import Email from "@/pages/Email";
 
 const queryClient = new QueryClient();
 
@@ -102,18 +108,12 @@ const AppRoutes = () => {
       } />
       <Route path="/create-booking" element={
         <ProtectedRoute>
-          <ComingSoonPage 
-            title="Create Booking" 
-            description="Create new VIP bookings and appointments" 
-          />
+          <CreateBooking />
         </ProtectedRoute>
       } />
       <Route path="/generate-quote" element={
         <ProtectedRoute>
-          <ComingSoonPage 
-            title="Generate Quote" 
-            description="Create custom quotes for VIP services" 
-          />
+          <GenerateQuote />
         </ProtectedRoute>
       } />
       <Route path="/bookings" element={
@@ -128,18 +128,12 @@ const AppRoutes = () => {
       } />
       <Route path="/inventory" element={
         <ProtectedRoute>
-          <ComingSoonPage 
-            title="Inventory Management" 
-            description="Manage supplies and resources" 
-          />
+          <Inventory />
         </ProtectedRoute>
       } />
       <Route path="/staff" element={
         <ProtectedRoute>
-          <ComingSoonPage 
-            title="Staff Management" 
-            description="Team coordination and assignments" 
-          />
+          <Staff />
         </ProtectedRoute>
       } />
       <Route path="/subscriptions" element={
@@ -154,10 +148,7 @@ const AppRoutes = () => {
       } />
       <Route path="/email" element={
         <ProtectedRoute>
-          <ComingSoonPage 
-            title="Email Management" 
-            description="Advanced email campaigns and automation" 
-          />
+          <Email />
         </ProtectedRoute>
       } />
       <Route path="/analytics" element={
@@ -167,10 +158,7 @@ const AppRoutes = () => {
       } />
       <Route path="/careers" element={
         <ProtectedRoute>
-          <ComingSoonPage 
-            title="Career Portal" 
-            description="Recruitment and staff management" 
-          />
+          <CareerPortal />
         </ProtectedRoute>
       } />
       <Route path="/profile" element={
