@@ -34,20 +34,20 @@ const Index = () => {
 
           {/* Features Grid */}
           <div className="grid md:grid-cols-3 gap-6 my-12 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-            <div className="vip-glass rounded-2xl p-6 vip-hover-lift">
+            <div className="bg-black/80 border border-vip-gold/30 rounded-2xl p-6 vip-hover-lift backdrop-blur-sm">
               <Shield className="h-8 w-8 text-vip-gold mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Secure Access</h3>
-              <p className="text-sm opacity-80">Role-based authentication with enterprise-grade security</p>
+              <h3 className="text-lg font-semibold mb-2 text-white">Secure Access</h3>
+              <p className="text-sm text-white/80">Role-based authentication with enterprise-grade security</p>
             </div>
-            <div className="vip-glass rounded-2xl p-6 vip-hover-lift">
+            <div className="bg-black/80 border border-vip-gold/30 rounded-2xl p-6 vip-hover-lift backdrop-blur-sm">
               <Star className="h-8 w-8 text-vip-gold mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">VIP Excellence</h3>
-              <p className="text-sm opacity-80">Luxury service management with premium protocol standards</p>
+              <h3 className="text-lg font-semibold mb-2 text-white">VIP Excellence</h3>
+              <p className="text-sm text-white/80">Luxury service management with premium protocol standards</p>
             </div>
-            <div className="vip-glass rounded-2xl p-6 vip-hover-lift">
+            <div className="bg-black/80 border border-vip-gold/30 rounded-2xl p-6 vip-hover-lift backdrop-blur-sm">
               <Zap className="h-8 w-8 text-vip-gold mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Intelligent Analytics</h3>
-              <p className="text-sm opacity-80">Real-time insights and comprehensive reporting suite</p>
+              <h3 className="text-lg font-semibold mb-2 text-white">Intelligent Analytics</h3>
+              <p className="text-sm text-white/80">Real-time insights and comprehensive reporting suite</p>
             </div>
           </div>
 
