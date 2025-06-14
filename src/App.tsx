@@ -21,6 +21,7 @@ import Inventory from "@/pages/Inventory";
 import Staff from "@/pages/Staff";
 import CareerPortal from "@/pages/CareerPortal";
 import Email from "@/pages/Email";
+import ContactSubmissions from "@/pages/ContactSubmissions";
 
 const queryClient = new QueryClient();
 
@@ -170,6 +171,13 @@ const AppRoutes = () => {
       <Route path="/subscribers" element={
         <ProtectedRoute>
           <Subscribers />
+        </ProtectedRoute>
+      } />
+      <Route path="/contact-submissions" element={
+        <ProtectedRoute>
+          <React.Suspense fallback={<div>Loading...</div>}>
+            <ContactSubmissions />
+          </React.Suspense>
         </ProtectedRoute>
       } />
       <Route path="*" element={<NotFound />} />
