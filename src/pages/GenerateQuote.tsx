@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -60,22 +59,38 @@ const GenerateQuote = () => {
   };
 
   const addCustomItem = () => {
-    if (customItemName && customItemPrice) {
-      const newItem: QuoteItem = {
-        id: Date.now().toString(),
-        name: customItemName,
-        quantity: 1,
-        unitPrice: parseFloat(customItemPrice),
-        total: parseFloat(customItemPrice)
-      };
-      setQuoteItems([...quoteItems, newItem]);
-      setCustomItemName('');
-      setCustomItemPrice('');
+    if (!customItemName.trim()) {
       toast({
-        title: "Custom Item Added",
-        description: `${customItemName} added to quote.`,
+        title: "Missing Item Name",
+        description: "Please enter an item name.",
+        variant: "destructive"
       });
+      return;
     }
+    
+    if (!customItemPrice || parseFloat(customItemPrice) <= 0) {
+      toast({
+        title: "Invalid Price",
+        description: "Please enter a valid price.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const newItem: QuoteItem = {
+      id: Date.now().toString(),
+      name: customItemName.trim(),
+      quantity: 1,
+      unitPrice: parseFloat(customItemPrice),
+      total: parseFloat(customItemPrice)
+    };
+    setQuoteItems([...quoteItems, newItem]);
+    setCustomItemName('');
+    setCustomItemPrice('');
+    toast({
+      title: "Custom Item Added",
+      description: `${customItemName} added to quote.`,
+    });
   };
 
   const updateItemQuantity = (id: string, quantity: number) => {
@@ -167,302 +182,309 @@ const GenerateQuote = () => {
   };
 
   return (
-    <div className="space-y-6 p-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-serif font-bold text-white">Generate Professional Quote</h1>
-          <p className="text-vip-gold/80 mt-2">Create detailed quotes for VIP services and events</p>
+    <div className="min-h-screen bg-black text-white p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header with prominent action buttons */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-4xl font-serif font-bold text-white mb-2">Generate Professional Quote</h1>
+            <p className="text-vip-gold text-lg">Create detailed quotes for VIP services and events</p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <Button 
+              onClick={handleSaveDraft} 
+              variant="outline" 
+              size="lg"
+              className="border-2 border-vip-gold text-vip-gold hover:bg-vip-gold hover:text-black transition-all duration-300 px-6 py-3 text-base font-medium"
+            >
+              <Save className="h-5 w-5 mr-2" />
+              Save Draft
+            </Button>
+            <Button 
+              onClick={handleGenerateQuote} 
+              size="lg"
+              className="bg-vip-gold text-black hover:bg-vip-gold-dark px-8 py-3 text-base font-medium shadow-lg"
+              disabled={!selectedClient || quoteItems.length === 0}
+            >
+              <Calculator className="h-5 w-5 mr-2" />
+              Generate Quote
+            </Button>
+          </div>
         </div>
-        <div className="flex items-center space-x-3">
-          <Button onClick={handleSaveDraft} variant="outline" className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10">
-            <Save className="h-4 w-4 mr-2" />
-            Save Draft
-          </Button>
-          <Button 
-            onClick={handleGenerateQuote} 
-            className="bg-vip-gold text-black hover:bg-vip-gold-dark"
-            disabled={!selectedClient || quoteItems.length === 0}
-          >
-            <Calculator className="h-4 w-4 mr-2" />
-            Generate Quote
-          </Button>
-        </div>
-      </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Quote Builder */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Step 1: Client Selection */}
-          <Card className="vip-glass border-vip-gold/20">
-            <CardHeader>
-              <CardTitle className="flex items-center text-white">
-                <Users className="h-5 w-5 mr-2 text-vip-gold" />
-                Step 1: Select Client
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <Label className="text-white font-medium">Choose Client *</Label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-vip-gold/60" />
-                  <Select value={selectedClient} onValueChange={setSelectedClient}>
-                    <SelectTrigger className="pl-10 border-vip-gold/30 focus:border-vip-gold bg-white text-black">
-                      <SelectValue placeholder="Search and select client..." />
+        <div className="grid gap-8 lg:grid-cols-3">
+          {/* Quote Builder */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Step 1: Client Selection */}
+            <Card className="bg-white border-2 border-vip-gold shadow-xl">
+              <CardHeader className="bg-vip-gold">
+                <CardTitle className="flex items-center text-black text-xl">
+                  <Users className="h-6 w-6 mr-3" />
+                  Step 1: Select Client
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  <Label className="text-black font-semibold text-base">Choose Client *</Label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500" />
+                    <Select value={selectedClient} onValueChange={setSelectedClient}>
+                      <SelectTrigger className="pl-12 h-12 border-2 border-gray-300 focus:border-vip-gold text-black text-base">
+                        <SelectValue placeholder="Search and select client..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white border-2 border-vip-gold">
+                        {mockClients.map((client) => (
+                          <SelectItem key={client} value={client} className="text-black hover:bg-vip-gold/20">
+                            {client}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button variant="outline" className="border-2 border-vip-gold text-vip-gold hover:bg-vip-gold hover:text-black">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add New Client
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Step 2: Add Services */}
+            <Card className="bg-white border-2 border-vip-gold shadow-xl">
+              <CardHeader className="bg-vip-gold">
+                <CardTitle className="text-black text-xl">Step 2: Add Services & Items</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-6">
+                {/* Quick Add Services */}
+                <div className="space-y-4">
+                  <Label className="text-black font-semibold text-base">Quick Add Services</Label>
+                  <Select onValueChange={addPredefinedItem}>
+                    <SelectTrigger className="h-12 border-2 border-gray-300 focus:border-vip-gold text-black text-base">
+                      <SelectValue placeholder="Select a service to add..." />
                     </SelectTrigger>
-                    <SelectContent>
-                      {mockClients.map((client) => (
-                        <SelectItem key={client} value={client}>{client}</SelectItem>
+                    <SelectContent className="bg-white border-2 border-vip-gold">
+                      {predefinedServices.map((service) => (
+                        <SelectItem key={service.id} value={service.id} className="text-black hover:bg-vip-gold/20">
+                          {service.name} - KSh {service.price.toLocaleString()}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-                <Button variant="outline" size="sm" className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add New Client
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
 
-          {/* Step 2: Add Services */}
-          <Card className="vip-glass border-vip-gold/20">
-            <CardHeader>
-              <CardTitle className="text-white">Step 2: Add Services & Items</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Quick Add Services */}
-              <div className="space-y-3">
-                <Label className="text-white font-medium">Quick Add Services</Label>
-                <Select onValueChange={addPredefinedItem}>
-                  <SelectTrigger className="border-vip-gold/30 focus:border-vip-gold bg-white text-black">
-                    <SelectValue placeholder="Select a service to add..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {predefinedServices.map((service) => (
-                      <SelectItem key={service.id} value={service.id}>
-                        {service.name} - KSh {service.price.toLocaleString()}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Custom Item */}
-              <div className="space-y-3">
-                <Label className="text-white font-medium">Add Custom Item</Label>
-                <div className="grid grid-cols-3 gap-3">
-                  <Input
-                    placeholder="Item name"
-                    value={customItemName}
-                    onChange={(e) => setCustomItemName(e.target.value)}
-                    className="col-span-2 border-vip-gold/30 focus:border-vip-gold bg-white text-black"
-                  />
-                  <Input
-                    placeholder="Price (KSh)"
-                    type="number"
-                    value={customItemPrice}
-                    onChange={(e) => setCustomItemPrice(e.target.value)}
-                    className="border-vip-gold/30 focus:border-vip-gold bg-white text-black"
-                  />
+                {/* Custom Item */}
+                <div className="space-y-4 p-4 border-2 border-gray-200 rounded-lg bg-gray-50">
+                  <Label className="text-black font-semibold text-base">Add Custom Item</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Input
+                      placeholder="Item name"
+                      value={customItemName}
+                      onChange={(e) => setCustomItemName(e.target.value)}
+                      className="md:col-span-2 h-12 border-2 border-gray-300 focus:border-vip-gold text-black"
+                    />
+                    <Input
+                      placeholder="Price (KSh)"
+                      type="number"
+                      value={customItemPrice}
+                      onChange={(e) => setCustomItemPrice(e.target.value)}
+                      className="h-12 border-2 border-gray-300 focus:border-vip-gold text-black"
+                    />
+                  </div>
+                  <Button 
+                    onClick={addCustomItem}
+                    className="w-full bg-vip-gold text-black hover:bg-vip-gold-dark h-12 text-base font-medium"
+                  >
+                    <Plus className="h-5 w-5 mr-2" />
+                    Add Custom Item
+                  </Button>
                 </div>
-                <Button 
-                  onClick={addCustomItem}
-                  disabled={!customItemName || !customItemPrice}
-                  variant="outline" 
-                  size="sm" 
-                  className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Custom Item
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          {/* Step 3: Review Items */}
-          {quoteItems.length > 0 && (
-            <Card className="vip-glass border-vip-gold/20">
-              <CardHeader>
-                <CardTitle className="text-white">Step 3: Review Quote Items</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {quoteItems.map((item) => (
-                    <div key={item.id} className="flex items-center space-x-3 p-3 border border-vip-gold/20 rounded-lg bg-black/20">
-                      <div className="flex-1">
-                        <h4 className="font-medium text-white">{item.name}</h4>
-                        <p className="text-sm text-vip-gold/80">KSh {item.unitPrice.toLocaleString()} each</p>
+            {/* Step 3: Review Items */}
+            {quoteItems.length > 0 && (
+              <Card className="bg-white border-2 border-vip-gold shadow-xl">
+                <CardHeader className="bg-vip-gold">
+                  <CardTitle className="text-black text-xl">Step 3: Review Quote Items</CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    {quoteItems.map((item) => (
+                      <div key={item.id} className="flex items-center space-x-4 p-4 border-2 border-gray-200 rounded-lg bg-gray-50">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-black text-base">{item.name}</h4>
+                          <p className="text-gray-600">KSh {item.unitPrice.toLocaleString()} each</p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Label className="text-black font-medium">Qty:</Label>
+                          <Input
+                            type="number"
+                            min="1"
+                            value={item.quantity}
+                            onChange={(e) => updateItemQuantity(item.id, parseInt(e.target.value) || 1)}
+                            className="w-20 h-10 border-2 border-gray-300 focus:border-vip-gold text-black text-center"
+                          />
+                        </div>
+                        <div className="text-right min-w-[120px]">
+                          <p className="font-bold text-vip-gold text-lg">KSh {item.total.toLocaleString()}</p>
+                        </div>
+                        <Button
+                          onClick={() => removeItem(item.id)}
+                          variant="outline"
+                          size="sm"
+                          className="border-red-300 text-red-600 hover:bg-red-50 hover:border-red-500"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Label className="text-sm text-vip-gold/80">Qty:</Label>
+                    ))}
+                  </div>
+
+                  {/* Discount Section */}
+                  <div className="mt-6 pt-6 border-t-2 border-gray-200">
+                    <div className="space-y-4">
+                      <Label className="text-black font-semibold text-base">Apply Discount (Optional)</Label>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <Select value={discountType} onValueChange={setDiscountType}>
+                          <SelectTrigger className="h-12 border-2 border-gray-300 focus:border-vip-gold text-black">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white border-2 border-vip-gold">
+                            <SelectItem value="percentage" className="text-black">Percentage (%)</SelectItem>
+                            <SelectItem value="fixed" className="text-black">Fixed Amount (KSh)</SelectItem>
+                          </SelectContent>
+                        </Select>
                         <Input
+                          placeholder={discountType === 'percentage' ? '10' : '5000'}
                           type="number"
-                          min="1"
-                          value={item.quantity}
-                          onChange={(e) => updateItemQuantity(item.id, parseInt(e.target.value) || 1)}
-                          className="w-16 border-vip-gold/30 focus:border-vip-gold bg-white text-black"
+                          value={discountValue}
+                          onChange={(e) => setDiscountValue(e.target.value)}
+                          className="md:col-span-2 h-12 border-2 border-gray-300 focus:border-vip-gold text-black"
                         />
                       </div>
-                      <div className="text-right min-w-[100px]">
-                        <p className="font-medium text-vip-gold">KSh {item.total.toLocaleString()}</p>
-                      </div>
-                      <Button
-                        onClick={() => removeItem(item.id)}
-                        variant="ghost"
-                        size="sm"
-                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Discount Section */}
-                <div className="mt-6 pt-4 border-t border-vip-gold/20">
-                  <div className="space-y-3">
-                    <Label className="text-white font-medium">Apply Discount (Optional)</Label>
-                    <div className="grid grid-cols-3 gap-3">
-                      <Select value={discountType} onValueChange={setDiscountType}>
-                        <SelectTrigger className="border-vip-gold/30 focus:border-vip-gold bg-white text-black">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="percentage">Percentage (%)</SelectItem>
-                          <SelectItem value="fixed">Fixed Amount (KSh)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Input
-                        placeholder={discountType === 'percentage' ? '10' : '5000'}
-                        type="number"
-                        value={discountValue}
-                        onChange={(e) => setDiscountValue(e.target.value)}
-                        className="col-span-2 border-vip-gold/30 focus:border-vip-gold bg-white text-black"
-                      />
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
 
-        {/* Quote Summary & Actions */}
-        <div className="space-y-6">
-          {/* Financial Summary */}
-          <Card className="vip-glass border-vip-gold/20">
-            <CardHeader>
-              <CardTitle className="flex items-center text-white">
-                <Calculator className="h-5 w-5 mr-2 text-vip-gold" />
-                Quote Summary
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-vip-gold/80">Items:</span>
-                  <span className="font-medium text-white">{quoteItems.length}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-vip-gold/80">Subtotal:</span>
-                  <span className="font-medium text-white">KSh {subtotal.toLocaleString()}</span>
-                </div>
-                {discountValue && (
-                  <div className="flex justify-between">
-                    <span className="text-vip-gold/80">
-                      Discount ({discountType === 'percentage' ? `${discountValue}%` : 'Fixed'}):
-                    </span>
-                    <span className="font-medium text-red-400">-KSh {discountAmount.toLocaleString()}</span>
-                  </div>
-                )}
-                <div className="border-t border-vip-gold/20 pt-3">
-                  <div className="flex justify-between">
-                    <span className="text-lg font-semibold text-white">Total:</span>
-                    <span className="text-xl font-bold text-vip-gold">KSh {finalTotal.toLocaleString()}</span>
-                  </div>
-                </div>
-              </div>
-              
-              {selectedClient && quoteItems.length > 0 && (
-                <Badge className="bg-ios-green text-white w-full justify-center">
-                  Quote Ready to Generate
-                </Badge>
-              )}
-              
-              {(!selectedClient || quoteItems.length === 0) && (
-                <Badge variant="outline" className="border-vip-gold/30 text-vip-gold w-full justify-center">
-                  Complete Steps Above
-                </Badge>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Actions */}
-          <Card className="vip-glass border-vip-gold/20">
-            <CardHeader>
-              <CardTitle className="text-white">Quote Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Button 
-                onClick={handleGeneratePDF} 
-                className="w-full bg-vip-gold text-black hover:bg-vip-gold-dark"
-                disabled={!selectedClient || quoteItems.length === 0}
-              >
-                <FileText className="h-4 w-4 mr-2" />
-                Download PDF
-              </Button>
-              <Button 
-                onClick={handleSendEmail} 
-                variant="outline" 
-                className="w-full border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
-                disabled={!selectedClient || quoteItems.length === 0}
-              >
-                <Mail className="h-4 w-4 mr-2" />
-                Email to Client
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Quote Preview */}
-          {selectedClient && quoteItems.length > 0 && (
-            <Card className="vip-glass border-vip-gold/20">
-              <CardHeader>
-                <CardTitle className="text-white">Quote Preview</CardTitle>
+          {/* Quote Summary & Actions */}
+          <div className="space-y-6">
+            {/* Financial Summary */}
+            <Card className="bg-white border-2 border-vip-gold shadow-xl">
+              <CardHeader className="bg-vip-gold">
+                <CardTitle className="flex items-center text-black text-xl">
+                  <Calculator className="h-6 w-6 mr-3" />
+                  Quote Summary
+                </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4 p-4 bg-white border border-gray-200 rounded-lg text-sm text-black">
-                  <div className="text-center border-b pb-4">
-                    <h3 className="font-bold text-lg">Sir Dennis Olele VVIP Protocol</h3>
-                    <p className="text-gray-600">Professional Quote</p>
+              <CardContent className="p-6 space-y-4">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600 font-medium">Items:</span>
+                    <span className="font-semibold text-black text-lg">{quoteItems.length}</span>
                   </div>
-                  
-                  <div>
-                    <p><strong>Client:</strong> {selectedClient}</p>
-                    <p><strong>Date:</strong> {new Date().toLocaleDateString()}</p>
-                    <p><strong>Quote #:</strong> Q{Date.now().toString().slice(-6)}</p>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600 font-medium">Subtotal:</span>
+                    <span className="font-semibold text-black text-lg">KSh {subtotal.toLocaleString()}</span>
                   </div>
-
-                  <div className="space-y-2">
-                    <h4 className="font-semibold">Services:</h4>
-                    {quoteItems.map((item) => (
-                      <div key={item.id} className="flex justify-between text-xs">
-                        <span>{item.name} (x{item.quantity})</span>
-                        <span>KSh {item.total.toLocaleString()}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="border-t pt-2">
-                    <div className="flex justify-between font-bold">
-                      <span>Total:</span>
-                      <span>KSh {finalTotal.toLocaleString()}</span>
+                  {discountValue && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600 font-medium">
+                        Discount ({discountType === 'percentage' ? `${discountValue}%` : 'Fixed'}):
+                      </span>
+                      <span className="font-semibold text-red-600 text-lg">-KSh {discountAmount.toLocaleString()}</span>
+                    </div>
+                  )}
+                  <div className="border-t-2 border-gray-200 pt-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xl font-bold text-black">Total:</span>
+                      <span className="text-2xl font-bold text-vip-gold">KSh {finalTotal.toLocaleString()}</span>
                     </div>
                   </div>
                 </div>
+                
+                {selectedClient && quoteItems.length > 0 && (
+                  <Badge className="bg-green-600 text-white w-full justify-center py-2 text-base">
+                    Quote Ready to Generate
+                  </Badge>
+                )}
+                
+                {(!selectedClient || quoteItems.length === 0) && (
+                  <Badge variant="outline" className="border-2 border-gray-300 text-gray-600 w-full justify-center py-2 text-base">
+                    Complete Steps Above
+                  </Badge>
+                )}
               </CardContent>
             </Card>
-          )}
+
+            {/* Actions */}
+            <Card className="bg-white border-2 border-vip-gold shadow-xl">
+              <CardHeader className="bg-vip-gold">
+                <CardTitle className="text-black text-xl">Quote Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-4">
+                <Button 
+                  onClick={handleGeneratePDF} 
+                  className="w-full bg-vip-gold text-black hover:bg-vip-gold-dark h-12 text-base font-medium"
+                  disabled={!selectedClient || quoteItems.length === 0}
+                >
+                  <FileText className="h-5 w-5 mr-2" />
+                  Download PDF
+                </Button>
+                <Button 
+                  onClick={handleSendEmail} 
+                  variant="outline" 
+                  className="w-full border-2 border-vip-gold text-vip-gold hover:bg-vip-gold hover:text-black h-12 text-base font-medium"
+                  disabled={!selectedClient || quoteItems.length === 0}
+                >
+                  <Mail className="h-5 w-5 mr-2" />
+                  Email to Client
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Quote Preview */}
+            {selectedClient && quoteItems.length > 0 && (
+              <Card className="bg-white border-2 border-vip-gold shadow-xl">
+                <CardHeader className="bg-vip-gold">
+                  <CardTitle className="text-black text-xl">Quote Preview</CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="space-y-4 p-4 bg-gray-50 border-2 border-gray-200 rounded-lg text-black">
+                    <div className="text-center border-b-2 border-gray-200 pb-4">
+                      <h3 className="font-bold text-xl text-vip-gold">Sir Dennis Olele VVIP Protocol</h3>
+                      <p className="text-gray-600 text-base">Professional Quote</p>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <p className="text-base"><strong>Client:</strong> {selectedClient}</p>
+                      <p className="text-base"><strong>Date:</strong> {new Date().toLocaleDateString()}</p>
+                      <p className="text-base"><strong>Quote #:</strong> Q{Date.now().toString().slice(-6)}</p>
+                    </div>
+
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-base">Services:</h4>
+                      {quoteItems.map((item) => (
+                        <div key={item.id} className="flex justify-between text-sm">
+                          <span>{item.name} (x{item.quantity})</span>
+                          <span className="font-medium">KSh {item.total.toLocaleString()}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="border-t-2 border-gray-200 pt-3">
+                      <div className="flex justify-between font-bold text-lg">
+                        <span>Total:</span>
+                        <span className="text-vip-gold">KSh {finalTotal.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
       </div>
     </div>
