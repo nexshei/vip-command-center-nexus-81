@@ -1,14 +1,14 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectSeparator } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Badge } from '@/components/ui/badge';
 import { Search, Plus, Calendar as CalendarIcon, Clock, User, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { AddClientModal } from '@/components/modals/AddClientModal';
 
 const CreateBooking = () => {
   const [step, setStep] = useState(1);
@@ -16,6 +16,7 @@ const CreateBooking = () => {
   const [selectedService, setSelectedService] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState('');
+  const [isAddClientModalOpen, setIsAddClientModalOpen] = useState(false);
   const { toast } = useToast();
 
   const services = [
@@ -96,16 +97,24 @@ const CreateBooking = () => {
                           <SelectValue placeholder="Search and select client..." />
                         </SelectTrigger>
                         <SelectContent>
+                          <div
+                            className="relative flex cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none hover:bg-accent focus:bg-accent focus:text-accent-foreground"
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                            onClick={() => setIsAddClientModalOpen(true)}
+                          >
+                            <Plus className="absolute left-2 h-4 w-4" />
+                            <span>Add New Client</span>
+                          </div>
+                          <SelectSeparator />
                           {mockClients.map((client) => (
                             <SelectItem key={client} value={client}>{client}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
-                    <Button variant="outline" size="sm" className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add New Client
-                    </Button>
                   </div>
 
                   {/* Service Selection */}
@@ -274,6 +283,7 @@ const CreateBooking = () => {
           </Card>
         </div>
       </div>
+      <AddClientModal open={isAddClientModalOpen} onOpenChange={setIsAddClientModalOpen} />
     </div>
   );
 };

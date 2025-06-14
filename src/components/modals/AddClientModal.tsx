@@ -8,14 +8,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-export const AddClientModal = () => {
-  const [isOpen, setIsOpen] = useState(false);
+interface AddClientModalProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export const AddClientModal = ({ open, onOpenChange }: AddClientModalProps) => {
+  const [internalOpen, setInternalOpen] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [tier, setTier] = useState('');
   const [company, setCompany] = useState('');
   const { toast } = useToast();
+
+  const isOpen = open ?? internalOpen;
+  const setIsOpen = onOpenChange ?? setInternalOpen;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,12 +54,14 @@ export const AddClientModal = () => {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button className="bg-vip-gold text-white hover:bg-vip-gold-dark">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Client
-        </Button>
-      </DialogTrigger>
+      {!onOpenChange && (
+        <DialogTrigger asChild>
+          <Button className="bg-vip-gold text-white hover:bg-vip-gold-dark">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Client
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-[500px] vip-glass border-vip-gold/20">
         <DialogHeader>
           <DialogTitle className="text-vip-black text-xl font-semibold">Add New VIP Client</DialogTitle>
