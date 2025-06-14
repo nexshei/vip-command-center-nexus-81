@@ -1,165 +1,261 @@
 
-import React from 'react';
-import { Package, Users, Bell, Calendar, FileText, Star } from 'lucide-react';
+import React, { useState } from 'react';
+import { Users, Search, Filter, Eye, Mail, Phone, Calendar } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { FilterModal } from '@/components/modals/FilterModal';
+
+// Mock data for VIP subscribers
+const mockSubscribers = [
+  {
+    id: 1,
+    name: "John Doe",
+    email: "john.doe@email.com",
+    phone: "+254 700 123 456",
+    tier: "Gold",
+    status: "Active",
+    joinDate: "2024-01-15",
+    lastPayment: "2024-06-01",
+    amount: "KSh 50,000"
+  },
+  {
+    id: 2,
+    name: "Jane Smith",
+    email: "jane.smith@email.com",
+    phone: "+254 700 789 012",
+    tier: "Platinum",
+    status: "Active",
+    joinDate: "2024-02-20",
+    lastPayment: "2024-06-01",
+    amount: "KSh 150,000"
+  },
+  {
+    id: 3,
+    name: "Michael Johnson",
+    email: "michael.j@email.com",
+    phone: "+254 700 345 678",
+    tier: "Diamond",
+    status: "Active",
+    joinDate: "2024-03-10",
+    lastPayment: "2024-06-01",
+    amount: "KSh 500,000"
+  },
+  {
+    id: 4,
+    name: "Sarah Wilson",
+    email: "sarah.wilson@email.com",
+    phone: "+254 700 456 789",
+    tier: "Gold",
+    status: "Pending",
+    joinDate: "2024-05-25",
+    lastPayment: "2024-05-25",
+    amount: "KSh 50,000"
+  },
+  {
+    id: 5,
+    name: "David Brown",
+    email: "david.brown@email.com",
+    phone: "+254 700 567 890",
+    tier: "Platinum",
+    status: "Expired",
+    joinDate: "2023-12-01",
+    lastPayment: "2024-04-01",
+    amount: "KSh 150,000"
+  }
+];
 
 const Subscriptions = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [subscribers] = useState(mockSubscribers);
+
+  const filteredSubscribers = subscribers.filter(subscriber =>
+    subscriber.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    subscriber.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    subscriber.tier.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'Active':
+        return <Badge className="bg-green-500 text-white">Active</Badge>;
+      case 'Pending':
+        return <Badge className="bg-yellow-500 text-white">Pending</Badge>;
+      case 'Expired':
+        return <Badge className="bg-red-500 text-white">Expired</Badge>;
+      default:
+        return <Badge className="bg-gray-500 text-white">{status}</Badge>;
+    }
+  };
+
+  const getTierBadge = (tier: string) => {
+    switch (tier) {
+      case 'Gold':
+        return <Badge className="bg-vip-gold text-black">Gold</Badge>;
+      case 'Platinum':
+        return <Badge className="bg-gray-300 text-black">Platinum</Badge>;
+      case 'Diamond':
+        return <Badge className="bg-blue-600 text-white">Diamond</Badge>;
+      default:
+        return <Badge className="bg-gray-500 text-white">{tier}</Badge>;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-black text-white p-6">
       <div className="max-w-7xl mx-auto space-y-8">
-        <div className="text-center">
-          <h1 className="text-4xl font-serif font-bold text-white mb-4">VIP Subscription Services</h1>
-          <p className="text-xl text-vip-gold">Exclusive membership plans for distinguished clients</p>
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-serif font-bold text-white mb-2">VIP Subscribers</h1>
+            <p className="text-xl text-vip-gold">Manage your exclusive VIP membership subscribers</p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <Users className="h-8 w-8 text-vip-gold" />
+            <span className="text-2xl font-bold text-white">{subscribers.length}</span>
+            <span className="text-vip-gold">Total Subscribers</span>
+          </div>
         </div>
 
-        {/* Premium Subscription Tiers */}
-        <div className="grid gap-8 md:grid-cols-3">
-          <Card className="bg-white border-2 border-vip-gold shadow-xl transform hover:scale-105 transition-transform duration-300">
-            <CardHeader className="bg-vip-gold text-center py-8">
-              <CardTitle className="text-2xl font-bold text-black">GOLD TIER</CardTitle>
-              <div className="text-3xl font-bold text-black mt-2">KSh 50,000</div>
-              <p className="text-black/80 mt-1">per month</p>
-            </CardHeader>
-            <CardContent className="p-8 text-black">
-              <ul className="space-y-4">
-                <li className="flex items-center">
-                  <Star className="h-5 w-5 text-vip-gold mr-3" />
-                  Priority booking services
-                </li>
-                <li className="flex items-center">
-                  <Users className="h-5 w-5 text-vip-gold mr-3" />
-                  Dedicated protocol officer
-                </li>
-                <li className="flex items-center">
-                  <Calendar className="h-5 w-5 text-vip-gold mr-3" />
-                  24/7 concierge support
-                </li>
-                <li className="flex items-center">
-                  <Package className="h-5 w-5 text-vip-gold mr-3" />
-                  Premium event planning
-                </li>
-              </ul>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white border-4 border-vip-gold shadow-2xl transform hover:scale-105 transition-transform duration-300 relative">
-            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-vip-gold text-black px-6 py-2 rounded-full font-bold">
-              MOST POPULAR
-            </div>
-            <CardHeader className="bg-gradient-to-r from-vip-gold to-yellow-400 text-center py-8">
-              <CardTitle className="text-2xl font-bold text-black">PLATINUM TIER</CardTitle>
-              <div className="text-3xl font-bold text-black mt-2">KSh 150,000</div>
-              <p className="text-black/80 mt-1">per month</p>
-            </CardHeader>
-            <CardContent className="p-8 text-black">
-              <ul className="space-y-4">
-                <li className="flex items-center">
-                  <Star className="h-5 w-5 text-vip-gold mr-3" />
-                  All Gold tier benefits
-                </li>
-                <li className="flex items-center">
-                  <Users className="h-5 w-5 text-vip-gold mr-3" />
-                  Personal security detail
-                </li>
-                <li className="flex items-center">
-                  <Calendar className="h-5 w-5 text-vip-gold mr-3" />
-                  Private jet coordination
-                </li>
-                <li className="flex items-center">
-                  <Package className="h-5 w-5 text-vip-gold mr-3" />
-                  Luxury accommodation
-                </li>
-                <li className="flex items-center">
-                  <Bell className="h-5 w-5 text-vip-gold mr-3" />
-                  Emergency response team
-                </li>
-              </ul>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white border-2 border-vip-gold shadow-xl transform hover:scale-105 transition-transform duration-300">
-            <CardHeader className="bg-gradient-to-r from-gray-800 to-black text-center py-8">
-              <CardTitle className="text-2xl font-bold text-vip-gold">DIAMOND TIER</CardTitle>
-              <div className="text-3xl font-bold text-vip-gold mt-2">KSh 500,000</div>
-              <p className="text-vip-gold/80 mt-1">per month</p>
-            </CardHeader>
-            <CardContent className="p-8 text-black">
-              <ul className="space-y-4">
-                <li className="flex items-center">
-                  <Star className="h-5 w-5 text-vip-gold mr-3" />
-                  All Platinum tier benefits
-                </li>
-                <li className="flex items-center">
-                  <Users className="h-5 w-5 text-vip-gold mr-3" />
-                  Executive protection team
-                </li>
-                <li className="flex items-center">
-                  <Calendar className="h-5 w-5 text-vip-gold mr-3" />
-                  Global protocol services
-                </li>
-                <li className="flex items-center">
-                  <Package className="h-5 w-5 text-vip-gold mr-3" />
-                  Bespoke lifestyle management
-                </li>
-                <li className="flex items-center">
-                  <FileText className="h-5 w-5 text-vip-gold mr-3" />
-                  Unlimited custom requests
-                </li>
-              </ul>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Service Features */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mt-12">
-          <Card className="bg-white border border-vip-gold/50 hover:border-vip-gold transition-colors">
+        {/* Stats Cards */}
+        <div className="grid gap-6 md:grid-cols-4">
+          <Card className="bg-white border border-vip-gold/20">
             <CardContent className="p-6 text-center">
-              <Users className="h-12 w-12 text-vip-gold mx-auto mb-4" />
-              <h3 className="font-bold text-black mb-2">Protocol Services</h3>
-              <p className="text-gray-600 text-sm">Professional diplomatic and social protocol management</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white border border-vip-gold/50 hover:border-vip-gold transition-colors">
-            <CardContent className="p-6 text-center">
-              <Calendar className="h-12 w-12 text-vip-gold mx-auto mb-4" />
-              <h3 className="font-bold text-black mb-2">Event Planning</h3>
-              <p className="text-gray-600 text-sm">Exclusive event coordination and management services</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white border border-vip-gold/50 hover:border-vip-gold transition-colors">
-            <CardContent className="p-6 text-center">
-              <Package className="h-12 w-12 text-vip-gold mx-auto mb-4" />
-              <h3 className="font-bold text-black mb-2">Concierge</h3>
-              <p className="text-gray-600 text-sm">Personalized lifestyle and travel management</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white border border-vip-gold/50 hover:border-vip-gold transition-colors">
-            <CardContent className="p-6 text-center">
-              <Bell className="h-12 w-12 text-vip-gold mx-auto mb-4" />
-              <h3 className="font-bold text-black mb-2">24/7 Support</h3>
-              <p className="text-gray-600 text-sm">Round-the-clock assistance and emergency response</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Contact Section */}
-        <Card className="bg-white border-2 border-vip-gold shadow-xl mt-12">
-          <CardContent className="p-8 text-center">
-            <h2 className="text-2xl font-bold text-black mb-4">Ready to Experience Excellence?</h2>
-            <p className="text-gray-600 mb-6">Contact our membership team to discuss your exclusive VIP subscription plan</p>
-            <div className="flex justify-center space-x-4">
-              <div className="text-center">
-                <p className="font-semibold text-black">Call</p>
-                <p className="text-vip-gold">+254 700 000 000</p>
+              <div className="text-2xl font-bold text-vip-black mb-2">
+                {subscribers.filter(s => s.status === 'Active').length}
               </div>
-              <div className="text-center">
-                <p className="font-semibold text-black">Email</p>
-                <p className="text-vip-gold">vip@sirolele.com</p>
+              <p className="text-vip-gold font-medium">Active Subscribers</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white border border-vip-gold/20">
+            <CardContent className="p-6 text-center">
+              <div className="text-2xl font-bold text-vip-black mb-2">
+                {subscribers.filter(s => s.tier === 'Gold').length}
+              </div>
+              <p className="text-vip-gold font-medium">Gold Tier</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white border border-vip-gold/20">
+            <CardContent className="p-6 text-center">
+              <div className="text-2xl font-bold text-vip-black mb-2">
+                {subscribers.filter(s => s.tier === 'Platinum').length}
+              </div>
+              <p className="text-vip-gold font-medium">Platinum Tier</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white border border-vip-gold/20">
+            <CardContent className="p-6 text-center">
+              <div className="text-2xl font-bold text-vip-black mb-2">
+                {subscribers.filter(s => s.tier === 'Diamond').length}
+              </div>
+              <p className="text-vip-gold font-medium">Diamond Tier</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Search and Filter */}
+        <Card className="bg-white border border-vip-gold/20">
+          <CardContent className="p-6">
+            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-vip-gold" />
+                <Input
+                  placeholder="Search subscribers..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 border-vip-gold/30 bg-white text-vip-black focus:border-vip-gold"
+                />
+              </div>
+              <div className="flex gap-2">
+                <FilterModal />
+                <Button variant="outline" className="border-vip-gold/30 text-vip-black bg-white hover:bg-vip-gold hover:text-black">
+                  <Eye className="h-4 w-4 mr-2" />
+                  View All
+                </Button>
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Subscribers Table */}
+        <Card className="bg-white border border-vip-gold/20">
+          <CardHeader className="border-b border-vip-gold/10">
+            <CardTitle className="text-xl font-serif text-vip-black">Subscriber List</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow className="border-b border-vip-gold/10">
+                  <TableHead className="text-vip-black font-semibold">Name</TableHead>
+                  <TableHead className="text-vip-black font-semibold">Contact</TableHead>
+                  <TableHead className="text-vip-black font-semibold">Tier</TableHead>
+                  <TableHead className="text-vip-black font-semibold">Status</TableHead>
+                  <TableHead className="text-vip-black font-semibold">Join Date</TableHead>
+                  <TableHead className="text-vip-black font-semibold">Last Payment</TableHead>
+                  <TableHead className="text-vip-black font-semibold">Amount</TableHead>
+                  <TableHead className="text-vip-black font-semibold">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredSubscribers.map((subscriber) => (
+                  <TableRow key={subscriber.id} className="border-b border-vip-gold/10 hover:bg-vip-gold/5">
+                    <TableCell className="font-medium text-vip-black">
+                      {subscriber.name}
+                    </TableCell>
+                    <TableCell className="text-vip-black">
+                      <div className="space-y-1">
+                        <div className="flex items-center text-sm">
+                          <Mail className="h-3 w-3 mr-1 text-vip-gold" />
+                          {subscriber.email}
+                        </div>
+                        <div className="flex items-center text-sm">
+                          <Phone className="h-3 w-3 mr-1 text-vip-gold" />
+                          {subscriber.phone}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {getTierBadge(subscriber.tier)}
+                    </TableCell>
+                    <TableCell>
+                      {getStatusBadge(subscriber.status)}
+                    </TableCell>
+                    <TableCell className="text-vip-black">
+                      <div className="flex items-center">
+                        <Calendar className="h-3 w-3 mr-1 text-vip-gold" />
+                        {subscriber.joinDate}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-vip-black">
+                      {subscriber.lastPayment}
+                    </TableCell>
+                    <TableCell className="font-semibold text-vip-black">
+                      {subscriber.amount}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="border-vip-gold/30 text-vip-black hover:bg-vip-gold hover:text-black"
+                        >
+                          View
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="border-vip-gold/30 text-vip-black hover:bg-vip-gold hover:text-black"
+                        >
+                          Edit
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
       </div>
