@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -11,9 +10,10 @@ import { useToast } from '@/hooks/use-toast';
 interface AddClientModalProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  onClientAdded?: (clientName: string) => void;
 }
 
-export const AddClientModal = ({ open, onOpenChange }: AddClientModalProps) => {
+export const AddClientModal = ({ open, onOpenChange, onClientAdded }: AddClientModalProps) => {
   const [internalOpen, setInternalOpen] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -33,6 +33,11 @@ export const AddClientModal = ({ open, onOpenChange }: AddClientModalProps) => {
       title: "Client Added",
       description: `${name} has been added to your VIP client database.`,
     });
+
+    // Call the onClientAdded callback if provided
+    if (onClientAdded) {
+      onClientAdded(name);
+    }
 
     // Reset form and close modal
     setName('');
