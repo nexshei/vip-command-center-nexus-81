@@ -31,7 +31,7 @@
     --card: 255 255 255;
     --card-foreground: 0 0 0;
 
-    --popover: 255 255 255;
+    --popover: 255 255 255; /* White background for popovers/dropdowns */
     --popover-foreground: 0 0 0;
 
     --primary: 212 175 55; /* VIP Gold */
@@ -96,6 +96,22 @@
   ::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(135deg, #E8C547, #D4AF37);
   }
+
+  /* Ensure all dropdowns have white backgrounds */
+  [data-radix-popper-content-wrapper] {
+    background: white !important;
+    z-index: 50 !important;
+  }
+
+  .dropdown-content,
+  [role="menu"],
+  [role="listbox"],
+  [role="combobox"] {
+    background: white !important;
+    border: 1px solid rgba(212, 175, 55, 0.2) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08) !important;
+    z-index: 50 !important;
+  }
 }
 
 /* Professional VIP Custom Styles */
@@ -143,6 +159,10 @@
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
   }
 
+  .vip-glow {
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.1);
+  }
+
   /* Professional Color Classes */
   .text-vip-black { color: #000000; }
   .text-vip-gold { color: #D4AF37; }
@@ -182,6 +202,15 @@
 
   .professional-card {
     @apply bg-white border border-gray-200 rounded-lg vip-professional-shadow;
+  }
+
+  /* Dropdown and Select Styling */
+  .professional-dropdown {
+    @apply bg-white border border-vip-gold/20 text-black shadow-lg z-50;
+  }
+
+  .professional-dropdown-item {
+    @apply text-black hover:bg-vip-gold/10 hover:text-black transition-colors;
   }
 }
 

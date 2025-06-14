@@ -20,7 +20,7 @@ export const FilterModal = () => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="border-vip-gold/30 text-vip-black bg-white hover:bg-vip-gold hover:text-white shadow-sm">
+        <Button variant="outline" className="border-vip-gold/30 text-vip-black bg-white hover:bg-vip-gold hover:text-black shadow-sm">
           <Filter className="h-4 w-4 mr-2" />
           Filter
         </Button>
@@ -83,7 +83,7 @@ export const FilterModal = () => {
           </Button>
           <Button 
             onClick={handleApplyFilter} 
-            className="bg-vip-gold text-white hover:bg-vip-gold-dark shadow-sm"
+            className="bg-vip-gold text-black hover:bg-vip-gold-dark shadow-sm"
           >
             Apply Filters
           </Button>

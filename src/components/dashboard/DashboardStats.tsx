@@ -31,9 +31,9 @@ const StatCard: React.FC<StatCardProps> = ({
   description 
 }) => {
   const changeColor = {
-    positive: 'ios-green',
-    negative: 'ios-red',
-    neutral: 'text-vip-gold/70'
+    positive: 'text-white',
+    negative: 'text-white',
+    neutral: 'text-white'
   }[changeType];
 
   return (
@@ -45,7 +45,7 @@ const StatCard: React.FC<StatCardProps> = ({
         </div>
       </CardHeader>
       <CardContent>
-        <div className="text-3xl font-bold text-vip-gold mb-1">{value}</div>
+        <div className="text-3xl font-bold text-white mb-1">{value}</div>
         {change && (
           <div className={`text-sm ${changeColor} flex items-center`}>
             <TrendingUp className="h-3 w-3 mr-1" />
