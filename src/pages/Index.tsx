@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Crown, Shield, Star, Zap } from 'lucide-react';
@@ -36,7 +37,7 @@ const Index = () => {
             </div>
             <div className="bg-black/80 border border-vip-gold/30 rounded-2xl p-6 vip-hover-lift backdrop-blur-sm">
               <Star className="h-8 w-8 text-vip-gold mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2 text-white">VIP Excellence</h3>
+              <h3 className="text-lg font-semibold mb-2 text-white">VVIP Excellence</h3>
               <p className="text-sm text-white/80">Luxury service management with premium protocol standards</p>
             </div>
             <div className="bg-black/80 border border-vip-gold/30 rounded-2xl p-6 vip-hover-lift backdrop-blur-sm">
@@ -51,7 +52,7 @@ const Index = () => {
           animationDelay: '0.4s'
         }}>
             <p className="text-lg opacity-90 max-w-2xl mx-auto">
-              Access the premier administrative platform for VIP protocol management, 
+              Access the premier administrative platform for VVIP protocol management, 
               client relations, and luxury service coordination.
             </p>
             
