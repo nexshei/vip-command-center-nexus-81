@@ -51,7 +51,7 @@ const LoginForm = () => {
     <div className="min-h-screen flex items-center justify-center vip-gradient p-4">
       <div className="absolute inset-0 bg-black/20"></div>
       
-      <Card className="w-full max-w-md relative z-10 vip-shadow border-0">
+      <Card className="w-full max-w-md relative z-10 vip-shadow border-0 bg-white">
         <CardHeader className="text-center space-y-4">
           <div className="flex items-center justify-center mb-4">
             <div className="relative">
@@ -80,7 +80,7 @@ const LoginForm = () => {
                   placeholder="admin@sirole.com"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="pl-10 border-vip-gold/30 focus:border-vip-gold text-vip-black"
+                  className="pl-10 border-vip-gold/30 focus:border-vip-gold text-vip-black bg-white"
                   required
                 />
               </div>
@@ -96,7 +96,7 @@ const LoginForm = () => {
                   placeholder="Enter your password"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="pl-10 border-vip-gold/30 focus:border-vip-gold text-vip-black"
+                  className="pl-10 border-vip-gold/30 focus:border-vip-gold text-vip-black bg-white"
                   required
                 />
               </div>
@@ -117,7 +117,7 @@ const LoginForm = () => {
                 <span className="w-full border-t border-vip-gold/30" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-vip-black/60">Demo Accounts</span>
+                <span className="bg-white px-2 text-vip-black/60">Demo Accounts</span>
               </div>
             </div>
             
@@ -125,14 +125,14 @@ const LoginForm = () => {
               <Button
                 variant="outline"
                 onClick={() => handleDemoLogin('super')}
-                className="text-vip-black border-vip-gold/30 hover:bg-vip-gold hover:text-white text-sm"
+                className="text-vip-black border-vip-gold/30 hover:bg-vip-gold hover:text-white text-sm bg-white"
               >
                 Super Admin
               </Button>
               <Button
                 variant="outline"
                 onClick={() => handleDemoLogin('protocol')}
-                className="text-vip-black border-vip-gold/30 hover:bg-vip-gold hover:text-white text-sm"
+                className="text-vip-black border-vip-gold/30 hover:bg-vip-gold hover:text-white text-sm bg-white"
               >
                 Protocol Admin
               </Button>
