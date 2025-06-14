@@ -9,6 +9,69 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      analytics: {
+        Row: {
+          created_at: string | null
+          id: string
+          metric_name: string | null
+          metric_value: number | null
+          notes: string | null
+          record_date: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          metric_name?: string | null
+          metric_value?: number | null
+          notes?: string | null
+          record_date?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          metric_name?: string | null
+          metric_value?: number | null
+          notes?: string | null
+          record_date?: string | null
+        }
+        Relationships: []
+      }
+      bookings: {
+        Row: {
+          client_id: string | null
+          client_name: string | null
+          created_at: string | null
+          id: string
+          notes: string | null
+          scheduled_at: string | null
+          service_type: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          client_name?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          scheduled_at?: string | null
+          service_type?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          client_name?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          scheduled_at?: string | null
+          service_type?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       career_applications: {
         Row: {
           cover_letter: string | null
@@ -45,6 +108,66 @@ export type Database = {
         }
         Relationships: []
       }
+      clients: {
+        Row: {
+          company: string | null
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          notes: string | null
+          phone: string | null
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          notes?: string | null
+          phone?: string | null
+        }
+        Update: {
+          company?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          notes?: string | null
+          phone?: string | null
+        }
+        Relationships: []
+      }
+      communications: {
+        Row: {
+          channel: string | null
+          created_at: string | null
+          id: string
+          message: string | null
+          receiver_id: string | null
+          sender_id: string | null
+          subject: string | null
+        }
+        Insert: {
+          channel?: string | null
+          created_at?: string | null
+          id?: string
+          message?: string | null
+          receiver_id?: string | null
+          sender_id?: string | null
+          subject?: string | null
+        }
+        Update: {
+          channel?: string | null
+          created_at?: string | null
+          id?: string
+          message?: string | null
+          receiver_id?: string | null
+          sender_id?: string | null
+          subject?: string | null
+        }
+        Relationships: []
+      }
       contact_submissions: {
         Row: {
           created_at: string | null
@@ -69,6 +192,99 @@ export type Database = {
           message?: string
           name?: string
           subject?: string | null
+        }
+        Relationships: []
+      }
+      emails: {
+        Row: {
+          body: string | null
+          from_email: string | null
+          id: string
+          sent_at: string | null
+          status: string | null
+          subject: string | null
+          to_email: string | null
+        }
+        Insert: {
+          body?: string | null
+          from_email?: string | null
+          id?: string
+          sent_at?: string | null
+          status?: string | null
+          subject?: string | null
+          to_email?: string | null
+        }
+        Update: {
+          body?: string | null
+          from_email?: string | null
+          id?: string
+          sent_at?: string | null
+          status?: string | null
+          subject?: string | null
+          to_email?: string | null
+        }
+        Relationships: []
+      }
+      inventory: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          item_name: string | null
+          location: string | null
+          quantity: number | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          item_name?: string | null
+          location?: string | null
+          quantity?: number | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          item_name?: string | null
+          location?: string | null
+          quantity?: number | null
+          status?: string | null
+        }
+        Relationships: []
+      }
+      jobs: {
+        Row: {
+          department: string | null
+          description: string | null
+          id: string
+          location: string | null
+          posted_at: string | null
+          requirements: string | null
+          status: string | null
+          title: string | null
+        }
+        Insert: {
+          department?: string | null
+          description?: string | null
+          id?: string
+          location?: string | null
+          posted_at?: string | null
+          requirements?: string | null
+          status?: string | null
+          title?: string | null
+        }
+        Update: {
+          department?: string | null
+          description?: string | null
+          id?: string
+          location?: string | null
+          posted_at?: string | null
+          requirements?: string | null
+          status?: string | null
+          title?: string | null
         }
         Relationships: []
       }
@@ -135,6 +351,72 @@ export type Database = {
         }
         Relationships: []
       }
+      quotes: {
+        Row: {
+          amount: number | null
+          created_at: string | null
+          id: string
+          quote_details: string | null
+          requested_service: string | null
+          requester_id: string | null
+          requester_name: string | null
+          status: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string | null
+          id?: string
+          quote_details?: string | null
+          requested_service?: string | null
+          requester_id?: string | null
+          requester_name?: string | null
+          status?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string | null
+          id?: string
+          quote_details?: string | null
+          requested_service?: string | null
+          requester_id?: string | null
+          requester_name?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
+      staff: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          notes: string | null
+          phone: string | null
+          role: string | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          role?: string | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          role?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
       subscribers: {
         Row: {
           created_at: string
@@ -168,6 +450,39 @@ export type Database = {
           subscription_tier?: string | null
           updated_at?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          active: boolean | null
+          client_id: string | null
+          created_at: string | null
+          end_date: string | null
+          id: string
+          notes: string | null
+          start_date: string | null
+          tier: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          client_id?: string | null
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          notes?: string | null
+          start_date?: string | null
+          tier?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          client_id?: string | null
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          notes?: string | null
+          start_date?: string | null
+          tier?: string | null
         }
         Relationships: []
       }
