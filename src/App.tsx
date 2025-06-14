@@ -10,6 +10,7 @@ import Dashboard from "@/pages/Dashboard";
 import Bookings from "@/pages/Bookings";
 import Clients from "@/pages/Clients";
 import Subscriptions from "@/pages/Subscriptions";
+import Subscribers from "@/pages/Subscribers";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Analytics from "@/pages/Analytics";
@@ -164,6 +165,11 @@ const AppRoutes = () => {
       <Route path="/profile" element={
         <ProtectedRoute>
           <ProfilePage />
+        </ProtectedRoute>
+      } />
+      <Route path="/subscribers" element={
+        <ProtectedRoute>
+          <Subscribers />
         </ProtectedRoute>
       } />
       <Route path="*" element={<NotFound />} />
