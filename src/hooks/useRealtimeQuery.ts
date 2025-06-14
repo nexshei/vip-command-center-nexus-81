@@ -3,13 +3,34 @@ import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+// Explicitly type all available Supabase tables for type-safety
+export type SupabaseTable =
+  | "analytics"
+  | "bookings"
+  | "career_applications"
+  | "clients"
+  | "communications"
+  | "contact_submissions"
+  | "emails"
+  | "inventory"
+  | "jobs"
+  | "meeting_requests"
+  | "profiles"
+  | "quotes"
+  | "staff"
+  | "subscribers"
+  | "subscriptions"
+  | "vvip_service_requests";
+
 /**
  * Generic realtime query for a Supabase table.
- * Usage: const { data, isLoading, error } = useRealtimeQuery('bookings')
+ * Usage: const { data, isLoading, error } = useRealtimeQuery("bookings")
  */
-export function useRealtimeQuery(table: string, options: { select?: string, orderBy?: string } = {}) {
+export function useRealtimeQuery(
+  table: SupabaseTable,
+  options: { select?: string; orderBy?: string } = {}
+) {
   const queryClient = useQueryClient();
-
   const select = options.select || "*";
   const orderBy = options.orderBy;
 
@@ -35,7 +56,6 @@ export function useRealtimeQuery(table: string, options: { select?: string, orde
         "postgres_changes",
         { event: "*", schema: "public", table },
         (payload) => {
-          // On INSERT, UPDATE, DELETE: refetch table data
           queryClient.invalidateQueries({ queryKey });
         }
       )
