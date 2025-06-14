@@ -42,7 +42,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-vip-professional-gradient">
+    <div className="min-h-screen bg-black">
       <ScrollArea className="h-screen">
         <div className="space-y-6 p-6 max-w-7xl mx-auto smooth-scroll">
           {/* Professional Welcome Header */}
@@ -90,9 +90,9 @@ const Dashboard = () => {
               <QuickActions />
               
               {/* Recent Activities with Scrolling */}
-              <Card className="professional-card">
-                <CardHeader className="border-b border-gray-100">
-                  <CardTitle className="text-xl font-serif text-vip-black flex items-center">
+              <Card className="bg-gray-900 border border-vip-gold/30">
+                <CardHeader className="border-b border-vip-gold/30">
+                  <CardTitle className="text-xl font-serif text-vip-gold flex items-center">
                     <TrendingUp className="h-5 w-5 mr-2 text-vip-gold" />
                     Recent Activities
                   </CardTitle>
@@ -103,7 +103,7 @@ const Dashboard = () => {
                       {recentActivities.map((activity, index) => (
                         <div 
                           key={activity.id}
-                          className="flex items-start space-x-4 p-4 rounded-lg border border-gray-100 hover:bg-vip-off-white transition-all duration-200 vip-hover-lift"
+                          className="flex items-start space-x-4 p-4 rounded-lg border border-vip-gold/20 hover:bg-vip-gold/5 transition-all duration-200 vip-hover-lift"
                           style={{ animationDelay: `${index * 0.1}s` }}
                         >
                           <div className="flex-shrink-0 mt-1">
@@ -116,9 +116,9 @@ const Dashboard = () => {
                             }`}></div>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-vip-black">{activity.action}</p>
-                            <p className="text-xs text-gray-600">{activity.client}</p>
-                            <p className="text-xs text-gray-400 mt-1">{activity.time}</p>
+                            <p className="text-sm font-medium text-vip-gold">{activity.action}</p>
+                            <p className="text-xs text-vip-gold/70">{activity.client}</p>
+                            <p className="text-xs text-vip-gold/50 mt-1">{activity.time}</p>
                           </div>
                         </div>
                       ))}
@@ -133,9 +133,9 @@ const Dashboard = () => {
               <VipCalendar />
               
               {/* Upcoming Tasks with Scrolling */}
-              <Card className="professional-card">
-                <CardHeader className="border-b border-gray-100">
-                  <CardTitle className="text-lg font-serif text-vip-black flex items-center">
+              <Card className="bg-gray-900 border border-vip-gold/30">
+                <CardHeader className="border-b border-vip-gold/30">
+                  <CardTitle className="text-lg font-serif text-vip-gold flex items-center">
                     <Calendar className="h-5 w-5 mr-2 text-vip-gold" />
                     Upcoming Tasks
                   </CardTitle>
@@ -146,11 +146,11 @@ const Dashboard = () => {
                       {upcomingTasks.map((task, index) => (
                         <div 
                           key={task.id}
-                          className="p-3 rounded-lg border border-gray-100 hover:bg-vip-off-white transition-all duration-200"
+                          className="p-3 rounded-lg border border-vip-gold/20 hover:bg-vip-gold/5 transition-all duration-200"
                           style={{ animationDelay: `${index * 0.1}s` }}
                         >
                           <div className="flex items-start justify-between mb-2">
-                            <p className="text-sm font-medium text-vip-black">{task.task}</p>
+                            <p className="text-sm font-medium text-vip-gold">{task.task}</p>
                             <span className={`text-xs px-2 py-1 rounded-full ${
                               task.priority === 'high' ? 'bg-red-100 text-red-700' :
                               task.priority === 'medium' ? 'bg-vip-gold/20 text-vip-gold' :
@@ -159,7 +159,7 @@ const Dashboard = () => {
                               {task.priority}
                             </span>
                           </div>
-                          <p className="text-xs text-gray-500">{task.deadline}</p>
+                          <p className="text-xs text-vip-gold/60">{task.deadline}</p>
                         </div>
                       ))}
                     </div>
