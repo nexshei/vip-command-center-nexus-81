@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, Plus, Users, Phone, Mail, Eye, Edit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { AddStaffModal } from '@/components/modals/AddStaffModal';
 
 interface StaffMember {
   id: string;
@@ -24,9 +24,10 @@ const Staff = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [addModalOpen, setAddModalOpen] = useState(false);
   const { toast } = useToast();
 
-  const staffMembers: StaffMember[] = [
+  const [staffMembers, setStaffMembers] = useState<StaffMember[]>([
     {
       id: '1',
       name: 'Margaret Wanjiku',
@@ -87,7 +88,7 @@ const Staff = () => {
       email: 'peter@sirolele.com',
       joinDate: '2022-12-01'
     },
-  ];
+  ]);
 
   const totalStaff = staffMembers.length;
   const activeStaff = staffMembers.filter(staff => staff.status === 'active').length;
@@ -116,10 +117,11 @@ const Staff = () => {
   });
 
   const handleAddStaff = () => {
-    toast({
-      title: "Add New Staff Member",
-      description: "Opening form to add new staff member...",
-    });
+    setAddModalOpen(true);
+  };
+
+  const handleStaffAdded = (newStaff: StaffMember) => {
+    setStaffMembers([...staffMembers, newStaff]);
   };
 
   const handleViewProfile = (staffId: string) => {
@@ -148,10 +150,10 @@ const Staff = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-vip-black">Staff Directory</h1>
+          <h1 className="text-3xl font-serif font-bold text-white">Staff Directory</h1>
           <p className="text-vip-gold/80 mt-2">Manage VIP protocol team members and assignments</p>
         </div>
-        <Button onClick={handleAddStaff} className="bg-vip-gold text-white hover:bg-vip-gold-dark">
+        <Button onClick={handleAddStaff} className="bg-vip-gold text-black hover:bg-vip-gold-dark">
           <Plus className="h-4 w-4 mr-2" />
           Add New Staff Member
         </Button>
@@ -164,7 +166,7 @@ const Staff = () => {
             <CardTitle className="text-sm font-medium text-vip-gold/80">Total Staff Members</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-black">{totalStaff}</div>
+            <div className="text-2xl font-bold text-white">{totalStaff}</div>
             <p className="text-xs text-vip-gold/60">Team members</p>
           </CardContent>
         </Card>
@@ -174,7 +176,7 @@ const Staff = () => {
             <CardTitle className="text-sm font-medium text-vip-gold/80">Active Staff</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-black">{activeStaff}</div>
+            <div className="text-2xl font-bold text-white">{activeStaff}</div>
             <p className="text-xs text-ios-green">Currently working</p>
           </CardContent>
         </Card>
@@ -184,7 +186,7 @@ const Staff = () => {
             <CardTitle className="text-sm font-medium text-vip-gold/80">On Leave</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-black">{onLeaveStaff}</div>
+            <div className="text-2xl font-bold text-white">{onLeaveStaff}</div>
             <p className="text-xs text-ios-orange">Temporarily away</p>
           </CardContent>
         </Card>
@@ -193,7 +195,7 @@ const Staff = () => {
       {/* Search & Filters */}
       <Card className="vip-glass border-vip-gold/20">
         <CardHeader>
-          <CardTitle className="text-vip-black">Search & Filter Staff</CardTitle>
+          <CardTitle className="text-white">Search & Filter Staff</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-4">
@@ -203,12 +205,12 @@ const Staff = () => {
                 placeholder="Search staff..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 border-vip-gold/30 focus:border-vip-gold"
+                className="pl-10 border-vip-gold/30 focus:border-vip-gold bg-white text-black"
               />
             </div>
             
             <Select value={roleFilter} onValueChange={setRoleFilter}>
-              <SelectTrigger className="border-vip-gold/30 focus:border-vip-gold">
+              <SelectTrigger className="border-vip-gold/30 focus:border-vip-gold bg-white text-black">
                 <SelectValue placeholder="Filter by role" />
               </SelectTrigger>
               <SelectContent>
@@ -222,7 +224,7 @@ const Staff = () => {
             </Select>
 
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="border-vip-gold/30 focus:border-vip-gold">
+              <SelectTrigger className="border-vip-gold/30 focus:border-vip-gold bg-white text-black">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
@@ -243,7 +245,7 @@ const Staff = () => {
       {/* Staff Directory */}
       <Card className="vip-glass border-vip-gold/20">
         <CardHeader>
-          <CardTitle className="flex items-center text-vip-black">
+          <CardTitle className="flex items-center text-white">
             <Users className="h-5 w-5 mr-2 text-vip-gold" />
             Staff Members ({filteredStaff.length})
           </CardTitle>
@@ -259,7 +261,7 @@ const Staff = () => {
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-vip-black truncate">{staff.name}</h3>
+                    <h3 className="font-semibold text-white truncate">{staff.name}</h3>
                     <p className="text-sm text-vip-gold/80">{staff.role}</p>
                     <p className="text-xs text-vip-gold/60">{staff.department}</p>
                     
@@ -316,6 +318,12 @@ const Staff = () => {
           </div>
         </CardContent>
       </Card>
+
+      <AddStaffModal 
+        open={addModalOpen}
+        onOpenChange={setAddModalOpen}
+        onStaffAdded={handleStaffAdded}
+      />
     </div>
   );
 };
