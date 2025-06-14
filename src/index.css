@@ -3,39 +3,30 @@
 @tailwind components;
 @tailwind utilities;
 
-/* VIP Theme Design System - Sir Ole VVIP Protocol */
+/* Professional Black, Gold & White Design System - Sir Ole VVIP Protocol */
 @layer base {
   :root {
-    /* Sir Ole VVIP Brand Colors */
+    /* Core Brand Colors - Professional Palette */
     --vip-black: #000000;
     --vip-gold: #D4AF37;
-    --vip-gold-light: #F4E4BC;
+    --vip-gold-light: #E8C547;
     --vip-gold-dark: #B8941F;
-    --vip-red: #DC143C;
-    --vip-shield-border: #C9B037;
+    --vip-white: #FFFFFF;
+    --vip-off-white: #FAFAFA;
+    --vip-gray-light: #F5F5F5;
+    --vip-gray-medium: #E0E0E0;
+    --vip-gray-dark: #333333;
     
-    /* iOS Inspired Colors (Updated - No Blue) */
-    --ios-orange: #FF9500;
-    --ios-green: #4CD964;
-    --ios-red: #FF3B30;
-    --ios-purple: #5856D6;
-    --ios-pink: #FFD3E0;
-    
-    /* Background & Glass Effects */
+    /* Professional Background & Glass Effects */
     --bg-primary: #FFFFFF;
-    --bg-secondary: #F8F9FA;
-    --bg-tertiary: #FFFFFF;
-    --glass-overlay: rgba(212, 175, 55, 0.1);
-    --glass-border: rgba(212, 175, 55, 0.2);
+    --bg-secondary: #FAFAFA;
+    --bg-tertiary: #F5F5F5;
+    --glass-overlay: rgba(212, 175, 55, 0.05);
+    --glass-border: rgba(212, 175, 55, 0.15);
     
-    /* Neutrals */
-    --neutral-light: #F7F7F7;
-    --neutral-medium: #D6CEC3;
-    --neutral-dark: #BDBEC2;
-    
-    /* shadcn variables adapted for VIP theme */
-    --background: 255 255 255; /* White */
-    --foreground: 0 0 0; /* Black */
+    /* shadcn variables adapted for professional VIP theme */
+    --background: 255 255 255; /* Pure White */
+    --foreground: 0 0 0; /* Pure Black */
 
     --card: 255 255 255;
     --card-foreground: 0 0 0;
@@ -44,33 +35,33 @@
     --popover-foreground: 0 0 0;
 
     --primary: 212 175 55; /* VIP Gold */
-    --primary-foreground: 255 255 255;
+    --primary-foreground: 0 0 0;
 
-    --secondary: 248 249 250; /* Light Gray */
+    --secondary: 250 250 250; /* Off White */
     --secondary-foreground: 0 0 0;
 
-    --muted: 248 249 250;
-    --muted-foreground: 107 114 126;
+    --muted: 245 245 245;
+    --muted-foreground: 115 115 115;
 
     --accent: 212 175 55; /* VIP Gold */
-    --accent-foreground: 255 255 255;
+    --accent-foreground: 0 0 0;
 
-    --destructive: 255 59 48; /* iOS Red */
+    --destructive: 220 38 38; /* Professional Red */
     --destructive-foreground: 255 255 255;
 
-    --border: 229 229 229;
+    --border: 224 224 224;
     --input: 255 255 255;
     --ring: 212 175 55;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
-    --sidebar-background: 255 255 255;
-    --sidebar-foreground: 0 0 0;
+    --sidebar-background: 0 0 0;
+    --sidebar-foreground: 212 175 55;
     --sidebar-primary: 212 175 55;
-    --sidebar-primary-foreground: 255 255 255;
+    --sidebar-primary-foreground: 0 0 0;
     --sidebar-accent: 212 175 55;
-    --sidebar-accent-foreground: 255 255 255;
-    --sidebar-border: 229 229 229;
+    --sidebar-accent-foreground: 0 0 0;
+    --sidebar-border: 51 51 51;
     --sidebar-ring: 212 175 55;
   }
 }
@@ -80,51 +71,67 @@
     @apply border-border;
   }
   body {
-    @apply bg-white text-vip-black font-sans antialiased;
-    background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%);
+    @apply bg-white text-black font-sans antialiased;
+    background: linear-gradient(135deg, #FFFFFF 0%, #FAFAFA 100%);
+    scroll-behavior: smooth;
+  }
+  
+  /* Custom Scrollbar Styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #F5F5F5;
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #D4AF37, #B8941F);
+    border-radius: 4px;
+    transition: all 0.3s ease;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #E8C547, #D4AF37);
   }
 }
 
-/* VIP Custom Styles */
+/* Professional VIP Custom Styles */
 @layer utilities {
   .vip-gradient {
-    background: linear-gradient(135deg, #000000 0%, #D4AF37 100%);
+    background: linear-gradient(135deg, #000000 0%, #333333 50%, #D4AF37 100%);
   }
   
   .vip-gold-gradient {
-    background: linear-gradient(135deg, #D4AF37 0%, #F4E4BC 100%);
+    background: linear-gradient(135deg, #D4AF37 0%, #E8C547 100%);
   }
   
-  .vip-red-gradient {
-    background: linear-gradient(135deg, #DC143C 0%, #FF6B6B 100%);
+  .vip-professional-gradient {
+    background: linear-gradient(135deg, #FFFFFF 0%, #FAFAFA 50%, #F5F5F5 100%);
   }
   
   .vip-glass {
     backdrop-filter: blur(20px);
     background: rgba(255, 255, 255, 0.95);
     border: 1px solid rgba(212, 175, 55, 0.2);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   }
   
   .vip-glass-dark {
     backdrop-filter: blur(20px);
-    background: rgba(255, 255, 255, 0.98);
+    background: rgba(0, 0, 0, 0.95);
     border: 1px solid rgba(212, 175, 55, 0.3);
     box-shadow: 0 8px 32px rgba(212, 175, 55, 0.1);
   }
   
-  .vip-glass-light {
-    backdrop-filter: blur(10px);
-    background: rgba(255, 255, 255, 0.9);
-    border: 1px solid rgba(212, 175, 55, 0.15);
+  .vip-professional-shadow {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
   }
   
-  .vip-shadow {
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  }
-  
-  .vip-glow {
-    box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+  .vip-gold-shadow {
+    box-shadow: 0 4px 20px rgba(212, 175, 55, 0.2);
   }
   
   .vip-hover-lift {
@@ -133,84 +140,63 @@
   
   .vip-hover-lift:hover {
     transform: translateY(-2px);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
   }
 
-  .vip-black {
-    color: #000000;
+  /* Professional Color Classes */
+  .text-vip-black { color: #000000; }
+  .text-vip-gold { color: #D4AF37; }
+  .text-vip-white { color: #FFFFFF; }
+  .text-vip-gray { color: #666666; }
+
+  .bg-vip-black { background-color: #000000; }
+  .bg-vip-gold { background-color: #D4AF37; }
+  .bg-vip-white { background-color: #FFFFFF; }
+  .bg-vip-off-white { background-color: #FAFAFA; }
+
+  .border-vip-gold { border-color: #D4AF37; }
+  .border-vip-black { border-color: #000000; }
+  
+  /* Scrolling Enhancements */
+  .smooth-scroll {
+    scroll-behavior: smooth;
+  }
+  
+  .scroll-container {
+    scrollbar-width: thin;
+    scrollbar-color: #D4AF37 #F5F5F5;
+  }
+  
+  /* Professional Form Elements */
+  .professional-input {
+    @apply border-gray-300 bg-white text-black focus:border-vip-gold focus:ring-vip-gold/20 transition-all duration-200;
   }
 
-  .vip-gold {
-    color: #D4AF37;
+  .professional-button {
+    @apply bg-vip-gold text-black hover:bg-vip-gold-light font-medium transition-all duration-200 vip-professional-shadow;
   }
 
-  .vip-red {
-    color: #DC143C;
+  .professional-button-outline {
+    @apply border-2 border-vip-gold text-vip-gold bg-white hover:bg-vip-gold hover:text-black transition-all duration-200;
   }
 
-  .bg-vip-black {
-    background-color: #000000;
-  }
-
-  .bg-vip-gold {
-    background-color: #D4AF37;
-  }
-
-  .bg-vip-red {
-    background-color: #DC143C;
-  }
-
-  .border-vip-gold {
-    border-color: #D4AF37;
-  }
-
-  .ios-orange {
-    color: #FF9500;
-  }
-
-  .ios-green {
-    color: #4CD964;
-  }
-
-  .ios-red {
-    color: #FF3B30;
-  }
-
-  .bg-ios-orange {
-    background-color: #FF9500;
-  }
-
-  .bg-ios-green {
-    background-color: #4CD964;
-  }
-
-  .bg-ios-red {
-    background-color: #FF3B30;
-  }
-
-  /* Professional form styling */
-  .form-container {
-    @apply bg-white border border-vip-gold/20 rounded-lg shadow-sm;
-  }
-
-  .form-field {
-    @apply border-vip-gold/30 bg-white text-vip-black focus:border-vip-gold focus:ring-vip-gold/20;
-  }
-
-  .form-label {
-    @apply text-sm font-medium text-vip-black;
-  }
-
-  .btn-primary {
-    @apply bg-vip-gold text-white hover:bg-vip-gold-dark shadow-sm transition-all duration-200;
-  }
-
-  .btn-secondary {
-    @apply border-vip-gold/30 text-vip-black bg-white hover:bg-vip-gold/10 transition-all duration-200;
+  .professional-card {
+    @apply bg-white border border-gray-200 rounded-lg vip-professional-shadow;
   }
 }
 
-/* Animation Keyframes */
+/* Professional Animation Keyframes */
+@keyframes fadeInUp {
+  0% {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 @keyframes slideInFromLeft {
   0% {
     transform: translateX(-100%);
@@ -222,27 +208,16 @@
   }
 }
 
-@keyframes fadeInUp {
-  0% {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-@keyframes pulse-gold {
+@keyframes professionalPulse {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7);
+    box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4);
   }
   50% {
     box-shadow: 0 0 0 20px rgba(212, 175, 55, 0);
   }
 }
 
-@keyframes shimmer {
+@keyframes shimmerGold {
   0% {
     background-position: -200% 0;
   }
@@ -251,20 +226,28 @@
   }
 }
 
-.animate-slide-in-left {
-  animation: slideInFromLeft 0.5s ease-out;
-}
-
+/* Professional Animation Classes */
 .animate-fade-in-up {
-  animation: fadeInUp 0.6s ease-out;
+  animation: fadeInUp 0.8s ease-out;
 }
 
-.animate-pulse-gold {
-  animation: pulse-gold 3s infinite;
+.animate-slide-in-left {
+  animation: slideInFromLeft 0.6s ease-out;
 }
 
-.animate-shimmer {
-  background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.3), transparent);
+.animate-professional-pulse {
+  animation: professionalPulse 3s infinite;
+}
+
+.animate-shimmer-gold {
+  background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.4), transparent);
   background-size: 200% 100%;
-  animation: shimmer 2s infinite;
+  animation: shimmerGold 2s infinite;
+}
+
+/* Responsive Professional Design */
+@media (max-width: 768px) {
+  .vip-glass, .vip-glass-dark {
+    backdrop-filter: blur(10px);
+  }
 }

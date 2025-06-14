@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -161,14 +160,14 @@ const VipSidebar = () => {
   };
 
   return (
-    <Sidebar className="border-r border-vip-gold/20 vip-glass-dark">
-      <SidebarHeader className="p-6 border-b border-vip-gold/20">
+    <Sidebar className="border-r border-gray-200 bg-black">
+      <SidebarHeader className="p-6 border-b border-gray-800">
         <div className="flex items-center space-x-3">
           <div className="relative">
             <img 
               src="/lovable-uploads/af24075c-d7ee-41bc-a3d3-d50d1b766753.png" 
               alt="Sir Dennis Olele VVIP Protocol" 
-              className="h-10 w-10 object-contain animate-pulse-gold"
+              className="h-12 w-12 object-contain animate-professional-pulse"
             />
           </div>
           <div>
@@ -188,8 +187,8 @@ const VipSidebar = () => {
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
-                    className={`hover:bg-vip-gold/10 hover:text-vip-gold-light transition-all duration-200 rounded-lg ${
-                      location.pathname === item.url ? 'bg-vip-gold/20 text-vip-gold' : 'text-vip-gold/80'
+                    className={`hover:bg-vip-gold/10 hover:text-vip-gold transition-all duration-200 rounded-lg ${
+                      location.pathname === item.url ? 'bg-vip-gold text-black' : 'text-vip-gold/80'
                     }`}
                     onClick={() => handleNavigation(item.url)}
                   >
@@ -205,13 +204,11 @@ const VipSidebar = () => {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t border-vip-gold/20">
-        <div className="flex items-center space-x-3 p-3 rounded-lg vip-glass border border-vip-gold/20">
-          <Avatar className="h-10 w-10 border-2 border-vip-gold">
-            <AvatarFallback className="bg-vip-gold text-black font-bold">
-              DO
-            </AvatarFallback>
-          </Avatar>
+      <SidebarFooter className="p-4 border-t border-gray-800">
+        <div className="flex items-center space-x-3 p-3 rounded-lg bg-gray-900 border border-gray-700">
+          <div className="h-10 w-10 rounded-full bg-vip-gold flex items-center justify-center">
+            <span className="text-black font-bold text-sm">DO</span>
+          </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-vip-gold truncate">
               Sir Dennis Olele

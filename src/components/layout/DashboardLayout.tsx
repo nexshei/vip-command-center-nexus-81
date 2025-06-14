@@ -20,35 +20,36 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-white">
+      <div className="min-h-screen flex w-full bg-vip-professional-gradient">
         <VipSidebar />
         <main className="flex-1 flex flex-col">
-          {/* Top Navigation */}
-          <header className="border-b border-vip-gold/20 bg-white/95 backdrop-blur-md sticky top-0 z-40 shadow-sm">
+          {/* Professional Top Navigation */}
+          <header className="border-b border-gray-200 bg-white/98 backdrop-blur-md sticky top-0 z-40 vip-professional-shadow">
             <div className="flex items-center justify-between px-6 py-4">
               <div className="flex items-center space-x-4">
-                <SidebarTrigger className="text-vip-gold hover:text-vip-gold-light transition-colors">
+                <SidebarTrigger className="text-vip-black hover:text-vip-gold transition-colors p-2 rounded-lg hover:bg-gray-50">
                   <Menu className="h-5 w-5" />
                 </SidebarTrigger>
                 
-                {/* Logo */}
+                {/* Professional Logo */}
                 <div className="flex items-center space-x-3">
                   <img 
                     src="/lovable-uploads/af24075c-d7ee-41bc-a3d3-d50d1b766753.png" 
                     alt="Sir Dennis Olele VVIP Protocol" 
-                    className="h-8 w-8 object-contain"
+                    className="h-10 w-10 object-contain"
                   />
                   <div className="hidden md:block">
-                    <h1 className="text-lg font-serif font-bold text-vip-gold">Sir Dennis Olele</h1>
-                    <p className="text-xs text-vip-gold/70">VVIP Protocol Dashboard</p>
+                    <h1 className="text-lg font-serif font-bold text-vip-black">Sir Dennis Olele</h1>
+                    <p className="text-xs text-gray-600">VVIP Protocol Dashboard</p>
                   </div>
                 </div>
                 
+                {/* Professional Search */}
                 <div className="relative max-w-md">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-vip-gold/60" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
                     placeholder="Search clients, bookings, or protocols..."
-                    className="pl-10 w-64 border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
+                    className="pl-10 w-64 professional-input border-gray-200 focus:border-vip-gold"
                   />
                 </div>
               </div>
@@ -57,7 +58,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 <Button
                   onClick={handleViewProfile}
                   variant="ghost"
-                  className="text-vip-gold hover:text-vip-gold-light hover:bg-vip-gold/10 transition-colors"
+                  className="text-vip-black hover:text-vip-gold hover:bg-gray-50 transition-colors"
                 >
                   <User className="h-5 w-5 mr-2" />
                   View Profile
@@ -66,8 +67,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             </div>
           </header>
 
-          {/* Main Content */}
-          <div className="flex-1 overflow-auto bg-gradient-to-br from-white via-neutral-light to-white">
+          {/* Main Content with Professional Background */}
+          <div className="flex-1 overflow-auto bg-vip-professional-gradient">
             {children}
           </div>
         </main>
