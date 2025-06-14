@@ -55,12 +55,13 @@ export const NewBookingModal = () => {
               onChange={(e) => setClientName(e.target.value)}
               placeholder="Enter client name"
               required
+              className="border-vip-gold/30 focus:border-vip-gold"
             />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="service" className="text-vip-black">Service Type</Label>
             <Select value={service} onValueChange={setService} required>
-              <SelectTrigger>
+              <SelectTrigger className="border-vip-gold/30 focus:border-vip-gold">
                 <SelectValue placeholder="Select service" />
               </SelectTrigger>
               <SelectContent>
@@ -80,6 +81,7 @@ export const NewBookingModal = () => {
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 required
+                className="border-vip-gold/30 focus:border-vip-gold"
               />
             </div>
             <div className="grid gap-2">
@@ -90,6 +92,7 @@ export const NewBookingModal = () => {
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
                 required
+                className="border-vip-gold/30 focus:border-vip-gold"
               />
             </div>
           </div>
@@ -101,10 +104,11 @@ export const NewBookingModal = () => {
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Additional notes or requirements"
               rows={3}
+              className="border-vip-gold/30 focus:border-vip-gold"
             />
           </div>
           <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline">Cancel</Button>
+            <Button type="button" variant="outline" className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10">Cancel</Button>
             <Button type="submit" className="bg-vip-gold text-white hover:bg-vip-gold-dark">
               Create Booking
             </Button>
