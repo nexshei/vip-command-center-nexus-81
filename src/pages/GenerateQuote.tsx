@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,11 +26,13 @@ const GenerateQuote = () => {
   const { toast } = useToast();
 
   const predefinedServices = [
-    { id: '1', name: 'VIP Airport Transfer', price: 15000 },
-    { id: '2', name: 'Executive Meeting Setup', price: 25000 },
-    { id: '3', name: 'Luxury Event Planning', price: 150000 },
-    { id: '4', name: 'Private Security Detail', price: 50000 },
-    { id: '5', name: 'Catering Services', price: 8000 },
+    { id: '1', name: 'Professional Ushering', price: 20000 },
+    { id: '2', name: 'VIP Security Services', price: 80000 },
+    { id: '3', name: 'High-Profile Protocol', price: 120000 },
+    { id: '4', name: 'Luxury Event Management', price: 200000 },
+    { id: '5', name: 'MC Services', price: 35000 },
+    { id: '6', name: 'Cutlery and Catering Services', price: 60000 },
+    { id: '7', name: 'Bridal Party Coordination', price: 90000 },
   ];
 
   const mockClients = [
@@ -183,20 +184,20 @@ const GenerateQuote = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black text-vip-gold p-6">
+    <div className="min-h-screen bg-black text-white p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header with prominent action buttons */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-serif font-bold text-vip-gold mb-2">Generate Professional Quote</h1>
-            <p className="text-vip-gold/70 text-lg">Create detailed quotes for VIP services and events</p>
+            <h1 className="text-4xl font-serif font-bold text-white mb-2">Generate Professional Quote</h1>
+            <p className="text-white/70 text-lg">Create detailed quotes for VIP services and events</p>
           </div>
           <div className="flex items-center space-x-4">
             <Button 
               onClick={handleSaveDraft} 
               variant="outline" 
               size="lg"
-              className="border-2 border-vip-gold text-vip-gold hover:bg-vip-gold hover:text-black transition-all duration-300 px-6 py-3 text-base font-medium bg-transparent"
+              className="border-2 border-white text-white hover:bg-white hover:text-black transition-all duration-300 px-6 py-3 text-base font-medium bg-transparent"
             >
               <Save className="h-5 w-5 mr-2" />
               Save Draft
@@ -204,7 +205,7 @@ const GenerateQuote = () => {
             <Button 
               onClick={handleGenerateQuote} 
               size="lg"
-              className="bg-vip-gold text-black hover:bg-vip-gold-light px-8 py-3 text-base font-medium shadow-lg"
+              className="bg-white text-black hover:bg-gray-200 px-8 py-3 text-base font-medium shadow-lg"
               disabled={!selectedClient || quoteItems.length === 0}
             >
               <Calculator className="h-5 w-5 mr-2" />
@@ -217,32 +218,32 @@ const GenerateQuote = () => {
           {/* Quote Builder */}
           <div className="lg:col-span-2 space-y-6">
             {/* Step 1: Client Selection */}
-            <Card className="bg-gray-900 border border-vip-gold/30 shadow-xl">
-              <CardHeader className="bg-vip-gold/10 border-b border-vip-gold/30">
-                <CardTitle className="flex items-center text-vip-gold text-xl">
+            <Card className="bg-gray-900 border border-white/30 shadow-xl">
+              <CardHeader className="bg-white/10 border-b border-white/30">
+                <CardTitle className="flex items-center text-white text-xl">
                   <Users className="h-6 w-6 mr-3" />
                   Step 1: Select Client
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
                 <div className="space-y-4">
-                  <Label className="text-vip-gold font-semibold text-base">Choose Client *</Label>
+                  <Label className="text-white font-semibold text-base">Choose Client *</Label>
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-vip-gold/60" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/60" />
                     <Select value={selectedClient} onValueChange={setSelectedClient}>
-                      <SelectTrigger className="pl-12 h-12 border-2 border-vip-gold/30 focus:border-vip-gold text-vip-gold text-base bg-black">
+                      <SelectTrigger className="pl-12 h-12 border-2 border-white/30 focus:border-white text-white text-base bg-black">
                         <SelectValue placeholder="Search and select client..." />
                       </SelectTrigger>
-                      <SelectContent className="bg-black border-2 border-vip-gold">
+                      <SelectContent className="bg-black border-2 border-white">
                         {mockClients.map((client) => (
-                          <SelectItem key={client} value={client} className="text-vip-gold hover:bg-vip-gold/20">
+                          <SelectItem key={client} value={client} className="text-white hover:bg-white/20">
                             {client}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
-                  <Button variant="outline" className="border-2 border-vip-gold text-vip-gold hover:bg-vip-gold hover:text-black bg-transparent">
+                  <Button variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-black bg-transparent">
                     <Plus className="h-4 w-4 mr-2" />
                     Add New Client
                   </Button>
@@ -251,21 +252,21 @@ const GenerateQuote = () => {
             </Card>
 
             {/* Step 2: Add Services */}
-            <Card className="bg-gray-900 border border-vip-gold/30 shadow-xl">
-              <CardHeader className="bg-vip-gold/10 border-b border-vip-gold/30">
-                <CardTitle className="text-vip-gold text-xl">Step 2: Add Services & Items</CardTitle>
+            <Card className="bg-gray-900 border border-white/30 shadow-xl">
+              <CardHeader className="bg-white/10 border-b border-white/30">
+                <CardTitle className="text-white text-xl">Step 2: Add Services & Items</CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-6">
                 {/* Quick Add Services */}
                 <div className="space-y-4">
-                  <Label className="text-vip-gold font-semibold text-base">Quick Add Services</Label>
+                  <Label className="text-white font-semibold text-base">Quick Add Services</Label>
                   <Select onValueChange={addPredefinedItem}>
-                    <SelectTrigger className="h-12 border-2 border-vip-gold/30 focus:border-vip-gold text-vip-gold text-base bg-black">
+                    <SelectTrigger className="h-12 border-2 border-white/30 focus:border-white text-white text-base bg-black">
                       <SelectValue placeholder="Select a service to add..." />
                     </SelectTrigger>
-                    <SelectContent className="bg-black border-2 border-vip-gold">
+                    <SelectContent className="bg-black border-2 border-white">
                       {predefinedServices.map((service) => (
-                        <SelectItem key={service.id} value={service.id} className="text-vip-gold hover:bg-vip-gold/20">
+                        <SelectItem key={service.id} value={service.id} className="text-white hover:bg-white/20">
                           {service.name} - KSh {service.price.toLocaleString()}
                         </SelectItem>
                       ))}
@@ -274,26 +275,26 @@ const GenerateQuote = () => {
                 </div>
 
                 {/* Custom Item */}
-                <div className="space-y-4 p-4 border-2 border-vip-gold/30 rounded-lg bg-gray-800">
-                  <Label className="text-vip-gold font-semibold text-base">Add Custom Item</Label>
+                <div className="space-y-4 p-4 border-2 border-white/30 rounded-lg bg-gray-800">
+                  <Label className="text-white font-semibold text-base">Add Custom Item</Label>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <Input
                       placeholder="Item name"
                       value={customItemName}
                       onChange={(e) => setCustomItemName(e.target.value)}
-                      className="md:col-span-2 h-12 border-2 border-vip-gold/30 focus:border-vip-gold text-vip-gold bg-black"
+                      className="md:col-span-2 h-12 border-2 border-white/30 focus:border-white text-white bg-black"
                     />
                     <Input
                       placeholder="Price (KSh)"
                       type="number"
                       value={customItemPrice}
                       onChange={(e) => setCustomItemPrice(e.target.value)}
-                      className="h-12 border-2 border-vip-gold/30 focus:border-vip-gold text-vip-gold bg-black"
+                      className="h-12 border-2 border-white/30 focus:border-white text-white bg-black"
                     />
                   </div>
                   <Button 
                     onClick={addCustomItem}
-                    className="w-full bg-vip-gold text-black hover:bg-vip-gold-light h-12 text-base font-medium"
+                    className="w-full bg-white text-black hover:bg-gray-200 h-12 text-base font-medium"
                   >
                     <Plus className="h-5 w-5 mr-2" />
                     Add Custom Item
@@ -304,30 +305,30 @@ const GenerateQuote = () => {
 
             {/* Step 3: Review Items */}
             {quoteItems.length > 0 && (
-              <Card className="bg-gray-900 border border-vip-gold/30 shadow-xl">
-                <CardHeader className="bg-vip-gold/10 border-b border-vip-gold/30">
-                  <CardTitle className="text-vip-gold text-xl">Step 3: Review Quote Items</CardTitle>
+              <Card className="bg-gray-900 border border-white/30 shadow-xl">
+                <CardHeader className="bg-white/10 border-b border-white/30">
+                  <CardTitle className="text-white text-xl">Step 3: Review Quote Items</CardTitle>
                 </CardHeader>
                 <CardContent className="p-6">
                   <div className="space-y-4">
                     {quoteItems.map((item) => (
-                      <div key={item.id} className="flex items-center space-x-4 p-4 border-2 border-vip-gold/30 rounded-lg bg-gray-800">
+                      <div key={item.id} className="flex items-center space-x-4 p-4 border-2 border-white/30 rounded-lg bg-gray-800">
                         <div className="flex-1">
-                          <h4 className="font-semibold text-vip-gold text-base">{item.name}</h4>
-                          <p className="text-vip-gold/70">KSh {item.unitPrice.toLocaleString()} each</p>
+                          <h4 className="font-semibold text-white text-base">{item.name}</h4>
+                          <p className="text-white/70">KSh {item.unitPrice.toLocaleString()} each</p>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <Label className="text-vip-gold font-medium">Qty:</Label>
+                          <Label className="text-white font-medium">Qty:</Label>
                           <Input
                             type="number"
                             min="1"
                             value={item.quantity}
                             onChange={(e) => updateItemQuantity(item.id, parseInt(e.target.value) || 1)}
-                            className="w-20 h-10 border-2 border-vip-gold/30 focus:border-vip-gold text-vip-gold text-center bg-black"
+                            className="w-20 h-10 border-2 border-white/30 focus:border-white text-white text-center bg-black"
                           />
                         </div>
                         <div className="text-right min-w-[120px]">
-                          <p className="font-bold text-vip-gold text-lg">KSh {item.total.toLocaleString()}</p>
+                          <p className="font-bold text-white text-lg">KSh {item.total.toLocaleString()}</p>
                         </div>
                         <Button
                           onClick={() => removeItem(item.id)}
@@ -342,17 +343,17 @@ const GenerateQuote = () => {
                   </div>
 
                   {/* Discount Section */}
-                  <div className="mt-6 pt-6 border-t-2 border-vip-gold/30">
+                  <div className="mt-6 pt-6 border-t-2 border-white/30">
                     <div className="space-y-4">
-                      <Label className="text-vip-gold font-semibold text-base">Apply Discount (Optional)</Label>
+                      <Label className="text-white font-semibold text-base">Apply Discount (Optional)</Label>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <Select value={discountType} onValueChange={setDiscountType}>
-                          <SelectTrigger className="h-12 border-2 border-vip-gold/30 focus:border-vip-gold text-vip-gold bg-black">
+                          <SelectTrigger className="h-12 border-2 border-white/30 focus:border-white text-white bg-black">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent className="bg-black border-2 border-vip-gold">
-                            <SelectItem value="percentage" className="text-vip-gold">Percentage (%)</SelectItem>
-                            <SelectItem value="fixed" className="text-vip-gold">Fixed Amount (KSh)</SelectItem>
+                          <SelectContent className="bg-black border-2 border-white">
+                            <SelectItem value="percentage" className="text-white">Percentage (%)</SelectItem>
+                            <SelectItem value="fixed" className="text-white">Fixed Amount (KSh)</SelectItem>
                           </SelectContent>
                         </Select>
                         <Input
@@ -360,7 +361,7 @@ const GenerateQuote = () => {
                           type="number"
                           value={discountValue}
                           onChange={(e) => setDiscountValue(e.target.value)}
-                          className="md:col-span-2 h-12 border-2 border-vip-gold/30 focus:border-vip-gold text-vip-gold bg-black"
+                          className="md:col-span-2 h-12 border-2 border-white/30 focus:border-white text-white bg-black"
                         />
                       </div>
                     </div>
@@ -373,9 +374,9 @@ const GenerateQuote = () => {
           {/* Quote Summary & Actions */}
           <div className="space-y-6">
             {/* Financial Summary */}
-            <Card className="bg-gray-900 border border-vip-gold/30 shadow-xl">
-              <CardHeader className="bg-vip-gold/10 border-b border-vip-gold/30">
-                <CardTitle className="flex items-center text-vip-gold text-xl">
+            <Card className="bg-gray-900 border border-white/30 shadow-xl">
+              <CardHeader className="bg-white/10 border-b border-white/30">
+                <CardTitle className="flex items-center text-white text-xl">
                   <Calculator className="h-6 w-6 mr-3" />
                   Quote Summary
                 </CardTitle>
@@ -383,25 +384,25 @@ const GenerateQuote = () => {
               <CardContent className="p-6 space-y-4">
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-vip-gold/70 font-medium">Items:</span>
-                    <span className="font-semibold text-vip-gold text-lg">{quoteItems.length}</span>
+                    <span className="text-white/70 font-medium">Items:</span>
+                    <span className="font-semibold text-white text-lg">{quoteItems.length}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-vip-gold/70 font-medium">Subtotal:</span>
-                    <span className="font-semibold text-vip-gold text-lg">KSh {subtotal.toLocaleString()}</span>
+                    <span className="text-white/70 font-medium">Subtotal:</span>
+                    <span className="font-semibold text-white text-lg">KSh {subtotal.toLocaleString()}</span>
                   </div>
                   {discountValue && (
                     <div className="flex justify-between items-center">
-                      <span className="text-vip-gold/70 font-medium">
+                      <span className="text-white/70 font-medium">
                         Discount ({discountType === 'percentage' ? `${discountValue}%` : 'Fixed'}):
                       </span>
                       <span className="font-semibold text-red-400 text-lg">-KSh {discountAmount.toLocaleString()}</span>
                     </div>
                   )}
-                  <div className="border-t-2 border-vip-gold/30 pt-3">
+                  <div className="border-t-2 border-white/30 pt-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-xl font-bold text-vip-gold">Total:</span>
-                      <span className="text-2xl font-bold text-vip-gold">KSh {finalTotal.toLocaleString()}</span>
+                      <span className="text-xl font-bold text-white">Total:</span>
+                      <span className="text-2xl font-bold text-white">KSh {finalTotal.toLocaleString()}</span>
                     </div>
                   </div>
                 </div>
@@ -413,7 +414,7 @@ const GenerateQuote = () => {
                 )}
                 
                 {(!selectedClient || quoteItems.length === 0) && (
-                  <Badge variant="outline" className="border-2 border-vip-gold/30 text-vip-gold/70 w-full justify-center py-2 text-base bg-transparent">
+                  <Badge variant="outline" className="border-2 border-white/30 text-white/70 w-full justify-center py-2 text-base bg-transparent">
                     Complete Steps Above
                   </Badge>
                 )}
@@ -421,14 +422,14 @@ const GenerateQuote = () => {
             </Card>
 
             {/* Actions */}
-            <Card className="bg-gray-900 border border-vip-gold/30 shadow-xl">
-              <CardHeader className="bg-vip-gold/10 border-b border-vip-gold/30">
-                <CardTitle className="text-vip-gold text-xl">Quote Actions</CardTitle>
+            <Card className="bg-gray-900 border border-white/30 shadow-xl">
+              <CardHeader className="bg-white/10 border-b border-white/30">
+                <CardTitle className="text-white text-xl">Quote Actions</CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-4">
                 <Button 
                   onClick={handleGeneratePDF} 
-                  className="w-full bg-vip-gold text-black hover:bg-vip-gold-light h-12 text-base font-medium"
+                  className="w-full bg-white text-black hover:bg-gray-200 h-12 text-base font-medium"
                   disabled={!selectedClient || quoteItems.length === 0}
                 >
                   <FileText className="h-5 w-5 mr-2" />
@@ -437,7 +438,7 @@ const GenerateQuote = () => {
                 <Button 
                   onClick={handleSendEmail} 
                   variant="outline" 
-                  className="w-full border-2 border-vip-gold text-vip-gold hover:bg-vip-gold hover:text-black h-12 text-base font-medium bg-transparent"
+                  className="w-full border-2 border-white text-white hover:bg-white hover:text-black h-12 text-base font-medium bg-transparent"
                   disabled={!selectedClient || quoteItems.length === 0}
                 >
                   <Mail className="h-5 w-5 mr-2" />
@@ -448,15 +449,15 @@ const GenerateQuote = () => {
 
             {/* Quote Preview */}
             {selectedClient && quoteItems.length > 0 && (
-              <Card className="bg-gray-900 border border-vip-gold/30 shadow-xl">
-                <CardHeader className="bg-vip-gold/10 border-b border-vip-gold/30">
-                  <CardTitle className="text-vip-gold text-xl">Quote Preview</CardTitle>
+              <Card className="bg-gray-900 border border-white/30 shadow-xl">
+                <CardHeader className="bg-white/10 border-b border-white/30">
+                  <CardTitle className="text-white text-xl">Quote Preview</CardTitle>
                 </CardHeader>
                 <CardContent className="p-6">
-                  <div className="space-y-4 p-4 bg-gray-800 border-2 border-vip-gold/30 rounded-lg text-vip-gold">
-                    <div className="text-center border-b-2 border-vip-gold/30 pb-4">
-                      <h3 className="font-bold text-xl text-vip-gold">Sir Dennis Olele VVIP Protocol</h3>
-                      <p className="text-vip-gold/70 text-base">Professional Quote</p>
+                  <div className="space-y-4 p-4 bg-gray-800 border-2 border-white/30 rounded-lg text-white">
+                    <div className="text-center border-b-2 border-white/30 pb-4">
+                      <h3 className="font-bold text-xl text-white">Sir Dennis Olele VVIP Protocol</h3>
+                      <p className="text-white/70 text-base">Professional Quote</p>
                     </div>
                     
                     <div className="space-y-2">
@@ -475,10 +476,10 @@ const GenerateQuote = () => {
                       ))}
                     </div>
 
-                    <div className="border-t-2 border-vip-gold/30 pt-3">
+                    <div className="border-t-2 border-white/30 pt-3">
                       <div className="flex justify-between font-bold text-lg">
                         <span>Total:</span>
-                        <span className="text-vip-gold">KSh {finalTotal.toLocaleString()}</span>
+                        <span className="text-white">KSh {finalTotal.toLocaleString()}</span>
                       </div>
                     </div>
                   </div>
