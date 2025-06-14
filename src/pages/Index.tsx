@@ -1,11 +1,8 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Crown, Shield, Star, Zap } from 'lucide-react';
-
 const Index = () => {
-  return (
-    <div className="min-h-screen vip-gradient text-white relative overflow-hidden">
+  return <div className="min-h-screen vip-gradient text-white relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-gradient-to-br from-black/30 to-transparent"></div>
       
@@ -17,11 +14,7 @@ const Index = () => {
           <div className="animate-fade-in-up">
             <div className="flex items-center justify-center mb-6">
               <div className="relative">
-                <img 
-                  src="/lovable-uploads/60f33973-4d25-45cd-ab56-8d36ade1a7b1.png" 
-                  alt="Sir Ole VVIP Protocol Logo" 
-                  className="h-32 w-32 object-contain"
-                />
+                <img src="/lovable-uploads/60f33973-4d25-45cd-ab56-8d36ade1a7b1.png" alt="Sir Ole VVIP Protocol Logo" className="h-32 w-32 object-contain" />
               </div>
             </div>
             <h1 className="text-5xl md:text-7xl font-serif font-bold mb-4">
@@ -33,7 +26,9 @@ const Index = () => {
           </div>
 
           {/* Features Grid */}
-          <div className="grid md:grid-cols-3 gap-6 my-12 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+          <div className="grid md:grid-cols-3 gap-6 my-12 animate-fade-in-up" style={{
+          animationDelay: '0.2s'
+        }}>
             <div className="bg-black/80 border border-vip-gold/30 rounded-2xl p-6 vip-hover-lift backdrop-blur-sm">
               <Shield className="h-8 w-8 text-vip-gold mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2 text-white">Secure Access</h3>
@@ -52,18 +47,16 @@ const Index = () => {
           </div>
 
           {/* CTA Section */}
-          <div className="space-y-6 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+          <div className="space-y-6 animate-fade-in-up" style={{
+          animationDelay: '0.4s'
+        }}>
             <p className="text-lg opacity-90 max-w-2xl mx-auto">
               Access the premier administrative platform for VIP protocol management, 
               client relations, and luxury service coordination.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button 
-                size="lg" 
-                className="vip-gold-gradient hover:opacity-90 text-white px-8 py-3 text-lg font-medium vip-hover-lift"
-                onClick={() => window.location.href = '/dashboard'}
-              >
+              <Button size="lg" className="vip-gold-gradient hover:opacity-90 text-white px-8 py-3 text-lg font-medium vip-hover-lift" onClick={() => window.location.href = '/dashboard'}>
                 <Crown className="h-5 w-5 mr-2" />
                 Enter Dashboard
               </Button>
@@ -79,15 +72,10 @@ const Index = () => {
 
           {/* Status Indicator */}
           <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-            <div className="flex items-center space-x-2 vip-glass rounded-full px-4 py-2">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              <span className="text-sm">All Systems Operational</span>
-            </div>
+            
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
