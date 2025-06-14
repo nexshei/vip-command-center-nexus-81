@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Plus, Briefcase, Users, Calendar, ArrowRight } from 'lucide-react';
+import { Search, Plus, Briefcase, Users, Calendar, ArrowRight, Eye, Edit, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface JobOpening {
@@ -113,7 +113,7 @@ const CareerPortal = () => {
     { id: 'interviewing', title: 'Interviewing', color: 'border-purple-500' },
     { id: 'offer-sent', title: 'Offer Sent', color: 'border-ios-purple' },
     { id: 'hired', title: 'Hired', color: 'border-ios-green' },
-    { id: 'rejected', title: 'Rejecte d', color: 'border-ios-red' },
+    { id: 'rejected', title: 'Rejected', color: 'border-ios-red' },
   ];
 
   const filteredJobs = jobOpenings.filter(job => {
@@ -125,6 +125,7 @@ const CareerPortal = () => {
   });
 
   const handleCreateJob = () => {
+    console.log('Creating new job opening');
     toast({
       title: "Create New Job Opening",
       description: "Opening form to create new job posting...",
@@ -132,9 +133,43 @@ const CareerPortal = () => {
   };
 
   const handleViewApplicants = (jobId: string) => {
+    console.log('Viewing applicants for job:', jobId);
     toast({
       title: "View Applicants",
       description: "Loading applicants for this position...",
+    });
+  };
+
+  const handleEditJob = (jobId: string) => {
+    console.log('Editing job:', jobId);
+    toast({
+      title: "Edit Job Opening",
+      description: "Opening edit form...",
+    });
+  };
+
+  const handleDeleteJob = (jobId: string) => {
+    console.log('Deleting job:', jobId);
+    toast({
+      title: "Delete Job Opening",
+      description: "Job opening has been deleted.",
+      variant: "destructive"
+    });
+  };
+
+  const handleApplicantClick = (applicant: Applicant) => {
+    console.log('Opening applicant profile:', applicant);
+    toast({
+      title: "Opening Applicant Profile",
+      description: `Loading profile for ${applicant.name}`,
+    });
+  };
+
+  const handleStatsCardClick = (cardType: string) => {
+    console.log('Stats card clicked:', cardType);
+    toast({
+      title: "Loading Details",
+      description: `Opening ${cardType} details...`,
     });
   };
 
@@ -154,7 +189,10 @@ const CareerPortal = () => {
 
       {/* Summary Stats */}
       <div className="grid gap-6 md:grid-cols-4">
-        <Card className="vip-glass border-vip-gold/20">
+        <Card 
+          className="vip-glass border-vip-gold/20 cursor-pointer hover:bg-vip-gold/5 transition-colors"
+          onClick={() => handleStatsCardClick("Total Job Openings")}
+        >
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-vip-gold/80">Total Job Openings</CardTitle>
           </CardHeader>
@@ -164,7 +202,10 @@ const CareerPortal = () => {
           </CardContent>
         </Card>
         
-        <Card className="vip-glass border-vip-gold/20">
+        <Card 
+          className="vip-glass border-vip-gold/20 cursor-pointer hover:bg-vip-gold/5 transition-colors"
+          onClick={() => handleStatsCardClick("Open Positions")}
+        >
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-vip-gold/80">Open Positions</CardTitle>
           </CardHeader>
@@ -174,7 +215,10 @@ const CareerPortal = () => {
           </CardContent>
         </Card>
 
-        <Card className="vip-glass border-vip-gold/20">
+        <Card 
+          className="vip-glass border-vip-gold/20 cursor-pointer hover:bg-vip-gold/5 transition-colors"
+          onClick={() => handleStatsCardClick("Total Applicants")}
+        >
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-vip-gold/80">Total Applicants</CardTitle>
           </CardHeader>
@@ -184,7 +228,10 @@ const CareerPortal = () => {
           </CardContent>
         </Card>
 
-        <Card className="vip-glass border-vip-gold/20">
+        <Card 
+          className="vip-glass border-vip-gold/20 cursor-pointer hover:bg-vip-gold/5 transition-colors"
+          onClick={() => handleStatsCardClick("New Applicants")}
+        >
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-vip-gold/80">New Applicants</CardTitle>
           </CardHeader>
@@ -210,14 +257,14 @@ const CareerPortal = () => {
                   placeholder="Search jobs..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 w-64 border-vip-gold/30 focus:border-vip-gold"
+                  className="pl-10 w-64 border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
                 />
               </div>
               <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
-                <SelectTrigger className="w-40 border-vip-gold/30 focus:border-vip-gold">
+                <SelectTrigger className="w-40 border-vip-gold/30 focus:border-vip-gold bg-white text-vip-black">
                   <SelectValue placeholder="Department" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white border-vip-gold/30 z-50">
                   <SelectItem value="all">All Departments</SelectItem>
                   <SelectItem value="protocol">Protocol</SelectItem>
                   <SelectItem value="security">Security</SelectItem>
@@ -263,12 +310,34 @@ const CareerPortal = () => {
                     size="sm" 
                     className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
                   >
-                    View Applicants
-                    <ArrowRight className="h-3 w-3 ml-1" />
+                    <Eye className="h-3 w-3 mr-1" />
+                    View
+                  </Button>
+                  <Button 
+                    onClick={() => handleEditJob(job.id)}
+                    variant="outline" 
+                    size="sm" 
+                    className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+                  >
+                    <Edit className="h-3 w-3" />
+                  </Button>
+                  <Button 
+                    onClick={() => handleDeleteJob(job.id)}
+                    variant="outline" 
+                    size="sm" 
+                    className="border-red-300 text-red-600 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>
               </div>
             ))}
+            
+            {filteredJobs.length === 0 && (
+              <div className="text-center py-8">
+                <p className="text-vip-gold/60">No job openings found matching your criteria.</p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -295,7 +364,11 @@ const CareerPortal = () => {
                   </div>
                   <div className="space-y-3">
                     {stageApplicants.map((applicant) => (
-                      <div key={applicant.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200 hover:shadow-sm transition-shadow cursor-pointer">
+                      <div 
+                        key={applicant.id} 
+                        className="p-3 bg-gray-50 rounded-lg border border-gray-200 hover:shadow-sm transition-shadow cursor-pointer"
+                        onClick={() => handleApplicantClick(applicant)}
+                      >
                         <h4 className="font-medium text-sm text-vip-black">{applicant.name}</h4>
                         <p className="text-xs text-vip-gold/80 mt-1">{applicant.position}</p>
                         <p className="text-xs text-vip-gold/60 mt-1">Applied {new Date(applicant.appliedDate).toLocaleDateString()}</p>

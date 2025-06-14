@@ -5,10 +5,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar, Clock, MapPin, Crown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 
 const VipCalendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const upcomingEvents = [
     {
@@ -77,19 +79,40 @@ const VipCalendar = () => {
   };
 
   const handlePreviousMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1));
+    const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1);
+    setCurrentDate(newDate);
+    console.log('Navigating to previous month:', newDate);
+    toast({
+      title: "Month Changed",
+      description: `Viewing ${newDate.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}`,
+    });
   };
 
   const handleNextMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1));
+    const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1);
+    setCurrentDate(newDate);
+    console.log('Navigating to next month:', newDate);
+    toast({
+      title: "Month Changed",
+      description: `Viewing ${newDate.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}`,
+    });
   };
 
   const handleViewCalendar = () => {
+    console.log('Navigating to full calendar view');
+    toast({
+      title: "Opening Calendar",
+      description: "Loading full calendar view...",
+    });
     navigate('/bookings');
   };
 
-  const handleEventClick = (eventId: number) => {
-    console.log('Event clicked:', eventId);
+  const handleEventClick = (event: any) => {
+    console.log('Event clicked:', event);
+    toast({
+      title: "Opening Event",
+      description: `Loading details for ${event.title}`,
+    });
     navigate('/bookings');
   };
 
@@ -109,7 +132,7 @@ const VipCalendar = () => {
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="text-sm font-medium text-vip-gold">
+          <span className="text-sm font-medium text-vip-gold min-w-[120px] text-center">
             {currentDate.toLocaleDateString('en-GB', { 
               month: 'long', 
               year: 'numeric' 
@@ -131,7 +154,7 @@ const VipCalendar = () => {
             key={event.id}
             className="flex items-start space-x-4 p-4 rounded-lg border border-vip-gold/20 hover:bg-vip-gold/5 transition-all duration-300 vip-hover-lift animate-fade-in-up cursor-pointer group"
             style={{ animationDelay: `${index * 0.1}s` }}
-            onClick={() => handleEventClick(event.id)}
+            onClick={() => handleEventClick(event)}
           >
             <div className="flex-shrink-0 mt-1">
               <div className="w-3 h-3 rounded-full bg-vip-gold animate-pulse"></div>
