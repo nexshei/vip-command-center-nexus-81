@@ -76,6 +76,23 @@ const VipCalendar = () => {
     return null;
   };
 
+  const handlePreviousMonth = () => {
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1));
+  };
+
+  const handleNextMonth = () => {
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1));
+  };
+
+  const handleViewCalendar = () => {
+    navigate('/bookings');
+  };
+
+  const handleEventClick = (eventId: number) => {
+    console.log('Event clicked:', eventId);
+    navigate('/bookings');
+  };
+
   return (
     <Card className="border-vip-gold/20 vip-glass-dark vip-glow">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -84,7 +101,12 @@ const VipCalendar = () => {
           VIP Schedule
         </CardTitle>
         <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="sm" className="text-vip-gold hover:bg-vip-gold/10">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-vip-gold hover:bg-vip-gold/10"
+            onClick={handlePreviousMonth}
+          >
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <span className="text-sm font-medium text-vip-gold">
@@ -93,7 +115,12 @@ const VipCalendar = () => {
               year: 'numeric' 
             })}
           </span>
-          <Button variant="ghost" size="sm" className="text-vip-gold hover:bg-vip-gold/10">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-vip-gold hover:bg-vip-gold/10"
+            onClick={handleNextMonth}
+          >
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
@@ -104,7 +131,7 @@ const VipCalendar = () => {
             key={event.id}
             className="flex items-start space-x-4 p-4 rounded-lg border border-vip-gold/20 hover:bg-vip-gold/5 transition-all duration-300 vip-hover-lift animate-fade-in-up cursor-pointer group"
             style={{ animationDelay: `${index * 0.1}s` }}
-            onClick={() => navigate('/bookings')}
+            onClick={() => handleEventClick(event.id)}
           >
             <div className="flex-shrink-0 mt-1">
               <div className="w-3 h-3 rounded-full bg-vip-gold animate-pulse"></div>
@@ -153,7 +180,7 @@ const VipCalendar = () => {
           <Button 
             variant="outline" 
             className="w-full border-vip-gold text-vip-gold hover:bg-vip-gold hover:text-black vip-glass"
-            onClick={() => navigate('/bookings')}
+            onClick={handleViewCalendar}
           >
             View Full Calendar
           </Button>

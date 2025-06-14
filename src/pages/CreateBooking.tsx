@@ -1,289 +1,206 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectSeparator } from '@/components/ui/select';
-import { Calendar } from '@/components/ui/calendar';
-import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Calendar as CalendarIcon, Clock, User, CheckCircle } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Calendar, Clock, User, Plus } from 'lucide-react';
 import { AddClientModal } from '@/components/modals/AddClientModal';
+import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 const CreateBooking = () => {
-  const [step, setStep] = useState(1);
-  const [selectedClient, setSelectedClient] = useState('');
-  const [selectedService, setSelectedService] = useState('');
-  const [selectedDate, setSelectedDate] = useState<Date>();
-  const [selectedTime, setSelectedTime] = useState('');
-  const [isAddClientModalOpen, setIsAddClientModalOpen] = useState(false);
+  const [clientName, setClientName] = useState('');
+  const [service, setService] = useState('');
+  const [date, setDate] = useState('');
+  const [time, setTime] = useState('');
+  const [notes, setNotes] = useState('');
+  const [showAddClient, setShowAddClient] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const services = [
-    { id: '1', name: 'VIP Airport Transfer', duration: '2 hours', capacity: '4 passengers' },
-    { id: '2', name: 'Executive Meeting Setup', duration: '4 hours', capacity: '20 people' },
-    { id: '3', name: 'Luxury Event Planning', duration: '8 hours', capacity: '100 guests' },
-    { id: '4', name: 'Private Security Detail', duration: '12 hours', capacity: '1 client' },
+  const existingClients = [
+    'Hon. Mary Wanjiku',
+    'Dr. James Kiprotich', 
+    'Ms. Grace Njeri',
+    'Lord Wellington',
+    'Ambassador Stevens'
   ];
 
-  const timeSlots = [
-    '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'
-  ];
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!clientName || !service || !date || !time) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive"
+      });
+      return;
+    }
 
-  const mockClients = [
-    'Hon. Peter Maina',
-    'Dr. Sarah Wanjiku', 
-    'Mr. James Kimani',
-    'Ms. Grace Mutua'
-  ];
-
-  const handleSaveBooking = () => {
+    console.log('Creating booking:', { clientName, service, date, time, notes });
+    
     toast({
       title: "Booking Created Successfully",
-      description: "The VIP booking has been saved to the system.",
+      description: `VIP booking for ${clientName} has been scheduled for ${date} at ${time}.`,
     });
-    // Reset form
-    setStep(1);
-    setSelectedClient('');
-    setSelectedService('');
-    setSelectedDate(undefined);
-    setSelectedTime('');
+
+    // Navigate back to bookings page
+    navigate('/bookings');
+  };
+
+  const handleCancel = () => {
+    navigate('/bookings');
+  };
+
+  const handleAddNewClient = () => {
+    setShowAddClient(true);
   };
 
   return (
-    <div className="space-y-6 p-6 max-w-6xl mx-auto">
+    <div className="space-y-6 p-6 max-w-4xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-vip-black">New Booking Creation</h1>
-          <p className="text-vip-gold/80 mt-2">Create VIP bookings with our streamlined booking wizard</p>
-        </div>
-        <div className="flex items-center space-x-2">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className={`flex items-center ${i < 3 ? 'mr-2' : ''}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                step >= i ? 'bg-vip-gold text-white' : 'bg-gray-200 text-gray-500'
-              }`}>
-                {step > i ? <CheckCircle className="h-4 w-4" /> : i}
-              </div>
-              {i < 3 && <div className={`w-8 h-0.5 ${step > i ? 'bg-vip-gold' : 'bg-gray-200'}`} />}
-            </div>
-          ))}
+          <h1 className="text-3xl font-serif font-bold text-vip-black">Create New VIP Booking</h1>
+          <p className="text-vip-gold/80 mt-2">Schedule a new appointment or protocol service</p>
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Main Form */}
-        <div className="lg:col-span-2">
-          <Card className="vip-glass border-vip-gold/20">
-            <CardHeader>
-              <CardTitle className="flex items-center text-vip-black">
-                Step {step} of 3
-                {step === 1 && <><User className="h-5 w-5 ml-2 text-vip-gold" /> Client & Service</>}
-                {step === 2 && <><CalendarIcon className="h-5 w-5 ml-2 text-vip-gold" /> Date & Time</>}
-                {step === 3 && <><CheckCircle className="h-5 w-5 ml-2 text-vip-gold" /> Confirmation</>}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {step === 1 && (
-                <>
-                  {/* Client Selection */}
-                  <div className="space-y-3">
-                    <Label className="text-vip-black font-medium">Select Client *</Label>
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-vip-gold/60" />
-                      <Select value={selectedClient} onValueChange={setSelectedClient}>
-                        <SelectTrigger className="pl-10 border-vip-gold/30 focus:border-vip-gold">
-                          <SelectValue placeholder="Search and select client..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <div
-                            className="relative flex cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none hover:bg-accent focus:bg-accent focus:text-accent-foreground"
-                            onMouseDown={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                            }}
-                            onClick={() => setIsAddClientModalOpen(true)}
-                          >
-                            <Plus className="absolute left-2 h-4 w-4" />
-                            <span>Add New Client</span>
-                          </div>
-                          <SelectSeparator />
-                          {mockClients.map((client) => (
-                            <SelectItem key={client} value={client}>{client}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  {/* Service Selection */}
-                  <div className="space-y-3">
-                    <Label className="text-vip-black font-medium">Select Service *</Label>
-                    <div className="grid gap-3">
-                      {services.map((service) => (
-                        <div
-                          key={service.id}
-                          className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                            selectedService === service.id
-                              ? 'border-vip-gold bg-vip-gold/10'
-                              : 'border-vip-gold/20 hover:border-vip-gold/40'
-                          }`}
-                          onClick={() => setSelectedService(service.id)}
-                        >
-                          <h4 className="font-medium text-vip-black">{service.name}</h4>
-                          <div className="flex space-x-4 mt-2 text-sm text-vip-gold/80">
-                            <span><Clock className="h-3 w-3 inline mr-1" />{service.duration}</span>
-                            <span><User className="h-3 w-3 inline mr-1" />{service.capacity}</span>
-                          </div>
-                        </div>
+      {/* Main Form */}
+      <Card className="vip-glass border-vip-gold/20">
+        <CardHeader>
+          <CardTitle className="text-vip-black flex items-center">
+            <Calendar className="h-5 w-5 mr-2 text-vip-gold" />
+            Booking Details
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Client Selection */}
+            <div className="space-y-2">
+              <Label htmlFor="client" className="text-sm font-medium text-vip-black">
+                Client Name *
+              </Label>
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <Select value={clientName} onValueChange={setClientName}>
+                    <SelectTrigger className="border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black">
+                      <SelectValue placeholder="Select existing client or add new" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-vip-gold/30 z-50">
+                      {existingClients.map((client) => (
+                        <SelectItem key={client} value={client} className="hover:bg-vip-gold/10">
+                          {client}
+                        </SelectItem>
                       ))}
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {step === 2 && (
-                <>
-                  {/* Date Selection */}
-                  <div className="space-y-3">
-                    <Label className="text-vip-black font-medium">Select Date *</Label>
-                    <Calendar
-                      mode="single"
-                      selected={selectedDate}
-                      onSelect={setSelectedDate}
-                      className="rounded-md border border-vip-gold/20"
-                      disabled={(date) => date < new Date()}
-                    />
-                  </div>
-
-                  {/* Time Selection */}
-                  {selectedDate && (
-                    <div className="space-y-3">
-                      <Label className="text-vip-black font-medium">Select Time *</Label>
-                      <div className="grid grid-cols-5 gap-2">
-                        {timeSlots.map((time) => (
-                          <Button
-                            key={time}
-                            variant={selectedTime === time ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => setSelectedTime(time)}
-                            className={selectedTime === time ? "bg-vip-gold text-white" : "border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"}
-                          >
-                            {time}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
-
-              {step === 3 && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-vip-black">Booking Confirmation</h3>
-                  <div className="space-y-3 p-4 bg-vip-gold/5 rounded-lg border border-vip-gold/20">
-                    <div className="flex justify-between">
-                      <span className="text-vip-gold/80">Client:</span>
-                      <span className="font-medium text-vip-black">{selectedClient}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-vip-gold/80">Service:</span>
-                      <span className="font-medium text-vip-black">
-                        {services.find(s => s.id === selectedService)?.name}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-vip-gold/80">Date:</span>
-                      <span className="font-medium text-vip-black">
-                        {selectedDate?.toLocaleDateString()}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-vip-gold/80">Time:</span>
-                      <span className="font-medium text-vip-black">{selectedTime}</span>
-                    </div>
-                  </div>
+                    </SelectContent>
+                  </Select>
                 </div>
-              )}
-
-              {/* Navigation Buttons */}
-              <div className="flex justify-between pt-6 border-t border-vip-gold/20">
                 <Button
-                  variant="outline"
-                  onClick={() => setStep(Math.max(1, step - 1))}
-                  disabled={step === 1}
-                  className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+                  type="button"
+                  onClick={handleAddNewClient}
+                  className="bg-vip-gold text-white hover:bg-vip-gold-dark flex-shrink-0"
                 >
-                  Previous
+                  <Plus className="h-4 w-4 mr-1" />
+                  Add New
                 </Button>
-                {step < 3 ? (
-                  <Button
-                    onClick={() => setStep(step + 1)}
-                    disabled={
-                      (step === 1 && (!selectedClient || !selectedService)) ||
-                      (step === 2 && (!selectedDate || !selectedTime))
-                    }
-                    className="bg-vip-gold text-white hover:bg-vip-gold-dark"
-                  >
-                    Next
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={handleSaveBooking}
-                    className="bg-vip-gold text-white hover:bg-vip-gold-dark"
-                  >
-                    Save Booking
-                  </Button>
-                )}
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
 
-        {/* Booking Summary */}
-        <div>
-          <Card className="vip-glass border-vip-gold/20">
-            <CardHeader>
-              <CardTitle className="text-vip-black">Booking Summary</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <div>
-                  <span className="text-sm text-vip-gold/80">Client</span>
-                  <p className="font-medium text-vip-black">
-                    {selectedClient || 'Not selected'}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-sm text-vip-gold/80">Service</span>
-                  <p className="font-medium text-vip-black">
-                    {services.find(s => s.id === selectedService)?.name || 'Not selected'}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-sm text-vip-gold/80">Date & Time</span>
-                  <p className="font-medium text-vip-black">
-                    {selectedDate && selectedTime 
-                      ? `${selectedDate.toLocaleDateString()} at ${selectedTime}`
-                      : 'Not selected'
-                    }
-                  </p>
-                </div>
+            {/* Service Type */}
+            <div className="space-y-2">
+              <Label htmlFor="service" className="text-sm font-medium text-vip-black">
+                Service Type *
+              </Label>
+              <Select value={service} onValueChange={setService}>
+                <SelectTrigger className="border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black">
+                  <SelectValue placeholder="Select service type" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-vip-gold/30 z-50">
+                  <SelectItem value="consultation" className="hover:bg-vip-gold/10">VIP Consultation</SelectItem>
+                  <SelectItem value="protocol" className="hover:bg-vip-gold/10">Protocol Service</SelectItem>
+                  <SelectItem value="event" className="hover:bg-vip-gold/10">Event Management</SelectItem>
+                  <SelectItem value="concierge" className="hover:bg-vip-gold/10">Concierge Service</SelectItem>
+                  <SelectItem value="diplomatic" className="hover:bg-vip-gold/10">Diplomatic Protocol</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Date and Time */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="date" className="text-sm font-medium text-vip-black">
+                  Date *
+                </Label>
+                <Input
+                  id="date"
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black"
+                  required
+                />
               </div>
-              
-              {selectedClient && selectedService && selectedDate && selectedTime && (
-                <div className="pt-4 border-t border-vip-gold/20">
-                  <Badge className="bg-ios-green text-white">
-                    Ready to Save
-                  </Badge>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-      <AddClientModal open={isAddClientModalOpen} onOpenChange={setIsAddClientModalOpen} />
+              <div className="space-y-2">
+                <Label htmlFor="time" className="text-sm font-medium text-vip-black">
+                  Time *
+                </Label>
+                <Input
+                  id="time"
+                  type="time"
+                  value={time}
+                  onChange={(e) => setTime(e.target.value)}
+                  className="border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Notes */}
+            <div className="space-y-2">
+              <Label htmlFor="notes" className="text-sm font-medium text-vip-black">
+                Additional Notes
+              </Label>
+              <Textarea
+                id="notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Enter any special requirements or notes for this booking..."
+                rows={4}
+                className="border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
+              />
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-3 pt-6 border-t border-vip-gold/20">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={handleCancel}
+                className="px-6 border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                className="px-6 bg-vip-gold text-white hover:bg-vip-gold-dark"
+              >
+                Create Booking
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
+      {/* Add Client Modal */}
+      <AddClientModal 
+        open={showAddClient} 
+        onOpenChange={setShowAddClient}
+      />
     </div>
   );
 };
