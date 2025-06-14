@@ -7,27 +7,26 @@ import { Input } from '@/components/ui/input';
 import { FilterModal } from '@/components/modals/FilterModal';
 import { NewBookingModal } from '@/components/modals/NewBookingModal';
 import { useToast } from '@/hooks/use-toast';
+import { useRealtimeQuery } from "@/hooks/useRealtimeQuery";
 
 const Bookings = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
 
-  const bookings = [
-    { id: 1, client: 'Hon. Mary Wanjiku', service: 'VIP Consultation', time: '10:00 AM', status: 'confirmed', date: 'Today' },
-    { id: 2, client: 'Dr. James Kiprotich', service: 'Protocol Service', time: '2:00 PM', status: 'pending', date: 'Today' },
-    { id: 3, client: 'Ms. Grace Njeri', service: 'Event Management', time: '4:30 PM', status: 'confirmed', date: 'Tomorrow' },
-  ];
+  // Realtime bookings from Supabase (ordered by scheduled_at)
+  const { data: bookings, isLoading, error } = useRealtimeQuery('bookings', { orderBy: 'scheduled_at' });
 
-  const filteredBookings = bookings.filter(booking => 
-    booking.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    booking.service.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredBookings = (bookings || []).filter(
+    (booking: any) =>
+      (booking.client_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (booking.service_type || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleBookingClick = (booking: any) => {
     console.log('Opening booking details:', booking);
     toast({
       title: "Opening Booking",
-      description: `Loading details for ${booking.client}`,
+      description: `Loading details for ${booking.client_name}`,
     });
   };
 
@@ -64,6 +63,7 @@ const Bookings = () => {
 
       {/* Stats Cards */}
       <div className="grid gap-6 md:grid-cols-4">
+        {/* Placeholders for now, can derive from live data if needed */}
         <Card 
           className="vip-glass border-vip-gold/20 cursor-pointer hover:bg-vip-gold/5 transition-colors"
           onClick={() => handleStatsCardClick("Today's Bookings")}
@@ -72,11 +72,14 @@ const Bookings = () => {
             <CardTitle className="text-sm font-medium text-vip-gold/80">Today's Bookings</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-black">12</div>
-            <p className="text-xs text-vip-gold/60">+2 from yesterday</p>
+            <div className="text-2xl font-bold text-vip-black">
+              {Array.isArray(bookings) ? bookings.filter((b:any)=>b.scheduled_at && new Date(b.scheduled_at).toDateString() === new Date().toDateString()).length : '-'}
+            </div>
+            <p className="text-xs text-vip-gold/60">Realtime</p>
           </CardContent>
         </Card>
         
+        {/* You can compute stats for other cards as needed */}
         <Card 
           className="vip-glass border-vip-gold/20 cursor-pointer hover:bg-vip-gold/5 transition-colors"
           onClick={() => handleStatsCardClick("This Week")}
@@ -85,8 +88,19 @@ const Bookings = () => {
             <CardTitle className="text-sm font-medium text-vip-gold/80">This Week</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-black">48</div>
-            <p className="text-xs text-vip-gold/60">+8 from last week</p>
+            <div className="text-2xl font-bold text-vip-black">
+              {Array.isArray(bookings)
+                ? bookings.filter((b:any)=>{
+                  if (!b.scheduled_at) return false;
+                  const d = new Date(b.scheduled_at);
+                  const now = new Date();
+                  const weekStart = new Date(now.setDate(now.getDate() - now.getDay()));
+                  const weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate()+7);
+                  return d >= weekStart && d < weekEnd;
+                }).length
+                : '-'}
+            </div>
+            <p className="text-xs text-vip-gold/60">Realtime</p>
           </CardContent>
         </Card>
 
@@ -98,8 +112,10 @@ const Bookings = () => {
             <CardTitle className="text-sm font-medium text-vip-gold/80">Pending Approval</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-black">6</div>
-            <p className="text-xs text-vip-red">Requires attention</p>
+            <div className="text-2xl font-bold text-vip-black">
+              {Array.isArray(bookings) ? bookings.filter((b:any)=>b.status==='pending').length : '-'}
+            </div>
+            <p className="text-xs text-vip-red">Realtime</p>
           </CardContent>
         </Card>
 
@@ -111,8 +127,11 @@ const Bookings = () => {
             <CardTitle className="text-sm font-medium text-vip-gold/80">Revenue (KSH)</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-black">2.8M</div>
-            <p className="text-xs text-ios-green">+12% this month</p>
+            <div className="text-2xl font-bold text-vip-black">
+              {/* Placeholder, sum over bookings when you have amount field */}
+              -
+            </div>
+            <p className="text-xs text-ios-green">Realtime</p>
           </CardContent>
         </Card>
       </div>
@@ -126,7 +145,10 @@ const Bookings = () => {
               Upcoming Bookings ({filteredBookings.length})
             </div>
             <Button 
-              onClick={() => console.log('Refreshing bookings')}
+              onClick={() => {
+                // refetch via React Query
+                window.location.reload();
+              }}
               variant="outline" 
               size="sm"
               className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
@@ -137,7 +159,17 @@ const Bookings = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {filteredBookings.map((booking) => (
+            {isLoading && (
+              <div className="text-center py-8">
+                <p className="text-vip-gold/60">Loading bookings...</p>
+              </div>
+            )}
+            {error && (
+              <div className="text-center py-8">
+                <p className="text-vip-red">{error.message}</p>
+              </div>
+            )}
+            {filteredBookings.map((booking: any) => (
               <div 
                 key={booking.id} 
                 className="flex items-center justify-between p-4 border border-vip-gold/20 rounded-lg vip-glass-light hover:bg-vip-gold/5 transition-colors cursor-pointer"
@@ -146,12 +178,12 @@ const Bookings = () => {
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="font-semibold text-vip-black">{booking.client}</h3>
-                      <p className="text-sm text-vip-gold/80">{booking.service}</p>
+                      <h3 className="font-semibold text-vip-black">{booking.client_name}</h3>
+                      <p className="text-sm text-vip-gold/80">{booking.service_type}</p>
                       <div className="flex items-center space-x-4 text-xs text-vip-gold/60 mt-1">
-                        <span>{booking.date}</span>
+                        <span>{booking.scheduled_at ? new Date(booking.scheduled_at).toLocaleDateString() : '-'}</span>
                         <span>•</span>
-                        <span>{booking.time}</span>
+                        <span>{booking.scheduled_at ? new Date(booking.scheduled_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '-'}</span>
                       </div>
                     </div>
                     <div className="text-right">
@@ -160,7 +192,7 @@ const Bookings = () => {
                           ? 'bg-ios-green text-white' 
                           : 'bg-vip-gold text-black'
                       }`}>
-                        {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                        {booking.status ? (booking.status.charAt(0).toUpperCase() + booking.status.slice(1)) : ""}
                       </span>
                     </div>
                   </div>
@@ -168,7 +200,7 @@ const Bookings = () => {
               </div>
             ))}
             
-            {filteredBookings.length === 0 && (
+            {!isLoading && filteredBookings.length === 0 && (
               <div className="text-center py-8">
                 <p className="text-vip-gold/60">No bookings found matching your search.</p>
               </div>
