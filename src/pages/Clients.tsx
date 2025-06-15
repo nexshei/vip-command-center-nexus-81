@@ -1,33 +1,30 @@
 
 import React, { useState } from 'react';
-import { Users, Plus, Search, Phone, Mail as MailIcon, MapPin } from 'lucide-react';
+import { Users, Plus, Search, Phone, Mail as MailIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { AddClientModal } from '@/components/modals/AddClientModal';
 import { useToast } from '@/hooks/use-toast';
+import { useRealtimeQuery } from "@/hooks/useRealtimeQuery";
 
 const Clients = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
 
-  const clients = [
-    { id: 1, name: 'Hon. Peter Maina', company: 'Government Official', lastVisit: '2 days ago', email: 'p.maina@gov.ke', phone: '+254 700 000 001', tier: 'VIP' },
-    { id: 2, name: 'Dr. Sarah Wanjiku', company: 'Nairobi Hospital', lastVisit: '1 week ago', email: 's.wanjiku@nh.co.ke', phone: '+254 700 000 002', tier: 'Premium' },
-    { id: 3, name: 'Mr. James Kimani', company: 'Safaricom PLC', lastVisit: '3 days ago', email: 'j.kimani@safaricom.co.ke', phone: '+254 700 000 003', tier: 'VIP' },
-    { id: 4, name: 'Ms. Grace Mutua', company: 'KCB Bank', lastVisit: '5 days ago', email: 'g.mutua@kcb.co.ke', phone: '+254 700 000 004', tier: 'Standard' },
-  ];
+  // Fetch live data from Supabase "clients" table
+  const { data: clients, isLoading, error } = useRealtimeQuery("clients", { orderBy: "created_at" });
 
-  const filteredClients = clients.filter(client => 
-    client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    client.company.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredClients = (clients || []).filter((client: any) => 
+    (client.full_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (client.company || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleClientClick = (client: any) => {
     console.log('Opening client details:', client);
     toast({
       title: "Opening Client Profile",
-      description: `Loading profile for ${client.name}`,
+      description: `Loading profile for ${client.full_name}`,
     });
   };
 
@@ -40,19 +37,38 @@ const Clients = () => {
   };
 
   const handleContactClient = (client: any, method: 'email' | 'phone') => {
-    console.log(`Contacting ${client.name} via ${method}`);
+    console.log(`Contacting ${client.full_name} via ${method}`);
     toast({
-      title: `Contacting ${client.name}`,
+      title: `Contacting ${client.full_name}`,
       description: `Opening ${method} application...`,
     });
   };
 
+  // Calculate counts for stats cards using live data
+  const totalClients = (clients || []).length;
+  // Identify tiers based on client notes or company (adjust logic if needed)
+  const vipTierCount = (clients || []).filter((client: any) =>
+    (client.notes || '').toLowerCase().includes('vip') ||
+    (client.company || '').toLowerCase().includes('vip')
+  ).length;
+  const premiumTierCount = (clients || []).filter((client: any) =>
+    (client.notes || '').toLowerCase().includes('premium') ||
+    (client.company || '').toLowerCase().includes('premium')
+  ).length;
+  // For "Active This Month" - just demo, could filter by created_at or add last_activity logic
+  const activeThisMonth = (clients || []).filter((client: any) => {
+    if (!client.created_at) return false;
+    const created = new Date(client.created_at);
+    const now = new Date();
+    return created.getMonth() === now.getMonth() && created.getFullYear() === now.getFullYear();
+  }).length;
+
   const getTierColor = (tier: string) => {
-    switch (tier) {
-      case 'VIP': return 'bg-vip-gold text-black';
-      case 'Premium': return 'bg-ios-purple text-white';
-      default: return 'bg-gray-500 text-white';
-    }
+    if (!tier) return 'bg-gray-500 text-white';
+    const t = tier.toLowerCase();
+    if (t.includes('vip')) return 'bg-vip-gold text-black';
+    if (t.includes('premium')) return 'bg-ios-purple text-white';
+    return 'bg-gray-500 text-white';
   };
 
   return (
@@ -86,11 +102,10 @@ const Clients = () => {
             <CardTitle className="text-sm font-medium text-vip-gold/80">Total Clients</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-black">847</div>
+            <div className="text-2xl font-bold text-vip-black">{totalClients}</div>
             <p className="text-xs text-ios-green">+23 this month</p>
           </CardContent>
         </Card>
-        
         <Card 
           className="vip-glass border-vip-gold/20 cursor-pointer hover:bg-vip-gold/5 transition-colors"
           onClick={() => handleStatsCardClick("VIP Tier")}
@@ -99,11 +114,10 @@ const Clients = () => {
             <CardTitle className="text-sm font-medium text-vip-gold/80">VIP Tier</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-black">156</div>
+            <div className="text-2xl font-bold text-vip-black">{vipTierCount + premiumTierCount}</div>
             <p className="text-xs text-vip-gold/60">Premium clients</p>
           </CardContent>
         </Card>
-
         <Card 
           className="vip-glass border-vip-gold/20 cursor-pointer hover:bg-vip-gold/5 transition-colors"
           onClick={() => handleStatsCardClick("Active This Month")}
@@ -112,7 +126,7 @@ const Clients = () => {
             <CardTitle className="text-sm font-medium text-vip-gold/80">Active This Month</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-black">324</div>
+            <div className="text-2xl font-bold text-vip-black">{activeThisMonth}</div>
             <p className="text-xs text-vip-gold/60">Engaged clients</p>
           </CardContent>
         </Card>
@@ -127,18 +141,28 @@ const Clients = () => {
               Client Directory ({filteredClients.length})
             </div>
             <Button 
-              onClick={() => console.log('Exporting client list')}
+              onClick={() => window.location.reload()}
               variant="outline" 
               size="sm"
               className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
             >
-              Export List
+              Refresh
             </Button>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {filteredClients.map((client) => (
+            {isLoading && (
+              <div className="text-center py-8">
+                <p className="text-vip-gold/60">Loading clients...</p>
+              </div>
+            )}
+            {error && (
+              <div className="text-center py-8">
+                <p className="text-vip-red">{error.message}</p>
+              </div>
+            )}
+            {filteredClients.map((client: any) => (
               <div 
                 key={client.id} 
                 className="flex items-center justify-between p-4 border border-vip-gold/20 rounded-lg vip-glass-light hover:bg-vip-gold/5 transition-colors cursor-pointer"
@@ -147,27 +171,30 @@ const Clients = () => {
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-vip-gold/20 rounded-full flex items-center justify-center flex-shrink-0">
                     <span className="text-vip-gold font-semibold text-sm">
-                      {client.name.split(' ').map(n => n[0]).join('')}
+                      {(client.full_name || 'NA').split(' ').map((n: string) => n[0]).join('')}
                     </span>
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center space-x-3">
-                      <h3 className="font-semibold text-vip-black">{client.name}</h3>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTierColor(client.tier)}`}>
-                        {client.tier}
+                      <h3 className="font-semibold text-vip-black">{client.full_name || 'Unknown'}</h3>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTierColor(client.notes || client.company || '')}`}>
+                        {/* Simple heuristic: notes/company may mention VIP/Premium */}
+                        {(/vip/i.test(client.notes) || /vip/i.test(client.company)) ? 'VIP'
+                          : /premium/i.test(client.notes) || /premium/i.test(client.company) ? 'Premium'
+                          : 'Standard'}
                       </span>
                     </div>
-                    <p className="text-sm text-vip-gold/80">{client.company}</p>
+                    <p className="text-sm text-vip-gold/80">{client.company || '-'}</p>
                     <div className="flex items-center space-x-4 text-xs text-vip-gold/60 mt-1">
                       <span className="flex items-center">
                         <MailIcon className="h-3 w-3 mr-1" />
-                        {client.email}
+                        {client.email || '-'}
                       </span>
                       <span className="flex items-center">
                         <Phone className="h-3 w-3 mr-1" />
-                        {client.phone}
+                        {client.phone || '-'}
                       </span>
-                      <span>Last visit: {client.lastVisit}</span>
+                      <span>Joined: {client.created_at ? new Date(client.created_at).toLocaleDateString() : '-'}</span>
                     </div>
                   </div>
                 </div>
@@ -197,8 +224,7 @@ const Clients = () => {
                 </div>
               </div>
             ))}
-            
-            {filteredClients.length === 0 && (
+            {!isLoading && filteredClients.length === 0 && (
               <div className="text-center py-8">
                 <p className="text-vip-gold/60">No clients found matching your search.</p>
               </div>
