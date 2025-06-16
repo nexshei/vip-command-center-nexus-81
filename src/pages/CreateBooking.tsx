@@ -253,8 +253,11 @@ const CreateBooking = () => {
     if (Array.isArray(clientsData) && clientsData.length > 0) {
       // Check if the first item has the expected Client properties
       const firstItem = clientsData[0];
-      if (firstItem != null && typeof firstItem === 'object' && 'id' in firstItem && 'full_name' in firstItem) {
-        return clientsData as unknown as Client[];
+      if (firstItem != null && typeof firstItem === 'object') {
+        // Additional type checking with proper null handling
+        if ('id' in firstItem && 'full_name' in firstItem) {
+          return clientsData as unknown as Client[];
+        }
       }
     }
     return [];
