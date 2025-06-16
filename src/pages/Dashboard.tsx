@@ -27,7 +27,7 @@ const Dashboard = () => {
   };
 
   const recentActivities = [
-    { id: 1, action: 'New VIP booking confirmed', client: 'Embassy of Sweden', time: '2 minutes ago', type: 'booking' },
+    { id: 1, action: 'New VVIP booking confirmed', client: 'Embassy of Sweden', time: '2 minutes ago', type: 'booking' },
     { id: 2, action: 'Payment received', client: 'Lord Wellington', time: '15 minutes ago', type: 'payment' },
     { id: 3, action: 'Staff member checked in', client: 'Internal', time: '1 hour ago', type: 'staff' },
     { id: 4, action: 'Protocol completed', client: 'Pemberton Holdings', time: '2 hours ago', type: 'protocol' },
