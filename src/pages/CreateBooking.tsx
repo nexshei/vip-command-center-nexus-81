@@ -255,11 +255,13 @@ const CreateBooking = () => {
     }
     
     const firstItem = clientsData[0];
-    if (!firstItem || typeof firstItem !== 'object') {
+    
+    // Explicit null and undefined check
+    if (firstItem === null || firstItem === undefined || typeof firstItem !== 'object') {
       return [];
     }
     
-    // Check if the first item has the expected Client properties
+    // Now TypeScript knows firstItem is not null
     if ('id' in firstItem && 'full_name' in firstItem) {
       return clientsData as unknown as Client[];
     }
