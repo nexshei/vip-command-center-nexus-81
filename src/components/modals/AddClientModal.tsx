@@ -7,11 +7,12 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from "@/integrations/supabase/client";
 
 interface AddClientModalProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  onClientAdded?: (clientName: string) => void;
+  onClientAdded?: (client: any) => void;
 }
 
 export const AddClientModal = ({ open, onOpenChange, onClientAdded }: AddClientModalProps) => {
@@ -26,18 +27,52 @@ export const AddClientModal = ({ open, onOpenChange, onClientAdded }: AddClientM
   const isOpen = open ?? internalOpen;
   const setIsOpen = onOpenChange ?? setInternalOpen;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Adding client:', { name, email, phone, eventType, company });
     
-    toast({
-      title: "Client Added",
-      description: `${name} has been added to your VVIP client database.`,
-    });
+    try {
+      // Insert into Supabase
+      const { data, error } = await supabase
+        .from('clients')
+        .insert([
+          {
+            full_name: name,
+            email: email,
+            phone: phone,
+            company: company,
+            notes: eventType,
+          }
+        ])
+        .select()
+        .single();
 
-    // Call the onClientAdded callback if provided
-    if (onClientAdded) {
-      onClientAdded(name);
+      if (error) {
+        console.error('Error adding client:', error);
+        toast({
+          title: "Error",
+          description: "Failed to add client. Please try again.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      toast({
+        title: "Client Added",
+        description: `${name} has been added to your VVIP client database.`,
+      });
+
+      // Call the onClientAdded callback if provided
+      if (onClientAdded) {
+        onClientAdded(data);
+      }
+    } catch (error) {
+      console.error('Error adding client:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add client. Please try again.",
+        variant: "destructive"
+      });
     }
 
     // Reset form and close modal

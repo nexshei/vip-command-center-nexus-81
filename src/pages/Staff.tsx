@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,9 @@ import { Search, Plus, Users, Phone, Mail, Eye, Edit, Trash2 } from 'lucide-reac
 import { useToast } from '@/hooks/use-toast';
 import { AddStaffModal } from '@/components/modals/AddStaffModal';
 import { useRealtimeQuery } from "@/hooks/useRealtimeQuery";
+import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
+import { ViewDetailsModal } from '@/components/modals/ViewDetailsModal';
+import { EditItemModal } from '@/components/modals/EditItemModal';
 
 interface StaffMember {
   id: string;
@@ -25,6 +28,10 @@ const Staff = () => {
   const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const [deleteModal, setDeleteModal] = useState({ open: false, item: null });
+  const [viewModal, setViewModal] = useState({ open: false, item: null });
+  const [editModal, setEditModal] = useState({ open: false, item: null });
+  const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
   const { toast } = useToast();
 
   // Fetch live data from Supabase "staff" table
@@ -94,12 +101,17 @@ const Staff = () => {
     },
   ];
 
-  // Use real data if available, otherwise use mock data
-  const staffMembers = staffData && staffData.length > 0 ? staffData.map((staff: any) => ({
-    ...staff,
-    // Ensure status is one of the expected values
-    status: ['active', 'on-leave', 'inactive'].includes(staff.status) ? staff.status : 'active'
-  })) : mockStaffMembers;
+  // Use real data if available, otherwise use mock data and state
+  useEffect(() => {
+    if (staffData && staffData.length > 0) {
+      setStaffMembers(staffData.map((staff: any) => ({
+        ...staff,
+        status: ['active', 'on-leave', 'inactive'].includes(staff.status) ? staff.status : 'active'
+      })));
+    } else {
+      setStaffMembers(mockStaffMembers);
+    }
+  }, [staffData]);
 
   const totalStaff = staffMembers.length;
   const activeStaff = staffMembers.filter((staff: StaffMember) => staff.status === 'active').length;
@@ -143,36 +155,39 @@ const Staff = () => {
   };
 
   const handleStaffAdded = (newStaff: StaffMember) => {
-    // The real-time query will automatically update the data
+    setStaffMembers([...staffMembers, newStaff]);
     toast({
       title: "Staff Added",
       description: "New staff member has been added successfully.",
     });
   };
 
-  const handleViewProfile = (staffId: string) => {
-    console.log('Viewing profile for staff:', staffId);
-    toast({
-      title: "View Profile",
-      description: "Opening staff member profile...",
-    });
+  const handleViewProfile = (staff: StaffMember) => {
+    setViewModal({ open: true, item: staff });
   };
 
-  const handleEditStaff = (staffId: string) => {
-    console.log('Editing staff:', staffId);
-    toast({
-      title: "Edit Staff",
-      description: "Opening edit form for staff member...",
-    });
+  const handleEditStaff = (staff: StaffMember) => {
+    setEditModal({ open: true, item: staff });
   };
 
-  const handleDeleteStaff = (staffId: string) => {
-    console.log('Deleting staff:', staffId);
-    toast({
-      title: "Delete Staff Member",
-      description: "Staff member has been removed from the directory.",
-      variant: "destructive"
-    });
+  const handleStaffUpdated = (updatedStaff: StaffMember) => {
+    setStaffMembers(staffMembers.map(staff => 
+      staff.id === updatedStaff.id ? updatedStaff : staff
+    ));
+  };
+
+  const handleDeleteStaff = (staff: StaffMember) => {
+    setDeleteModal({ open: true, item: staff });
+  };
+
+  const confirmDelete = () => {
+    if (deleteModal.item) {
+      setStaffMembers(staffMembers.filter(staff => staff.id !== deleteModal.item.id));
+      toast({
+        title: "Staff Member Deleted",
+        description: `${deleteModal.item.full_name} has been removed from the staff directory.`,
+      });
+    }
   };
 
   const handleContact = (phone: string) => {
@@ -199,6 +214,7 @@ const Staff = () => {
 
       {/* Summary Stats */}
       <div className="grid gap-6 md:grid-cols-3">
+        {/* ... keep existing code (stats cards) */}
         <Card className="vip-glass border-vip-gold/20">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-vip-gold/80">Total Staff Members</CardTitle>
@@ -310,8 +326,8 @@ const Staff = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-vip-black truncate">{staff.full_name}</h3>
-                    <p className="text-sm text-vip-gold/80">{staff.role}</p>
-                    <p className="text-xs text-vip-gold/60">{getDepartment(staff.role, staff.notes)}</p>
+                    <p className="text-sm text-vip-black">{staff.role}</p>
+                    <p className="text-xs text-vip-black">{getDepartment(staff.role, staff.notes)}</p>
                     
                     <div className="mt-2">
                       <Badge className={`${getStatusColor(staff.status)} text-xs`}>
@@ -333,7 +349,7 @@ const Staff = () => {
                     
                     <div className="grid grid-cols-4 gap-1 mt-3">
                       <Button 
-                        onClick={() => handleViewProfile(staff.id)}
+                        onClick={() => handleViewProfile(staff)}
                         variant="outline" 
                         size="sm" 
                         className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10 text-xs px-2"
@@ -341,7 +357,7 @@ const Staff = () => {
                         <Eye className="h-3 w-3" />
                       </Button>
                       <Button 
-                        onClick={() => handleEditStaff(staff.id)}
+                        onClick={() => handleEditStaff(staff)}
                         variant="outline" 
                         size="sm" 
                         className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10 text-xs px-2"
@@ -357,7 +373,7 @@ const Staff = () => {
                         <Phone className="h-3 w-3" />
                       </Button>
                       <Button 
-                        onClick={() => handleDeleteStaff(staff.id)}
+                        onClick={() => handleDeleteStaff(staff)}
                         variant="outline" 
                         size="sm" 
                         className="border-red-300 text-red-600 hover:bg-red-50 text-xs px-2"
@@ -382,6 +398,66 @@ const Staff = () => {
         open={addModalOpen}
         onOpenChange={setAddModalOpen}
         onStaffAdded={handleStaffAdded}
+      />
+
+      {/* Modals */}
+      <DeleteConfirmationModal
+        open={deleteModal.open}
+        onOpenChange={(open) => setDeleteModal({ ...deleteModal, open })}
+        title="Delete Staff Member"
+        description="Are you sure you want to remove"
+        itemName={deleteModal.item?.full_name || ''}
+        onConfirm={confirmDelete}
+      />
+
+      <ViewDetailsModal
+        open={viewModal.open}
+        onOpenChange={(open) => setViewModal({ ...viewModal, open })}
+        title="Staff Member Details"
+      >
+        {viewModal.item && (
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-semibold text-vip-black">Full Name</h3>
+              <p className="text-vip-gold/80">{viewModal.item.full_name}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-vip-black">Role</h3>
+              <p className="text-vip-gold/80">{viewModal.item.role}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-vip-black">Department</h3>
+              <p className="text-vip-gold/80">{getDepartment(viewModal.item.role, viewModal.item.notes)}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-vip-black">Email</h3>
+              <p className="text-vip-gold/80">{viewModal.item.email}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-vip-black">Phone</h3>
+              <p className="text-vip-gold/80">{viewModal.item.phone}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-vip-black">Status</h3>
+              <Badge className={getStatusColor(viewModal.item.status)}>
+                {viewModal.item.status === 'active' ? 'Active' : 
+                 viewModal.item.status === 'on-leave' ? 'On Leave' : 'Inactive'}
+              </Badge>
+            </div>
+            <div>
+              <h3 className="font-semibold text-vip-black">Joined</h3>
+              <p className="text-vip-gold/80">{new Date(viewModal.item.created_at).toLocaleDateString()}</p>
+            </div>
+          </div>
+        )}
+      </ViewDetailsModal>
+
+      <EditItemModal
+        open={editModal.open}
+        onOpenChange={(open) => setEditModal({ ...editModal, open })}
+        item={editModal.item}
+        onItemUpdated={handleStaffUpdated}
+        type="staff"
       />
     </div>
   );

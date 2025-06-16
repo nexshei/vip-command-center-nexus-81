@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,11 +7,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Search, Plus, Package, AlertTriangle, CheckCircle, Filter, Edit, Eye, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRealtimeQuery } from "@/hooks/useRealtimeQuery";
+import { AddInventoryModal } from '@/components/modals/AddInventoryModal';
+import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
+import { ViewDetailsModal } from '@/components/modals/ViewDetailsModal';
+import { EditItemModal } from '@/components/modals/EditItemModal';
 
 const Inventory = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [deleteModal, setDeleteModal] = useState({ open: false, item: null });
+  const [viewModal, setViewModal] = useState({ open: false, item: null });
+  const [editModal, setEditModal] = useState({ open: false, item: null });
+  const [inventoryItems, setInventoryItems] = useState<any[]>([]);
   const { toast } = useToast();
 
   // Fetch live data from Supabase "inventory" table
@@ -29,32 +37,38 @@ const Inventory = () => {
     { id: '8', item_name: 'Meeting Rooms', description: 'Venues', quantity: 1, status: 'low_stock', location: 'Building A' },
   ];
 
-  // Use real data if available, otherwise use mock data
-  const inventoryItems = inventoryData && inventoryData.length > 0 ? inventoryData.map((item: any) => ({
-    ...item,
-    // Map database status to display status
-    status: item.status === 'available' ? 'good' : 
-           item.status === 'low_stock' ? 'low' : 
-           item.status === 'out_of_stock' ? 'out' : 'good',
-    name: item.item_name,
-    category: item.description || 'General',
-    minStock: 5, // Default min stock
-    lastUpdated: item.created_at ? new Date(item.created_at).toLocaleDateString() : 'Unknown'
-  })) : mockInventoryItems.map(item => ({
-    ...item,
-    name: item.item_name,
-    category: item.description,
-    status: item.status === 'available' ? 'good' : 
-           item.status === 'low_stock' ? 'low' : 
-           item.status === 'out_of_stock' ? 'out' : 'good',
-    minStock: 5,
-    lastUpdated: '1 hour ago'
-  }));
+  // Use real data if available, otherwise use mock data and state
+  useEffect(() => {
+    if (inventoryData && inventoryData.length > 0) {
+      setInventoryItems(inventoryData.map((item: any) => ({
+        ...item,
+        // Map database status to display status
+        status: item.status === 'available' ? 'good' : 
+               item.status === 'low_stock' ? 'low' : 
+               item.status === 'out_of_stock' ? 'out' : 'good',
+        name: item.item_name,
+        category: item.description || 'General',
+        minStock: 5,
+        lastUpdated: item.created_at ? new Date(item.created_at).toLocaleDateString() : 'Unknown'
+      })));
+    } else {
+      setInventoryItems(mockInventoryItems.map(item => ({
+        ...item,
+        name: item.item_name,
+        category: item.description,
+        status: item.status === 'available' ? 'good' : 
+               item.status === 'low_stock' ? 'low' : 
+               item.status === 'out_of_stock' ? 'out' : 'good',
+        minStock: 5,
+        lastUpdated: '1 hour ago'
+      })));
+    }
+  }, [inventoryData]);
 
   const totalItems = inventoryItems.length;
   const lowStockItems = inventoryItems.filter((item: any) => item.status === 'low').length;
   const outOfStockItems = inventoryItems.filter((item: any) => item.status === 'out').length;
-  const bookedThisWeek = 24; // Mock data
+  const bookedThisWeek = 24;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -82,36 +96,36 @@ const Inventory = () => {
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
-  const handleAddItem = () => {
-    toast({
-      title: "Add New Item",
-      description: "Opening form to add new inventory item...",
-    });
+  const handleAddItem = (newItem: any) => {
+    setInventoryItems([...inventoryItems, newItem]);
   };
 
-  const handleEditItem = (itemId: string) => {
-    console.log('Editing item:', itemId);
-    toast({
-      title: "Edit Item",
-      description: "Opening edit form for inventory item...",
-    });
+  const handleEditItem = (item: any) => {
+    setEditModal({ open: true, item });
   };
 
-  const handleViewDetails = (itemId: string) => {
-    console.log('Viewing details for item:', itemId);
-    toast({
-      title: "Item Details",
-      description: "Opening detailed view of inventory item...",
-    });
+  const handleItemUpdated = (updatedItem: any) => {
+    setInventoryItems(inventoryItems.map(item => 
+      item.id === updatedItem.id ? updatedItem : item
+    ));
   };
 
-  const handleDeleteItem = (itemId: string) => {
-    console.log('Deleting item:', itemId);
-    toast({
-      title: "Delete Item",
-      description: "Inventory item has been deleted successfully.",
-      variant: "destructive"
-    });
+  const handleViewDetails = (item: any) => {
+    setViewModal({ open: true, item });
+  };
+
+  const handleDeleteItem = (item: any) => {
+    setDeleteModal({ open: true, item });
+  };
+
+  const confirmDelete = () => {
+    if (deleteModal.item) {
+      setInventoryItems(inventoryItems.filter(item => item.id !== deleteModal.item.id));
+      toast({
+        title: "Item Deleted",
+        description: `${deleteModal.item.name} has been removed from inventory.`,
+      });
+    }
   };
 
   const handleClearFilters = () => {
@@ -132,10 +146,7 @@ const Inventory = () => {
           <h1 className="text-3xl font-serif font-bold text-vip-black">Inventory Management</h1>
           <p className="text-vip-gold/80 mt-2">Manage VVIP resources and booking availability</p>
         </div>
-        <Button onClick={handleAddItem} className="bg-vip-gold text-white hover:bg-vip-gold-dark">
-          <Plus className="h-4 w-4 mr-2" />
-          Add New Item
-        </Button>
+        <AddInventoryModal onItemAdded={handleAddItem} />
       </div>
 
       {/* Overview Metrics */}
@@ -291,7 +302,7 @@ const Inventory = () => {
                         variant="outline" 
                         size="sm" 
                         className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
-                        onClick={() => handleEditItem(item.id)}
+                        onClick={() => handleEditItem(item)}
                       >
                         <Edit className="h-3 w-3 mr-1" />
                         Edit
@@ -300,7 +311,7 @@ const Inventory = () => {
                         variant="outline" 
                         size="sm" 
                         className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
-                        onClick={() => handleViewDetails(item.id)}
+                        onClick={() => handleViewDetails(item)}
                       >
                         <Eye className="h-3 w-3 mr-1" />
                         Details
@@ -309,7 +320,7 @@ const Inventory = () => {
                         variant="outline" 
                         size="sm" 
                         className="border-red-300 text-red-600 hover:bg-red-50"
-                        onClick={() => handleDeleteItem(item.id)}
+                        onClick={() => handleDeleteItem(item)}
                       >
                         <Trash2 className="h-3 w-3 mr-1" />
                         Delete
@@ -327,6 +338,62 @@ const Inventory = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Modals */}
+      <DeleteConfirmationModal
+        open={deleteModal.open}
+        onOpenChange={(open) => setDeleteModal({ ...deleteModal, open })}
+        title="Delete Inventory Item"
+        description="Are you sure you want to delete"
+        itemName={deleteModal.item?.name || ''}
+        onConfirm={confirmDelete}
+      />
+
+      <ViewDetailsModal
+        open={viewModal.open}
+        onOpenChange={(open) => setViewModal({ ...viewModal, open })}
+        title="Inventory Item Details"
+      >
+        {viewModal.item && (
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-semibold text-vip-black">Item Name</h3>
+              <p className="text-vip-gold/80">{viewModal.item.name}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-vip-black">Category</h3>
+              <p className="text-vip-gold/80">{viewModal.item.category}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-vip-black">Current Stock</h3>
+              <p className="text-vip-gold/80">{viewModal.item.quantity}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-vip-black">Location</h3>
+              <p className="text-vip-gold/80">{viewModal.item.location}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-vip-black">Status</h3>
+              <Badge className={getStatusColor(viewModal.item.status)}>
+                {viewModal.item.status === 'good' ? 'Good Stock' : 
+                 viewModal.item.status === 'low' ? 'Low Stock' : 'Out of Stock'}
+              </Badge>
+            </div>
+            <div>
+              <h3 className="font-semibold text-vip-black">Last Updated</h3>
+              <p className="text-vip-gold/80">{viewModal.item.lastUpdated}</p>
+            </div>
+          </div>
+        )}
+      </ViewDetailsModal>
+
+      <EditItemModal
+        open={editModal.open}
+        onOpenChange={(open) => setEditModal({ ...editModal, open })}
+        item={editModal.item}
+        onItemUpdated={handleItemUpdated}
+        type="inventory"
+      />
     </div>
   );
 };

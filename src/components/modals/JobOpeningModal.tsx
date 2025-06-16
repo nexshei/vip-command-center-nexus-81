@@ -54,6 +54,8 @@ export const JobOpeningModal = ({ open, onOpenChange, onJobAdded }: JobOpeningMo
       description,
       requirements,
       posted_at: new Date().toISOString(),
+      applicants: 0,
+      datePosted: new Date().toISOString().split('T')[0],
     };
 
     if (onJobAdded) {
@@ -65,6 +67,10 @@ export const JobOpeningModal = ({ open, onOpenChange, onJobAdded }: JobOpeningMo
       description: `${jobTitle} position has been posted successfully.`,
     });
 
+    resetFormAndClose();
+  };
+
+  const handleCancel = () => {
     resetFormAndClose();
   };
 
@@ -161,11 +167,11 @@ export const JobOpeningModal = ({ open, onOpenChange, onJobAdded }: JobOpeningMo
           </div>
 
           <div className="flex justify-end gap-3 pt-6 border-t border-vip-gold/20">
-            <Button type="button" variant="outline" onClick={resetFormAndClose} className="px-6 border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10">
+            <Button type="button" variant="outline" onClick={handleCancel} className="px-6 border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10">
               Cancel
             </Button>
             <Button type="submit" className="px-6 bg-vip-gold text-white hover:bg-vip-gold-dark">
-              Create Job Opening
+              Create
             </Button>
           </div>
         </form>

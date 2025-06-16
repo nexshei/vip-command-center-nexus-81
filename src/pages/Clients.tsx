@@ -1,31 +1,67 @@
-
-import React, { useState } from 'react';
-import { Users, Plus, Search, Phone, Mail as MailIcon } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Users, Plus, Search, Phone, Mail as MailIcon, Eye, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { AddClientModal } from '@/components/modals/AddClientModal';
+import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
+import { ViewDetailsModal } from '@/components/modals/ViewDetailsModal';
+import { EditItemModal } from '@/components/modals/EditItemModal';
 import { useToast } from '@/hooks/use-toast';
 import { useRealtimeQuery } from "@/hooks/useRealtimeQuery";
 
 const Clients = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [clients, setClients] = useState<any[]>([]);
+  const [deleteModal, setDeleteModal] = useState({ open: false, item: null });
+  const [viewModal, setViewModal] = useState({ open: false, item: null });
+  const [editModal, setEditModal] = useState({ open: false, item: null });
   const { toast } = useToast();
 
   // Fetch live data from Supabase "clients" table
-  const { data: clients, isLoading, error } = useRealtimeQuery("clients", { orderBy: "created_at" });
+  const { data: clientsData, isLoading, error } = useRealtimeQuery("clients", { orderBy: "created_at" });
 
-  const filteredClients = (clients || []).filter((client: any) => 
+  useEffect(() => {
+    if (clientsData) {
+      setClients(clientsData);
+    }
+  }, [clientsData]);
+
+  const filteredClients = clients.filter((client: any) => 
     (client.full_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     (client.company || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleClientClick = (client: any) => {
-    console.log('Opening client details:', client);
-    toast({
-      title: "Opening Client Profile",
-      description: `Loading profile for ${client.full_name}`,
-    });
+    setViewModal({ open: true, item: client });
+  };
+
+  const handleEditClient = (client: any) => {
+    setEditModal({ open: true, item: client });
+  };
+
+  const handleDeleteClient = (client: any) => {
+    setDeleteModal({ open: true, item: client });
+  };
+
+  const handleClientUpdated = (updatedClient: any) => {
+    setClients(clients.map(client => 
+      client.id === updatedClient.id ? updatedClient : client
+    ));
+  };
+
+  const confirmDelete = () => {
+    if (deleteModal.item) {
+      setClients(clients.filter(client => client.id !== deleteModal.item.id));
+      toast({
+        title: "Client Deleted",
+        description: `${deleteModal.item.full_name} has been removed from the client directory.`,
+      });
+    }
+  };
+
+  const handleClientAdded = (newClient: any) => {
+    setClients([...clients, newClient]);
   };
 
   const handleStatsCardClick = (cardType: string) => {
@@ -45,18 +81,16 @@ const Clients = () => {
   };
 
   // Calculate counts for stats cards using live data
-  const totalClients = (clients || []).length;
-  // Identify tiers based on client notes or company (adjust logic if needed)
-  const vvipTierCount = (clients || []).filter((client: any) =>
+  const totalClients = clients.length;
+  const vvipTierCount = clients.filter((client: any) =>
     (client.notes || '').toLowerCase().includes('vvip') ||
     (client.company || '').toLowerCase().includes('vvip')
   ).length;
-  const premiumTierCount = (clients || []).filter((client: any) =>
+  const premiumTierCount = clients.filter((client: any) =>
     (client.notes || '').toLowerCase().includes('premium') ||
     (client.company || '').toLowerCase().includes('premium')
   ).length;
-  // For "Active This Month" - just demo, could filter by created_at or add last_activity logic
-  const activeThisMonth = (clients || []).filter((client: any) => {
+  const activeThisMonth = clients.filter((client: any) => {
     if (!client.created_at) return false;
     const created = new Date(client.created_at);
     const now = new Date();
@@ -88,7 +122,7 @@ const Clients = () => {
               className="pl-10 w-64 border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
             />
           </div>
-          <AddClientModal />
+          <AddClientModal onClientAdded={handleClientAdded} />
         </div>
       </div>
 
@@ -165,8 +199,7 @@ const Clients = () => {
             {filteredClients.map((client: any) => (
               <div 
                 key={client.id} 
-                className="flex items-center justify-between p-4 border border-vip-gold/20 rounded-lg vip-glass-light hover:bg-vip-gold/5 transition-colors cursor-pointer"
-                onClick={() => handleClientClick(client)}
+                className="flex items-center justify-between p-4 border border-vip-gold/20 rounded-lg vip-glass-light hover:bg-vip-gold/5 transition-colors"
               >
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-vip-gold/20 rounded-full flex items-center justify-center flex-shrink-0">
@@ -178,7 +211,6 @@ const Clients = () => {
                     <div className="flex items-center space-x-3">
                       <h3 className="font-semibold text-vip-black">{client.full_name || 'Unknown'}</h3>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTierColor(client.notes || client.company || '')}`}>
-                        {/* Simple heuristic: notes/company may mention VVIP/Premium */}
                         {(/vvip/i.test(client.notes) || /vvip/i.test(client.company)) ? 'VVIP'
                           : /premium/i.test(client.notes) || /premium/i.test(client.company) ? 'Premium'
                           : 'Standard'}
@@ -202,6 +234,28 @@ const Clients = () => {
                   <Button
                     onClick={(e) => {
                       e.stopPropagation();
+                      handleClientClick(client);
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+                  >
+                    <Eye className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEditClient(client);
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+                  >
+                    <Edit className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
                       handleContactClient(client, 'email');
                     }}
                     variant="outline"
@@ -221,6 +275,17 @@ const Clients = () => {
                   >
                     <Phone className="h-3 w-3" />
                   </Button>
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteClient(client);
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="border-red-300 text-red-600 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
                 </div>
               </div>
             ))}
@@ -232,6 +297,59 @@ const Clients = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Modals */}
+      <DeleteConfirmationModal
+        open={deleteModal.open}
+        onOpenChange={(open) => setDeleteModal({ ...deleteModal, open })}
+        title="Delete Client"
+        description="Are you sure you want to remove"
+        itemName={deleteModal.item?.full_name || ''}
+        onConfirm={confirmDelete}
+      />
+
+      <ViewDetailsModal
+        open={viewModal.open}
+        onOpenChange={(open) => setViewModal({ ...viewModal, open })}
+        title="Client Details"
+      >
+        {viewModal.item && (
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-semibold text-vip-black">Full Name</h3>
+              <p className="text-vip-gold/80">{viewModal.item.full_name}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-vip-black">Email</h3>
+              <p className="text-vip-gold/80">{viewModal.item.email}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-vip-black">Phone</h3>
+              <p className="text-vip-gold/80">{viewModal.item.phone}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-vip-black">Company</h3>
+              <p className="text-vip-gold/80">{viewModal.item.company || 'Not specified'}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-vip-black">Event Type</h3>
+              <p className="text-vip-gold/80">{viewModal.item.notes || 'Not specified'}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-vip-black">Joined</h3>
+              <p className="text-vip-gold/80">{viewModal.item.created_at ? new Date(viewModal.item.created_at).toLocaleDateString() : 'Unknown'}</p>
+            </div>
+          </div>
+        )}
+      </ViewDetailsModal>
+
+      <EditItemModal
+        open={editModal.open}
+        onOpenChange={(open) => setEditModal({ ...editModal, open })}
+        item={editModal.item}
+        onItemUpdated={handleClientUpdated}
+        type="client"
+      />
     </div>
   );
 };
