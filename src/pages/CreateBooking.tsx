@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -230,12 +229,37 @@ const CreateBooking = () => {
   };
 
   const handleClientSelection = (clientName: string) => {
-    const clients = clientsData as Client[] | undefined;
-    const selectedClient = clients?.find((client: Client) => client.full_name === clientName);
-    
-    handleInputChange('clientName', clientName);
-    handleInputChange('clientId', selectedClient?.id || '');
+    // Type guard to ensure clientsData is an array of clients
+    const isValidClientsData = (data: any): data is Client[] => {
+      return Array.isArray(data) && data.length > 0 && 
+             typeof data[0] === 'object' && 
+             'id' in data[0] && 
+             'full_name' in data[0];
+    };
+
+    if (isValidClientsData(clientsData)) {
+      const selectedClient = clientsData.find((client: Client) => client.full_name === clientName);
+      handleInputChange('clientName', clientName);
+      handleInputChange('clientId', selectedClient?.id || '');
+    } else {
+      handleInputChange('clientName', clientName);
+      handleInputChange('clientId', '');
+    }
   };
+
+  // Type guard for safe client data usage
+  const getValidClients = (): Client[] => {
+    if (Array.isArray(clientsData) && clientsData.length > 0) {
+      // Check if the first item has the expected Client properties
+      const firstItem = clientsData[0];
+      if (typeof firstItem === 'object' && 'id' in firstItem && 'full_name' in firstItem) {
+        return clientsData as Client[];
+      }
+    }
+    return [];
+  };
+
+  const validClients = getValidClients();
 
   const selectedEventType = eventTypes.find(e => e.value === formData.eventType);
   const today = new Date().toISOString().split('T')[0];
@@ -290,8 +314,8 @@ const CreateBooking = () => {
                       <SelectContent className="bg-white border-gray-200 z-50">
                         {clientsLoading ? (
                           <SelectItem value="loading" disabled>Loading clients...</SelectItem>
-                        ) : clientsData && clientsData.length > 0 ? (
-                          (clientsData as Client[]).map((client: Client) => (
+                        ) : validClients.length > 0 ? (
+                          validClients.map((client: Client) => (
                             <SelectItem key={client.id} value={client.full_name} className="hover:bg-blue-50">
                               <div className="flex items-center">
                                 <User className="h-4 w-4 mr-2 text-blue-600" />
