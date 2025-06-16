@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -18,7 +19,7 @@ export const AddClientModal = ({ open, onOpenChange, onClientAdded }: AddClientM
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [tier, setTier] = useState('');
+  const [eventType, setEventType] = useState('');
   const [company, setCompany] = useState('');
   const { toast } = useToast();
 
@@ -27,11 +28,11 @@ export const AddClientModal = ({ open, onOpenChange, onClientAdded }: AddClientM
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Adding client:', { name, email, phone, tier, company });
+    console.log('Adding client:', { name, email, phone, eventType, company });
     
     toast({
       title: "Client Added",
-      description: `${name} has been added to your VIP client database.`,
+      description: `${name} has been added to your VVIP client database.`,
     });
 
     // Call the onClientAdded callback if provided
@@ -43,7 +44,7 @@ export const AddClientModal = ({ open, onOpenChange, onClientAdded }: AddClientM
     setName('');
     setEmail('');
     setPhone('');
-    setTier('');
+    setEventType('');
     setCompany('');
     setIsOpen(false);
   };
@@ -52,7 +53,7 @@ export const AddClientModal = ({ open, onOpenChange, onClientAdded }: AddClientM
     setName('');
     setEmail('');
     setPhone('');
-    setTier('');
+    setEventType('');
     setCompany('');
     setIsOpen(false);
   };
@@ -69,7 +70,7 @@ export const AddClientModal = ({ open, onOpenChange, onClientAdded }: AddClientM
       )}
       <DialogContent className="sm:max-w-[500px] vip-glass border-vip-gold/20">
         <DialogHeader>
-          <DialogTitle className="text-vip-black text-xl font-semibold">Add New VIP Client</DialogTitle>
+          <DialogTitle className="text-vip-black text-xl font-semibold">Add New VVIP Client</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6 mt-4">
           <div className="space-y-2">
@@ -116,18 +117,24 @@ export const AddClientModal = ({ open, onOpenChange, onClientAdded }: AddClientM
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="tier" className="text-sm font-medium text-vip-black">
-              Client Tier *
+            <Label htmlFor="eventType" className="text-sm font-medium text-vip-black">
+              Event Type *
             </Label>
-            <Select value={tier} onValueChange={setTier} required>
+            <Select value={eventType} onValueChange={setEventType} required>
               <SelectTrigger className="w-full border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black">
-                <SelectValue placeholder="Select client tier" />
+                <SelectValue placeholder="Select event type" />
               </SelectTrigger>
               <SelectContent className="bg-white border-vip-gold/30">
-                <SelectItem value="vvip" className="hover:bg-vip-gold/10">VVIP</SelectItem>
-                <SelectItem value="vip" className="hover:bg-vip-gold/10">VIP</SelectItem>
-                <SelectItem value="premium" className="hover:bg-vip-gold/10">Premium</SelectItem>
-                <SelectItem value="standard" className="hover:bg-vip-gold/10">Standard</SelectItem>
+                <SelectItem value="diplomatic-meeting" className="hover:bg-vip-gold/10">Diplomatic Meeting</SelectItem>
+                <SelectItem value="corporate-event" className="hover:bg-vip-gold/10">Corporate Event</SelectItem>
+                <SelectItem value="government-protocol" className="hover:bg-vip-gold/10">Government Protocol</SelectItem>
+                <SelectItem value="state-reception" className="hover:bg-vip-gold/10">State Reception</SelectItem>
+                <SelectItem value="business-summit" className="hover:bg-vip-gold/10">Business Summit</SelectItem>
+                <SelectItem value="cultural-exchange" className="hover:bg-vip-gold/10">Cultural Exchange</SelectItem>
+                <SelectItem value="charity-gala" className="hover:bg-vip-gold/10">Charity Gala</SelectItem>
+                <SelectItem value="award-ceremony" className="hover:bg-vip-gold/10">Award Ceremony</SelectItem>
+                <SelectItem value="executive-retreat" className="hover:bg-vip-gold/10">Executive Retreat</SelectItem>
+                <SelectItem value="international-conference" className="hover:bg-vip-gold/10">International Conference</SelectItem>
               </SelectContent>
             </Select>
           </div>

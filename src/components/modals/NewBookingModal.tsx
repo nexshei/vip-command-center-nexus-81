@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 export const NewBookingModal = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [clientName, setClientName] = useState('');
-  const [service, setService] = useState('');
+  const [eventType, setEventType] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [notes, setNotes] = useState('');
@@ -20,7 +20,7 @@ export const NewBookingModal = () => {
 
   const resetFormAndClose = () => {
     setClientName('');
-    setService('');
+    setEventType('');
     setDate('');
     setTime('');
     setNotes('');
@@ -29,11 +29,11 @@ export const NewBookingModal = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Creating booking:', { clientName, service, date, time, notes });
+    console.log('Creating booking:', { clientName, eventType, date, time, notes });
     
     toast({
       title: "Booking Created",
-      description: `VIP booking for ${clientName} has been scheduled successfully.`,
+      description: `VVIP booking for ${clientName} has been scheduled successfully.`,
     });
 
     resetFormAndClose();
@@ -49,7 +49,7 @@ export const NewBookingModal = () => {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px] vip-glass border-vip-gold/20">
         <DialogHeader>
-          <DialogTitle className="text-vip-black text-xl font-semibold">Create New VIP Booking</DialogTitle>
+          <DialogTitle className="text-vip-black text-xl font-semibold">Create New VVIP Booking</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6 mt-4">
           <div className="space-y-2">
@@ -64,16 +64,22 @@ export const NewBookingModal = () => {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="service" className="text-sm font-medium text-vip-black">Service Type *</Label>
-            <Select value={service} onValueChange={setService} required>
+            <Label htmlFor="eventType" className="text-sm font-medium text-vip-black">Event Type *</Label>
+            <Select value={eventType} onValueChange={setEventType} required>
               <SelectTrigger className="w-full border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black">
-                <SelectValue placeholder="Select service" />
+                <SelectValue placeholder="Select event type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="consultation">VIP Consultation</SelectItem>
-                <SelectItem value="protocol">Protocol Service</SelectItem>
-                <SelectItem value="event">Event Management</SelectItem>
-                <SelectItem value="concierge">Concierge Service</SelectItem>
+                <SelectItem value="diplomatic-meeting">Diplomatic Meeting</SelectItem>
+                <SelectItem value="corporate-event">Corporate Event</SelectItem>
+                <SelectItem value="government-protocol">Government Protocol</SelectItem>
+                <SelectItem value="state-reception">State Reception</SelectItem>
+                <SelectItem value="business-summit">Business Summit</SelectItem>
+                <SelectItem value="cultural-exchange">Cultural Exchange</SelectItem>
+                <SelectItem value="charity-gala">Charity Gala</SelectItem>
+                <SelectItem value="award-ceremony">Award Ceremony</SelectItem>
+                <SelectItem value="executive-retreat">Executive Retreat</SelectItem>
+                <SelectItem value="international-conference">International Conference</SelectItem>
               </SelectContent>
             </Select>
           </div>

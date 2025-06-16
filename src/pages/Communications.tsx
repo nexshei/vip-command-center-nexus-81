@@ -15,10 +15,6 @@ const Communications = () => {
           <h1 className="text-3xl font-serif font-bold text-vip-black">Communications</h1>
           <p className="text-vip-gold/80 mt-2">Client communications and campaign management</p>
         </div>
-        <Button className="bg-vip-gold text-white hover:bg-vip-gold-dark">
-          <Send className="h-4 w-4 mr-2" />
-          New Campaign
-        </Button>
       </div>
 
       <div className="grid gap-6 md:grid-cols-4">
@@ -96,7 +92,7 @@ const Communications = () => {
           <CardContent>
             <div className="space-y-4">
               {[
-                { name: 'VIP Event Invitation', sent: '234 recipients', status: 'Active', rate: '92.1%' },
+                { name: 'VVIP Event Invitation', sent: '234 recipients', status: 'Active', rate: '92.1%' },
                 { name: 'Monthly Newsletter', sent: '847 recipients', status: 'Completed', rate: '85.7%' },
                 { name: 'Service Update', sent: '156 recipients', status: 'Draft', rate: '-' },
               ].map((campaign, index) => (

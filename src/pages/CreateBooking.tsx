@@ -13,7 +13,7 @@ import { useNavigate } from 'react-router-dom';
 
 const CreateBooking = () => {
   const [clientName, setClientName] = useState('');
-  const [service, setService] = useState('');
+  const [eventType, setEventType] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [notes, setNotes] = useState('');
@@ -30,18 +30,23 @@ const CreateBooking = () => {
     'Ambassador Stevens'
   ];
 
-  const serviceTypes = [
-    { value: 'consultation', label: 'VIP Consultation', price: 'KSH 50,000' },
-    { value: 'protocol', label: 'Protocol Service', price: 'KSH 75,000' },
-    { value: 'event', label: 'Event Management', price: 'KSH 150,000' },
-    { value: 'concierge', label: 'Concierge Service', price: 'KSH 25,000' },
-    { value: 'diplomatic', label: 'Diplomatic Protocol', price: 'KSH 200,000' },
+  const eventTypes = [
+    { value: 'diplomatic-meeting', label: 'Diplomatic Meeting', price: 'KSH 75,000' },
+    { value: 'corporate-event', label: 'Corporate Event', price: 'KSH 150,000' },
+    { value: 'government-protocol', label: 'Government Protocol', price: 'KSH 200,000' },
+    { value: 'state-reception', label: 'State Reception', price: 'KSH 300,000' },
+    { value: 'business-summit', label: 'Business Summit', price: 'KSH 250,000' },
+    { value: 'cultural-exchange', label: 'Cultural Exchange', price: 'KSH 100,000' },
+    { value: 'charity-gala', label: 'Charity Gala', price: 'KSH 180,000' },
+    { value: 'award-ceremony', label: 'Award Ceremony', price: 'KSH 120,000' },
+    { value: 'executive-retreat', label: 'Executive Retreat', price: 'KSH 220,000' },
+    { value: 'international-conference', label: 'International Conference', price: 'KSH 350,000' },
   ];
 
   const validateForm = () => {
     const errors = [];
     if (!clientName) errors.push('Client name is required');
-    if (!service) errors.push('Service type is required');
+    if (!eventType) errors.push('Event type is required');
     if (!date) errors.push('Date is required');
     if (!time) errors.push('Time is required');
     
@@ -73,12 +78,12 @@ const CreateBooking = () => {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500));
 
-    const selectedService = serviceTypes.find(s => s.value === service);
-    console.log('Creating booking:', { clientName, service, date, time, notes, selectedService });
+    const selectedEventType = eventTypes.find(s => s.value === eventType);
+    console.log('Creating booking:', { clientName, eventType, date, time, notes, selectedEventType });
     
     toast({
       title: "Booking Created Successfully",
-      description: `VIP booking for ${clientName} has been scheduled for ${new Date(date).toLocaleDateString()} at ${time}.`,
+      description: `VVIP booking for ${clientName} has been scheduled for ${new Date(date).toLocaleDateString()} at ${time}.`,
     });
 
     setIsSubmitting(false);
@@ -86,7 +91,7 @@ const CreateBooking = () => {
   };
 
   const handleCancel = () => {
-    if (clientName || service || date || time || notes) {
+    if (clientName || eventType || date || time || notes) {
       if (confirm('Are you sure you want to cancel? All unsaved changes will be lost.')) {
         navigate('/bookings');
       }
@@ -109,7 +114,7 @@ const CreateBooking = () => {
     });
   };
 
-  const selectedService = serviceTypes.find(s => s.value === service);
+  const selectedEventType = eventTypes.find(s => s.value === eventType);
 
   // Set minimum date to today
   const today = new Date().toISOString().split('T')[0];
@@ -119,7 +124,7 @@ const CreateBooking = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-vip-black">Create New VIP Booking</h1>
+          <h1 className="text-3xl font-serif font-bold text-vip-black">Create New VVIP Booking</h1>
           <p className="text-vip-gold/80 mt-2">Schedule a new appointment or protocol service</p>
         </div>
         <div className="text-right">
@@ -177,34 +182,34 @@ const CreateBooking = () => {
               )}
             </div>
 
-            {/* Service Type */}
+            {/* Event Type */}
             <div className="space-y-2">
-              <Label htmlFor="service" className="text-sm font-medium text-vip-black">
-                Service Type *
+              <Label htmlFor="eventType" className="text-sm font-medium text-vip-black">
+                Event Type *
               </Label>
-              <Select value={service} onValueChange={setService}>
+              <Select value={eventType} onValueChange={setEventType}>
                 <SelectTrigger className="border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black">
-                  <SelectValue placeholder="Select service type" />
+                  <SelectValue placeholder="Select event type" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-vip-gold/30 z-50">
-                  {serviceTypes.map((serviceType) => (
-                    <SelectItem key={serviceType.value} value={serviceType.value} className="hover:bg-vip-gold/10">
+                  {eventTypes.map((event) => (
+                    <SelectItem key={event.value} value={event.value} className="hover:bg-vip-gold/10">
                       <div className="flex justify-between items-center w-full">
-                        <span>{serviceType.label}</span>
-                        <span className="text-vip-gold font-semibold ml-4">{serviceType.price}</span>
+                        <span>{event.label}</span>
+                        <span className="text-vip-gold font-semibold ml-4">{event.price}</span>
                       </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              {selectedService && (
+              {selectedEventType && (
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center text-ios-green">
                     <CheckCircle className="h-3 w-3 mr-1" />
-                    Service selected: {selectedService.label}
+                    Event selected: {selectedEventType.label}
                   </div>
                   <div className="text-vip-gold font-semibold">
-                    Estimated cost: {selectedService.price}
+                    Estimated cost: {selectedEventType.price}
                   </div>
                 </div>
               )}
