@@ -13,9 +13,7 @@ import {
   FileText, 
   Download, 
   Settings,
-  Crown,
-  Zap,
-  BarChart3
+  Zap
 } from 'lucide-react';
 
 const QuickActions = () => {
@@ -25,15 +23,43 @@ const QuickActions = () => {
   
   const superAdminActions = [
     {
-      title: "Create VVIP Booking",
-      description: "Schedule new protocol service",
+      title: "New Booking",
+      description: "Create VVIP appointment",
       icon: Plus,
       action: () => navigate('/create-booking'),
-      className: "professional-button"
+      primary: true
     },
     {
-      title: "Export Analytics",
-      description: "Download monthly reports",
+      title: "View Calendar",
+      description: "Check schedule",
+      icon: Calendar,
+      action: () => navigate('/bookings'),
+      primary: false
+    },
+    {
+      title: "Manage Clients",
+      description: "Client directory",
+      icon: Users,
+      action: () => navigate('/clients'),
+      primary: false
+    },
+    {
+      title: "Send Message",
+      description: "Communication",
+      icon: Mail,
+      action: () => navigate('/communications'),
+      primary: false
+    },
+    {
+      title: "Generate Quote",
+      description: "Create estimate",
+      icon: FileText,
+      action: () => navigate('/generate-quote'),
+      primary: false
+    },
+    {
+      title: "Export Data",
+      description: "Download reports",
       icon: Download,
       action: () => {
         const csvContent = "data:text/csv;charset=utf-8,Date,Revenue,Bookings,Clients\n2024-01,KSH 8900000,24,156\n2024-02,KSH 9200000,28,162";
@@ -46,108 +72,72 @@ const QuickActions = () => {
         document.body.removeChild(link);
         toast({
           title: "Export Complete",
-          description: "Analytics report has been downloaded successfully.",
+          description: "Report downloaded successfully.",
         });
       },
-      className: "bg-black text-vip-gold hover:bg-gray-800 border border-vip-gold/30"
-    },
-    {
-      title: "System Health",
-      description: "Monitor platform status",
-      icon: BarChart3,
-      action: () => navigate('/analytics'),
-      className: "bg-white text-black border-2 border-black hover:bg-black hover:text-white"
-    },
-    {
-      title: "Global Settings",
-      description: "Configure system parameters",
-      icon: Settings,
-      action: () => navigate('/settings'),
-      className: "professional-button-outline"
+      primary: false
     }
   ];
 
   const protocolAdminActions = [
     {
       title: "New Booking",
-      description: "Create VVIP appointment",
-      icon: Calendar,
+      description: "Create appointment",
+      icon: Plus,
       action: () => navigate('/create-booking'),
-      className: "professional-button"
+      primary: true
     },
     {
-      title: "Client Check-in",
-      description: "Process arrival protocols",
+      title: "View Schedule",
+      description: "Today's events",
+      icon: Calendar,
+      action: () => navigate('/bookings'),
+      primary: false
+    },
+    {
+      title: "Client Directory",
+      description: "Manage clients",
       icon: Users,
       action: () => navigate('/clients'),
-      className: "bg-black text-vip-gold hover:bg-gray-800 border border-vip-gold/30"
+      primary: false
     },
     {
-      title: "Send Communication",
-      description: "Email/SMS to clients",
+      title: "Send Message",
+      description: "Communications",
       icon: Mail,
       action: () => navigate('/communications'),
-      className: "bg-white text-black border-2 border-black hover:bg-black hover:text-white"
-    },
-    {
-      title: "Generate Report",
-      description: "Create service summary",
-      icon: FileText,
-      action: () => {
-        const reportContent = `
-          Sir Ole VVIP Protocol Report
-          Generated: ${new Date().toLocaleDateString()}
-          
-          Summary:
-          - Active Bookings: 24
-          - Revenue: KSH 8,900,000
-          - Client Satisfaction: 4.9/5
-          - Protocols Completed: 156
-        `;
-        const blob = new Blob([reportContent], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'vvip_protocol_report.txt';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        toast({
-          title: "Report Generated",
-          description: "Protocol report has been downloaded successfully.",
-        });
-      },
-      className: "professional-button-outline"
+      primary: false
     }
   ];
 
   const actions = user?.role === 'super_admin' ? superAdminActions : protocolAdminActions;
 
   return (
-    <Card className="professional-card">
-      <CardHeader className="border-b border-gray-100">
-        <CardTitle className="text-xl font-serif text-vip-black flex items-center">
-          <Zap className="h-5 w-5 mr-2 text-vip-gold animate-professional-pulse" />
+    <Card className="bg-white shadow-sm">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg text-gray-900 flex items-center">
+          <Zap className="h-5 w-5 mr-2 text-vip-gold" />
           Quick Actions
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-6">
-        <div className="grid gap-4 md:grid-cols-2">
+      <CardContent>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {actions.map((action, index) => (
             <Button
               key={action.title}
               onClick={action.action}
-              className={`${action.className} h-auto p-6 flex flex-col items-start space-y-3 transition-all duration-300 vip-hover-lift group animate-fade-in-up`}
-              style={{ animationDelay: `${index * 0.1}s` }}
+              variant={action.primary ? "default" : "outline"}
+              className={`h-auto p-4 flex flex-col items-start space-y-2 transition-all duration-200 ${
+                action.primary 
+                  ? 'bg-vip-gold text-black hover:bg-vip-gold/90' 
+                  : 'border-gray-200 hover:bg-gray-50'
+              }`}
             >
-              <div className="flex items-center space-x-3 w-full">
-                <div className="p-2 rounded-lg bg-black/10 group-hover:bg-black/20 transition-colors">
-                  <action.icon className="h-5 w-5" />
-                </div>
-                <span className="font-semibold text-left">{action.title}</span>
+              <div className="flex items-center space-x-2 w-full">
+                <action.icon className="h-4 w-4" />
+                <span className="font-medium text-sm">{action.title}</span>
               </div>
-              <span className="text-sm opacity-80 text-left w-full">{action.description}</span>
+              <span className="text-xs opacity-70 text-left w-full">{action.description}</span>
             </Button>
           ))}
         </div>
