@@ -250,16 +250,20 @@ const CreateBooking = () => {
 
   // Type guard for safe client data usage
   const getValidClients = (): Client[] => {
-    if (Array.isArray(clientsData) && clientsData.length > 0) {
-      // Check if the first item has the expected Client properties
-      const firstItem = clientsData[0];
-      if (firstItem != null && typeof firstItem === 'object') {
-        // Additional type checking with proper null handling
-        if ('id' in firstItem && 'full_name' in firstItem) {
-          return clientsData as unknown as Client[];
-        }
-      }
+    if (!Array.isArray(clientsData) || clientsData.length === 0) {
+      return [];
     }
+    
+    const firstItem = clientsData[0];
+    if (!firstItem || typeof firstItem !== 'object') {
+      return [];
+    }
+    
+    // Check if the first item has the expected Client properties
+    if ('id' in firstItem && 'full_name' in firstItem) {
+      return clientsData as unknown as Client[];
+    }
+    
     return [];
   };
 
