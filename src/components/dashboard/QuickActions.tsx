@@ -25,7 +25,7 @@ const QuickActions = () => {
   
   const superAdminActions = [
     {
-      title: "Create VIP Booking",
+      title: "Create VVIP Booking",
       description: "Schedule new protocol service",
       icon: Plus,
       action: () => navigate('/create-booking'),
@@ -40,7 +40,7 @@ const QuickActions = () => {
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "vip_analytics.csv");
+        link.setAttribute("download", "vvip_analytics.csv");
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -70,7 +70,7 @@ const QuickActions = () => {
   const protocolAdminActions = [
     {
       title: "New Booking",
-      description: "Create VIP appointment",
+      description: "Create VVIP appointment",
       icon: Calendar,
       action: () => navigate('/create-booking'),
       className: "professional-button"
@@ -108,7 +108,7 @@ const QuickActions = () => {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = 'vip_protocol_report.txt';
+        link.download = 'vvip_protocol_report.txt';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);

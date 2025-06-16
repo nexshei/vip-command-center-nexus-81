@@ -47,9 +47,9 @@ const Clients = () => {
   // Calculate counts for stats cards using live data
   const totalClients = (clients || []).length;
   // Identify tiers based on client notes or company (adjust logic if needed)
-  const vipTierCount = (clients || []).filter((client: any) =>
-    (client.notes || '').toLowerCase().includes('vip') ||
-    (client.company || '').toLowerCase().includes('vip')
+  const vvipTierCount = (clients || []).filter((client: any) =>
+    (client.notes || '').toLowerCase().includes('vvip') ||
+    (client.company || '').toLowerCase().includes('vvip')
   ).length;
   const premiumTierCount = (clients || []).filter((client: any) =>
     (client.notes || '').toLowerCase().includes('premium') ||
@@ -66,7 +66,7 @@ const Clients = () => {
   const getTierColor = (tier: string) => {
     if (!tier) return 'bg-gray-500 text-white';
     const t = tier.toLowerCase();
-    if (t.includes('vip')) return 'bg-vip-gold text-black';
+    if (t.includes('vvip')) return 'bg-vip-gold text-black';
     if (t.includes('premium')) return 'bg-ios-purple text-white';
     return 'bg-gray-500 text-white';
   };
@@ -76,7 +76,7 @@ const Clients = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-serif font-bold text-vip-black">Client Management</h1>
-          <p className="text-vip-gold/80 mt-2">VIP client profiles and relationship management</p>
+          <p className="text-vip-gold/80 mt-2">VVIP client profiles and relationship management</p>
         </div>
         <div className="flex space-x-3">
           <div className="relative">
@@ -108,13 +108,13 @@ const Clients = () => {
         </Card>
         <Card 
           className="vip-glass border-vip-gold/20 cursor-pointer hover:bg-vip-gold/5 transition-colors"
-          onClick={() => handleStatsCardClick("VIP Tier")}
+          onClick={() => handleStatsCardClick("VVIP Tier")}
         >
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">VIP Tier</CardTitle>
+            <CardTitle className="text-sm font-medium text-vip-gold/80">VVIP Tier</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-black">{vipTierCount + premiumTierCount}</div>
+            <div className="text-2xl font-bold text-vip-black">{vvipTierCount + premiumTierCount}</div>
             <p className="text-xs text-vip-gold/60">Premium clients</p>
           </CardContent>
         </Card>
@@ -178,8 +178,8 @@ const Clients = () => {
                     <div className="flex items-center space-x-3">
                       <h3 className="font-semibold text-vip-black">{client.full_name || 'Unknown'}</h3>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTierColor(client.notes || client.company || '')}`}>
-                        {/* Simple heuristic: notes/company may mention VIP/Premium */}
-                        {(/vip/i.test(client.notes) || /vip/i.test(client.company)) ? 'VIP'
+                        {/* Simple heuristic: notes/company may mention VVIP/Premium */}
+                        {(/vvip/i.test(client.notes) || /vvip/i.test(client.company)) ? 'VVIP'
                           : /premium/i.test(client.notes) || /premium/i.test(client.company) ? 'Premium'
                           : 'Standard'}
                       </span>

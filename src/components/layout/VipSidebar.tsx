@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -79,7 +80,7 @@ const VipSidebar = () => {
       icon: UserCheck,
     },
     {
-      title: "VIP Subscriptions",
+      title: "VVIP Subscriptions",
       url: "/subscriptions",
       icon: CreditCard,
     },

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,17 +8,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Search, Plus, Users, Phone, Mail, Eye, Edit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { AddStaffModal } from '@/components/modals/AddStaffModal';
+import { useRealtimeQuery } from "@/hooks/useRealtimeQuery";
 
 interface StaffMember {
   id: string;
-  name: string;
+  full_name: string;
   role: string;
-  department: string;
-  status: 'active' | 'on-leave' | 'inactive';
-  phone: string;
   email: string;
-  avatar?: string;
-  joinDate: string;
+  phone: string;
+  status: 'active' | 'on-leave' | 'inactive';
+  notes?: string;
+  created_at: string;
 }
 
 const Staff = () => {
@@ -27,72 +28,83 @@ const Staff = () => {
   const [addModalOpen, setAddModalOpen] = useState(false);
   const { toast } = useToast();
 
-  const [staffMembers, setStaffMembers] = useState<StaffMember[]>([
+  // Fetch live data from Supabase "staff" table
+  const { data: staffData, isLoading, error } = useRealtimeQuery("staff", { orderBy: "created_at" });
+
+  // Mock data for fallback
+  const mockStaffMembers = [
     {
       id: '1',
-      name: 'Margaret Wanjiku',
+      full_name: 'Margaret Wanjiku',
       role: 'Protocol Officer',
-      department: 'Protocol',
-      status: 'active',
-      phone: '+254 701 234 567',
       email: 'margaret@sirolele.com',
-      joinDate: '2023-01-15'
+      phone: '+254 701 234 567',
+      status: 'active' as const,
+      notes: 'Protocol department',
+      created_at: '2023-01-15'
     },
     {
       id: '2',
-      name: 'David Kimani',
+      full_name: 'David Kimani',
       role: 'Security Lead',
-      department: 'Security',
-      status: 'active',
-      phone: '+254 702 345 678',
       email: 'david@sirolele.com',
-      joinDate: '2022-11-20'
+      phone: '+254 702 345 678',
+      status: 'active' as const,
+      notes: 'Security department',
+      created_at: '2022-11-20'
     },
     {
       id: '3',
-      name: 'Grace Muthoni',
+      full_name: 'Grace Muthoni',
       role: 'Event Coordinator',
-      department: 'Events',
-      status: 'on-leave',
-      phone: '+254 703 456 789',
       email: 'grace@sirolele.com',
-      joinDate: '2023-03-10'
+      phone: '+254 703 456 789',
+      status: 'on-leave' as const,
+      notes: 'Events department',
+      created_at: '2023-03-10'
     },
     {
       id: '4',
-      name: 'John Ochieng',
+      full_name: 'John Ochieng',
       role: 'Transport Manager',
-      department: 'Logistics',
-      status: 'active',
-      phone: '+254 704 567 890',
       email: 'john@sirolele.com',
-      joinDate: '2022-08-05'
+      phone: '+254 704 567 890',
+      status: 'active' as const,
+      notes: 'Logistics department',
+      created_at: '2022-08-05'
     },
     {
       id: '5',
-      name: 'Susan Akinyi',
+      full_name: 'Susan Akinyi',
       role: 'Communications Lead',
-      department: 'Marketing',
-      status: 'active',
-      phone: '+254 705 678 901',
       email: 'susan@sirolele.com',
-      joinDate: '2023-05-22'
+      phone: '+254 705 678 901',
+      status: 'active' as const,
+      notes: 'Marketing department',
+      created_at: '2023-05-22'
     },
     {
       id: '6',
-      name: 'Peter Mutua',
+      full_name: 'Peter Mutua',
       role: 'Protocol Assistant',
-      department: 'Protocol',
-      status: 'inactive',
-      phone: '+254 706 789 012',
       email: 'peter@sirolele.com',
-      joinDate: '2022-12-01'
+      phone: '+254 706 789 012',
+      status: 'inactive' as const,
+      notes: 'Protocol department',
+      created_at: '2022-12-01'
     },
-  ]);
+  ];
+
+  // Use real data if available, otherwise use mock data
+  const staffMembers = staffData && staffData.length > 0 ? staffData.map((staff: any) => ({
+    ...staff,
+    // Ensure status is one of the expected values
+    status: ['active', 'on-leave', 'inactive'].includes(staff.status) ? staff.status : 'active'
+  })) : mockStaffMembers;
 
   const totalStaff = staffMembers.length;
-  const activeStaff = staffMembers.filter(staff => staff.status === 'active').length;
-  const onLeaveStaff = staffMembers.filter(staff => staff.status === 'on-leave').length;
+  const activeStaff = staffMembers.filter((staff: StaffMember) => staff.status === 'active').length;
+  const onLeaveStaff = staffMembers.filter((staff: StaffMember) => staff.status === 'on-leave').length;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -107,10 +119,21 @@ const Staff = () => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
 
-  const filteredStaff = staffMembers.filter(staff => {
-    const matchesSearch = staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  const getDepartment = (role: string, notes?: string) => {
+    if (notes) return notes;
+    if (role.toLowerCase().includes('protocol')) return 'Protocol';
+    if (role.toLowerCase().includes('security')) return 'Security';
+    if (role.toLowerCase().includes('event')) return 'Events';
+    if (role.toLowerCase().includes('transport')) return 'Logistics';
+    if (role.toLowerCase().includes('communication')) return 'Marketing';
+    return 'General';
+  };
+
+  const filteredStaff = staffMembers.filter((staff: StaffMember) => {
+    const department = getDepartment(staff.role, staff.notes);
+    const matchesSearch = staff.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          staff.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         staff.department.toLowerCase().includes(searchTerm.toLowerCase());
+                         department.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRole = roleFilter === 'all' || staff.role.toLowerCase().includes(roleFilter.toLowerCase());
     const matchesStatus = statusFilter === 'all' || staff.status === statusFilter;
     return matchesSearch && matchesRole && matchesStatus;
@@ -121,10 +144,15 @@ const Staff = () => {
   };
 
   const handleStaffAdded = (newStaff: StaffMember) => {
-    setStaffMembers([...staffMembers, newStaff]);
+    // The real-time query will automatically update the data
+    toast({
+      title: "Staff Added",
+      description: "New staff member has been added successfully.",
+    });
   };
 
   const handleViewProfile = (staffId: string) => {
+    console.log('Viewing profile for staff:', staffId);
     toast({
       title: "View Profile",
       description: "Opening staff member profile...",
@@ -132,6 +160,7 @@ const Staff = () => {
   };
 
   const handleEditStaff = (staffId: string) => {
+    console.log('Editing staff:', staffId);
     toast({
       title: "Edit Staff",
       description: "Opening edit form for staff member...",
@@ -139,6 +168,7 @@ const Staff = () => {
   };
 
   const handleContact = (phone: string) => {
+    console.log('Calling:', phone);
     toast({
       title: "Calling",
       description: `Dialing ${phone}...`,
@@ -150,8 +180,8 @@ const Staff = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-white">Staff Directory</h1>
-          <p className="text-vip-gold/80 mt-2">Manage VIP protocol team members and assignments</p>
+          <h1 className="text-3xl font-serif font-bold text-vip-black">Staff Directory</h1>
+          <p className="text-vip-gold/80 mt-2">Manage VVIP protocol team members and assignments</p>
         </div>
         <Button onClick={handleAddStaff} className="bg-vip-gold text-black hover:bg-vip-gold-dark">
           <Plus className="h-4 w-4 mr-2" />
@@ -166,7 +196,7 @@ const Staff = () => {
             <CardTitle className="text-sm font-medium text-vip-gold/80">Total Staff Members</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">{totalStaff}</div>
+            <div className="text-2xl font-bold text-vip-black">{totalStaff}</div>
             <p className="text-xs text-vip-gold/60">Team members</p>
           </CardContent>
         </Card>
@@ -176,7 +206,7 @@ const Staff = () => {
             <CardTitle className="text-sm font-medium text-vip-gold/80">Active Staff</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">{activeStaff}</div>
+            <div className="text-2xl font-bold text-vip-black">{activeStaff}</div>
             <p className="text-xs text-ios-green">Currently working</p>
           </CardContent>
         </Card>
@@ -186,7 +216,7 @@ const Staff = () => {
             <CardTitle className="text-sm font-medium text-vip-gold/80">On Leave</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">{onLeaveStaff}</div>
+            <div className="text-2xl font-bold text-vip-black">{onLeaveStaff}</div>
             <p className="text-xs text-ios-orange">Temporarily away</p>
           </CardContent>
         </Card>
@@ -195,7 +225,7 @@ const Staff = () => {
       {/* Search & Filters */}
       <Card className="vip-glass border-vip-gold/20">
         <CardHeader>
-          <CardTitle className="text-white">Search & Filter Staff</CardTitle>
+          <CardTitle className="text-vip-black">Search & Filter Staff</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-4">
@@ -245,25 +275,35 @@ const Staff = () => {
       {/* Staff Directory */}
       <Card className="vip-glass border-vip-gold/20">
         <CardHeader>
-          <CardTitle className="flex items-center text-white">
+          <CardTitle className="flex items-center text-vip-black">
             <Users className="h-5 w-5 mr-2 text-vip-gold" />
             Staff Members ({filteredStaff.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
+          {isLoading && (
+            <div className="text-center py-8">
+              <p className="text-vip-gold/60">Loading staff...</p>
+            </div>
+          )}
+          {error && (
+            <div className="text-center py-8">
+              <p className="text-vip-red">{error.message}</p>
+            </div>
+          )}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {filteredStaff.map((staff) => (
+            {filteredStaff.map((staff: StaffMember) => (
               <div key={staff.id} className="p-4 border border-vip-gold/20 rounded-lg vip-glass-light hover:bg-vip-gold/5 transition-colors">
                 <div className="flex items-start space-x-3">
                   <div className="w-12 h-12 bg-vip-gold/20 rounded-full flex items-center justify-center flex-shrink-0">
                     <span className="text-vip-gold font-semibold text-sm">
-                      {getInitials(staff.name)}
+                      {getInitials(staff.full_name)}
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-white truncate">{staff.name}</h3>
+                    <h3 className="font-semibold text-vip-black truncate">{staff.full_name}</h3>
                     <p className="text-sm text-vip-gold/80">{staff.role}</p>
-                    <p className="text-xs text-vip-gold/60">{staff.department}</p>
+                    <p className="text-xs text-vip-gold/60">{getDepartment(staff.role, staff.notes)}</p>
                     
                     <div className="mt-2">
                       <Badge className={`${getStatusColor(staff.status)} text-xs`}>
@@ -273,11 +313,11 @@ const Staff = () => {
                     </div>
                     
                     <div className="mt-3 space-y-1">
-                      <div className="flex items-center text-xs text-vip-gold/70">
+                      <div className="flex items-center text-xs text-vip-black">
                         <Phone className="h-3 w-3 mr-1" />
                         <span className="truncate">{staff.phone}</span>
                       </div>
-                      <div className="flex items-center text-xs text-vip-gold/70">
+                      <div className="flex items-center text-xs text-vip-black">
                         <Mail className="h-3 w-3 mr-1" />
                         <span className="truncate">{staff.email}</span>
                       </div>
@@ -315,6 +355,11 @@ const Staff = () => {
                 </div>
               </div>
             ))}
+            {!isLoading && filteredStaff.length === 0 && (
+              <div className="col-span-full text-center py-8">
+                <p className="text-vip-gold/60">No staff members found matching your search.</p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

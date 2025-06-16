@@ -34,7 +34,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
       <div className="min-h-screen flex items-center justify-center vip-gradient">
         <div className="text-center text-white">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p className="text-lg font-serif">Loading VIP Dashboard...</p>
+          <p className="text-lg font-serif">Loading VVIP Dashboard...</p>
         </div>
       </div>
     );
