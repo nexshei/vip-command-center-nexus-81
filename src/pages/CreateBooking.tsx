@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -252,8 +253,8 @@ const CreateBooking = () => {
     if (Array.isArray(clientsData) && clientsData.length > 0) {
       // Check if the first item has the expected Client properties
       const firstItem = clientsData[0];
-      if (typeof firstItem === 'object' && 'id' in firstItem && 'full_name' in firstItem) {
-        return clientsData as Client[];
+      if (firstItem && typeof firstItem === 'object' && 'id' in firstItem && 'full_name' in firstItem) {
+        return clientsData as unknown as Client[];
       }
     }
     return [];
