@@ -25,6 +25,14 @@ interface BookingFormData {
   duration: number;
 }
 
+interface Client {
+  id: string;
+  full_name: string;
+  email?: string;
+  phone?: string;
+  company?: string;
+}
+
 const CreateBooking = () => {
   const [formData, setFormData] = useState<BookingFormData>({
     clientId: '',
@@ -209,7 +217,7 @@ const CreateBooking = () => {
     }
   };
 
-  const handleClientAdded = (newClient: any) => {
+  const handleClientAdded = (newClient: Client) => {
     setFormData(prev => ({
       ...prev,
       clientId: newClient.id,
@@ -219,6 +227,14 @@ const CreateBooking = () => {
       title: "Client Added",
       description: `${newClient.full_name} has been added to your client list.`,
     });
+  };
+
+  const handleClientSelection = (clientName: string) => {
+    const clients = clientsData as Client[] | undefined;
+    const selectedClient = clients?.find((client: Client) => client.full_name === clientName);
+    
+    handleInputChange('clientName', clientName);
+    handleInputChange('clientId', selectedClient?.id || '');
   };
 
   const selectedEventType = eventTypes.find(e => e.value === formData.eventType);
@@ -266,11 +282,7 @@ const CreateBooking = () => {
                   <div className="flex-1">
                     <Select 
                       value={formData.clientName} 
-                      onValueChange={(value) => {
-                        const selectedClient = clientsData?.find((client: any) => client.full_name === value);
-                        handleInputChange('clientName', value);
-                        handleInputChange('clientId', selectedClient?.id || '');
-                      }}
+                      onValueChange={handleClientSelection}
                     >
                       <SelectTrigger className={`bg-white border-gray-300 ${validationErrors.clientName ? 'border-red-500' : 'focus:border-blue-500'}`}>
                         <SelectValue placeholder="Select existing client or add new" />
@@ -279,7 +291,7 @@ const CreateBooking = () => {
                         {clientsLoading ? (
                           <SelectItem value="loading" disabled>Loading clients...</SelectItem>
                         ) : clientsData && clientsData.length > 0 ? (
-                          clientsData.map((client: any) => (
+                          (clientsData as Client[]).map((client: Client) => (
                             <SelectItem key={client.id} value={client.full_name} className="hover:bg-blue-50">
                               <div className="flex items-center">
                                 <User className="h-4 w-4 mr-2 text-blue-600" />
@@ -406,7 +418,6 @@ const CreateBooking = () => {
                 </div>
               </div>
 
-              {/* Location */}
               <div className="space-y-2">
                 <Label htmlFor="location" className="text-sm font-medium text-gray-700">
                   Location *
@@ -425,7 +436,6 @@ const CreateBooking = () => {
                 )}
               </div>
 
-              {/* Duration */}
               {selectedEventType && (
                 <div className="space-y-2">
                   <Label htmlFor="duration" className="text-sm font-medium text-gray-700">
@@ -443,7 +453,6 @@ const CreateBooking = () => {
                 </div>
               )}
 
-              {/* Notes */}
               <div className="space-y-2">
                 <Label htmlFor="notes" className="text-sm font-medium text-gray-700">
                   Additional Notes
@@ -461,7 +470,6 @@ const CreateBooking = () => {
                 </p>
               </div>
 
-              {/* Action Buttons */}
               <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
                 <Button 
                   type="button" 
