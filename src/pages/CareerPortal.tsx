@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, Plus, Briefcase, Users, Calendar, ArrowRight, Eye, Edit, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { JobOpeningModalTrigger } from '@/components/modals/JobOpeningModal';
 
 interface JobOpening {
   id: string;
@@ -31,9 +31,7 @@ const CareerPortal = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
-  const { toast } = useToast();
-
-  const jobOpenings: JobOpening[] = [
+  const [jobOpenings, setJobOpenings] = useState<JobOpening[]>([
     {
       id: '1',
       title: 'Senior Protocol Officer',
@@ -45,7 +43,7 @@ const CareerPortal = () => {
     },
     {
       id: '2',
-      title: 'VIP Security Specialist',
+      title: 'VVIP Security Specialist',
       department: 'Security',
       status: 'open',
       applicants: 8,
@@ -70,12 +68,14 @@ const CareerPortal = () => {
       datePosted: '2024-01-20',
       location: 'Nairobi'
     },
-  ];
+  ]);
+
+  const { toast } = useToast();
 
   const applicants: Applicant[] = [
     { id: '1', name: 'Alice Wanjiru', position: 'Senior Protocol Officer', stage: 'new', appliedDate: '2024-01-22', email: 'alice@email.com' },
     { id: '2', name: 'John Mwangi', position: 'Senior Protocol Officer', stage: 'screening', appliedDate: '2024-01-21', email: 'john@email.com' },
-    { id: '3', name: 'Grace Achieng', position: 'VIP Security Specialist', stage: 'interviewing', appliedDate: '2024-01-20', email: 'grace@email.com' },
+    { id: '3', name: 'Grace Achieng', position: 'VVIP Security Specialist', stage: 'interviewing', appliedDate: '2024-01-20', email: 'grace@email.com' },
     { id: '4', name: 'Peter Kiprotich', position: 'Senior Protocol Officer', stage: 'offer-sent', appliedDate: '2024-01-18', email: 'peter@email.com' },
     { id: '5', name: 'Mary Nyokabi', position: 'Event Coordinator', stage: 'hired', appliedDate: '2024-01-15', email: 'mary@email.com' },
     { id: '6', name: 'David Omondi', position: 'Executive Driver', stage: 'rejected', appliedDate: '2024-01-12', email: 'david@email.com' },
@@ -124,6 +124,19 @@ const CareerPortal = () => {
     return matchesSearch && matchesDepartment && matchesStatus;
   });
 
+  const handleJobAdded = (newJob: any) => {
+    const jobOpening: JobOpening = {
+      id: newJob.id,
+      title: newJob.title,
+      department: newJob.department,
+      status: newJob.status as 'open' | 'closed' | 'on-hold',
+      applicants: 0,
+      datePosted: new Date().toISOString().split('T')[0],
+      location: newJob.location
+    };
+    setJobOpenings([...jobOpenings, jobOpening]);
+  };
+
   const handleCreateJob = () => {
     console.log('Creating new job opening');
     toast({
@@ -150,6 +163,7 @@ const CareerPortal = () => {
 
   const handleDeleteJob = (jobId: string) => {
     console.log('Deleting job:', jobId);
+    setJobOpenings(jobOpenings.filter(job => job.id !== jobId));
     toast({
       title: "Delete Job Opening",
       description: "Job opening has been deleted.",
@@ -181,10 +195,7 @@ const CareerPortal = () => {
           <h1 className="text-3xl font-serif font-bold text-vip-black">Career Portal Management</h1>
           <p className="text-vip-gold/80 mt-2">Manage job openings and track recruitment pipeline</p>
         </div>
-        <Button onClick={handleCreateJob} className="bg-vip-gold text-white hover:bg-vip-gold-dark">
-          <Plus className="h-4 w-4 mr-2" />
-          Create New Job Opening
-        </Button>
+        <JobOpeningModalTrigger onJobAdded={handleJobAdded} />
       </div>
 
       {/* Summary Stats */}

@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Plus, Users, Phone, Mail, Eye, Edit } from 'lucide-react';
+import { Search, Plus, Users, Phone, Mail, Eye, Edit, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { AddStaffModal } from '@/components/modals/AddStaffModal';
 import { useRealtimeQuery } from "@/hooks/useRealtimeQuery";
@@ -167,6 +166,15 @@ const Staff = () => {
     });
   };
 
+  const handleDeleteStaff = (staffId: string) => {
+    console.log('Deleting staff:', staffId);
+    toast({
+      title: "Delete Staff Member",
+      description: "Staff member has been removed from the directory.",
+      variant: "destructive"
+    });
+  };
+
   const handleContact = (phone: string) => {
     console.log('Calling:', phone);
     toast({
@@ -323,32 +331,38 @@ const Staff = () => {
                       </div>
                     </div>
                     
-                    <div className="flex space-x-2 mt-3">
+                    <div className="grid grid-cols-4 gap-1 mt-3">
                       <Button 
                         onClick={() => handleViewProfile(staff.id)}
                         variant="outline" 
                         size="sm" 
-                        className="flex-1 border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10 text-xs"
+                        className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10 text-xs px-2"
                       >
-                        <Eye className="h-3 w-3 mr-1" />
-                        View
+                        <Eye className="h-3 w-3" />
                       </Button>
                       <Button 
                         onClick={() => handleEditStaff(staff.id)}
                         variant="outline" 
                         size="sm" 
-                        className="flex-1 border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10 text-xs"
+                        className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10 text-xs px-2"
                       >
-                        <Edit className="h-3 w-3 mr-1" />
-                        Edit
+                        <Edit className="h-3 w-3" />
                       </Button>
                       <Button 
                         onClick={() => handleContact(staff.phone)}
                         variant="outline" 
                         size="sm" 
-                        className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+                        className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10 text-xs px-2"
                       >
                         <Phone className="h-3 w-3" />
+                      </Button>
+                      <Button 
+                        onClick={() => handleDeleteStaff(staff.id)}
+                        variant="outline" 
+                        size="sm" 
+                        className="border-red-300 text-red-600 hover:bg-red-50 text-xs px-2"
+                      >
+                        <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
                   </div>

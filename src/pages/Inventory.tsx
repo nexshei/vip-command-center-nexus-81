@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Plus, Package, AlertTriangle, CheckCircle, Filter, Edit, Eye } from 'lucide-react';
+import { Search, Plus, Package, AlertTriangle, CheckCircle, Filter, Edit, Eye, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRealtimeQuery } from "@/hooks/useRealtimeQuery";
 
@@ -103,6 +102,15 @@ const Inventory = () => {
     toast({
       title: "Item Details",
       description: "Opening detailed view of inventory item...",
+    });
+  };
+
+  const handleDeleteItem = (itemId: string) => {
+    console.log('Deleting item:', itemId);
+    toast({
+      title: "Delete Item",
+      description: "Inventory item has been deleted successfully.",
+      variant: "destructive"
     });
   };
 
@@ -296,6 +304,15 @@ const Inventory = () => {
                       >
                         <Eye className="h-3 w-3 mr-1" />
                         Details
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="border-red-300 text-red-600 hover:bg-red-50"
+                        onClick={() => handleDeleteItem(item.id)}
+                      >
+                        <Trash2 className="h-3 w-3 mr-1" />
+                        Delete
                       </Button>
                     </div>
                   </div>
