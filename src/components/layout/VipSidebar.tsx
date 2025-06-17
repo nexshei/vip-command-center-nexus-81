@@ -33,10 +33,10 @@ export const VipSidebar = () => {
       description: 'Schedule new VVIP events'
     },
     {
-      name: 'Bookings & Quotes',
+      name: 'Events',
       icon: Calendar,
       path: '/bookings',
-      description: 'View and manage all bookings and events'
+      description: 'View and manage all events'
     },
     {
       name: 'List Bookings',
