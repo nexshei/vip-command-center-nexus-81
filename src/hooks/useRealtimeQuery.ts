@@ -24,7 +24,7 @@ export type SupabaseTable =
 
 /**
  * Generic realtime query for a Supabase table.
- * Usage: const { data, isLoading, error } = useRealtimeQuery("bookings")
+ * Usage: const { data, isLoading, error, refetch } = useRealtimeQuery("bookings")
  */
 export function useRealtimeQuery(
   table: SupabaseTable,
@@ -44,7 +44,7 @@ export function useRealtimeQuery(
 
   const queryKey = [table];
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey,
     queryFn: fetchData,
   });
@@ -66,5 +66,5 @@ export function useRealtimeQuery(
     };
   }, [queryClient, table]);
 
-  return { data, isLoading, error };
+  return { data, isLoading, error, refetch };
 }

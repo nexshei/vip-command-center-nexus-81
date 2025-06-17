@@ -12,10 +12,11 @@ import { supabase } from "@/integrations/supabase/client";
 interface AddClientModalProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  onSuccess?: () => void;
   onClientAdded?: (client: any) => void;
 }
 
-export const AddClientModal = ({ open, onOpenChange, onClientAdded }: AddClientModalProps) => {
+export const AddClientModal = ({ open, onOpenChange, onSuccess, onClientAdded }: AddClientModalProps) => {
   const [internalOpen, setInternalOpen] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -74,9 +75,13 @@ export const AddClientModal = ({ open, onOpenChange, onClientAdded }: AddClientM
         description: `${name} has been added to your VVIP client database.`,
       });
 
-      // Call the onClientAdded callback if provided
+      // Call the callbacks if provided
       if (onClientAdded && data) {
         onClientAdded(data);
+      }
+      
+      if (onSuccess) {
+        onSuccess();
       }
 
       // Reset form and close modal
