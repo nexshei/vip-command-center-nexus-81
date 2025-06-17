@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -9,13 +10,11 @@ import LoginForm from "@/components/auth/LoginForm";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import Dashboard from "@/pages/Dashboard";
 import Bookings from "@/pages/Bookings";
-import Clients from "@/pages/Clients";
 import Subscriptions from "@/pages/Subscriptions";
 import Subscribers from "@/pages/Subscribers";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Analytics from "@/pages/Analytics";
-import Communications from "@/pages/Communications";
 import CreateBooking from "@/pages/CreateBooking";
 import GenerateQuote from "@/pages/GenerateQuote";
 import Inventory from "@/pages/Inventory";
@@ -124,11 +123,6 @@ const AppRoutes = () => {
           <Bookings />
         </ProtectedRoute>
       } />
-      <Route path="/clients" element={
-        <ProtectedRoute>
-          <Clients />
-        </ProtectedRoute>
-      } />
       <Route path="/inventory" element={
         <ProtectedRoute>
           <Inventory />
@@ -142,11 +136,6 @@ const AppRoutes = () => {
       <Route path="/subscriptions" element={
         <ProtectedRoute>
           <Subscriptions />
-        </ProtectedRoute>
-      } />
-      <Route path="/communications" element={
-        <ProtectedRoute>
-          <Communications />
         </ProtectedRoute>
       } />
       <Route path="/email" element={

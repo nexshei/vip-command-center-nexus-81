@@ -21,8 +21,6 @@ import {
   Crown,
   LayoutDashboard,
   Calendar,
-  Users,
-  MessageSquare,
   Briefcase,
   BarChart3,
   Bell,
@@ -65,11 +63,6 @@ const VipSidebar = () => {
       icon: Calendar,
     },
     {
-      title: "Client Management",
-      url: "/clients",
-      icon: Users,
-    },
-    {
       title: "Inventory",
       url: "/inventory", 
       icon: Package,
@@ -90,12 +83,7 @@ const VipSidebar = () => {
       icon: Briefcase,
     },
     {
-      title: "Communications",
-      url: "/communications",
-      icon: MessageSquare,
-    },
-    {
-      title: "Email",
+      title: "Email & Communications",
       url: "/email",
       icon: Mail,
     },
@@ -128,11 +116,6 @@ const VipSidebar = () => {
       icon: Calendar,
     },
     {
-      title: "Client Management",
-      url: "/clients",
-      icon: Users,
-    },
-    {
       title: "Inventory",
       url: "/inventory",
       icon: Package,
@@ -143,8 +126,8 @@ const VipSidebar = () => {
       icon: UserCheck,
     },
     {
-      title: "Communications",
-      url: "/communications",
+      title: "Email & Communications",
+      url: "/email",
       icon: Mail,
     },
     {

@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Mail, SendHorizontal, Inbox, Archive, Users, Search } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Mail, SendHorizontal, Inbox, Archive, Users, Search, Send, MessageSquare } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const Email = () => {
@@ -12,6 +13,9 @@ const Email = () => {
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [recipientGroup, setRecipientGroup] = useState('');
+  const [campaignSubject, setCampaignSubject] = useState('');
+  const [campaignMessage, setCampaignMessage] = useState('');
   const { toast } = useToast();
 
   const handleSendMessage = () => {
@@ -35,6 +39,29 @@ const Email = () => {
     setTo('');
     setSubject('');
     setMessage('');
+  };
+
+  const handleSendCampaign = () => {
+    if (!recipientGroup || !campaignSubject || !campaignMessage) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all campaign fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    console.log('Sending campaign:', { recipientGroup, campaignSubject, campaignMessage });
+    
+    toast({
+      title: "Campaign Sent Successfully",
+      description: `Campaign sent to ${recipientGroup} group`,
+    });
+
+    // Clear form
+    setRecipientGroup('');
+    setCampaignSubject('');
+    setCampaignMessage('');
   };
 
   const handleSaveDraft = () => {
@@ -76,8 +103,8 @@ const Email = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-vip-black">Email Communications</h1>
-          <p className="text-vip-gold/80 mt-2">Manage VIP client communications</p>
+          <h1 className="text-3xl font-serif font-bold text-vip-black">Email & Communications</h1>
+          <p className="text-vip-gold/80 mt-2">Manage VIP client communications and campaigns</p>
         </div>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-vip-gold/60" />
@@ -91,7 +118,7 @@ const Email = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-6 md:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-5">
         <Card className="vip-glass border-vip-gold/20 cursor-pointer hover:bg-vip-gold/5 transition-colors">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-vip-gold/80 flex items-center">
@@ -120,96 +147,142 @@ const Email = () => {
 
         <Card className="vip-glass border-vip-gold/20 cursor-pointer hover:bg-vip-gold/5 transition-colors">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80 flex items-center">
-              <Archive className="h-4 w-4 mr-2" />
-              Archived
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-vip-gold/80">Open Rate</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-black">156</div>
-            <p className="text-xs text-vip-gold/60">Total archived</p>
+            <div className="text-2xl font-bold text-vip-black">87.3%</div>
+            <p className="text-xs text-ios-green">+2.1% improvement</p>
           </CardContent>
         </Card>
 
         <Card className="vip-glass border-vip-gold/20 cursor-pointer hover:bg-vip-gold/5 transition-colors">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80 flex items-center">
-              <Users className="h-4 w-4 mr-2" />
-              VIP Contacts
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-vip-gold/80">Click Rate</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-black">89</div>
-            <p className="text-xs text-vip-gold/60">Active contacts</p>
+            <div className="text-2xl font-bold text-vip-black">23.8%</div>
+            <p className="text-xs text-ios-green">+1.5% increase</p>
+          </CardContent>
+        </Card>
+
+        <Card className="vip-glass border-vip-gold/20 cursor-pointer hover:bg-vip-gold/5 transition-colors">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-vip-gold/80">Active Campaigns</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-vip-black">8</div>
+            <p className="text-xs text-vip-gold/60">Running campaigns</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Email Composition */}
       <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <Card className="vip-glass border-vip-gold/20">
-            <CardHeader>
-              <CardTitle className="text-vip-black flex items-center">
-                <Mail className="h-5 w-5 mr-2 text-vip-gold" />
-                Compose Message
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="text-sm font-medium text-vip-black block mb-2">To *</label>
-                <Input
-                  placeholder="Enter VIP client email..."
-                  value={to}
-                  onChange={(e) => setTo(e.target.value)}
-                  className="border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
-                  required
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-vip-black block mb-2">Subject *</label>
-                <Input
-                  placeholder="Enter message subject..."
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                  className="border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
-                  required
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-vip-black block mb-2">Message *</label>
-                <Textarea
-                  placeholder="Type your message here..."
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  rows={8}
-                  className="border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
-                  required
-                />
-              </div>
-              <div className="flex justify-end space-x-3 pt-4 border-t border-vip-gold/20">
-                <Button 
-                  type="button"
-                  variant="outline" 
-                  onClick={handleSaveDraft}
-                  className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
-                >
-                  Save Draft
-                </Button>
-                <Button 
-                  type="button"
-                  onClick={handleSendMessage}
-                  className="bg-vip-gold text-white hover:bg-vip-gold-dark"
-                >
-                  <SendHorizontal className="h-4 w-4 mr-2" />
-                  Send Message
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Individual Email Composition */}
+        <Card className="vip-glass border-vip-gold/20">
+          <CardHeader>
+            <CardTitle className="text-vip-black flex items-center">
+              <Mail className="h-5 w-5 mr-2 text-vip-gold" />
+              Compose Individual Message
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-vip-black block mb-2">To *</label>
+              <Input
+                placeholder="Enter VIP client email..."
+                value={to}
+                onChange={(e) => setTo(e.target.value)}
+                className="border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
+                required
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-vip-black block mb-2">Subject *</label>
+              <Input
+                placeholder="Enter message subject..."
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                className="border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
+                required
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-vip-black block mb-2">Message *</label>
+              <Textarea
+                placeholder="Type your message here..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                rows={6}
+                className="border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
+                required
+              />
+            </div>
+            <div className="flex justify-end space-x-3 pt-4 border-t border-vip-gold/20">
+              <Button 
+                type="button"
+                variant="outline" 
+                onClick={handleSaveDraft}
+                className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+              >
+                Save Draft
+              </Button>
+              <Button 
+                type="button"
+                onClick={handleSendMessage}
+                className="bg-vip-gold text-white hover:bg-vip-gold-dark"
+              >
+                <SendHorizontal className="h-4 w-4 mr-2" />
+                Send Message
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-        <div>
+        {/* Campaign Email */}
+        <Card className="vip-glass border-vip-gold/20">
+          <CardHeader>
+            <CardTitle className="text-vip-black flex items-center">
+              <MessageSquare className="h-5 w-5 mr-2 text-vip-gold" />
+              Send Campaign Message
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Select value={recipientGroup} onValueChange={setRecipientGroup}>
+              <SelectTrigger className="border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black">
+                <SelectValue placeholder="Select recipient group" />
+              </SelectTrigger>
+              <SelectContent className="bg-white border-vip-gold/30">
+                <SelectItem value="vvip">VVIP Clients</SelectItem>
+                <SelectItem value="vip">VIP Clients</SelectItem>
+                <SelectItem value="premium">Premium Clients</SelectItem>
+                <SelectItem value="all">All Clients</SelectItem>
+              </SelectContent>
+            </Select>
+            <Input 
+              placeholder="Campaign subject line" 
+              value={campaignSubject}
+              onChange={(e) => setCampaignSubject(e.target.value)}
+              className="border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
+            />
+            <Textarea 
+              placeholder="Your campaign message..." 
+              rows={6} 
+              value={campaignMessage}
+              onChange={(e) => setCampaignMessage(e.target.value)}
+              className="border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
+            />
+            <Button 
+              onClick={handleSendCampaign}
+              className="w-full bg-vip-gold text-white hover:bg-vip-gold-dark"
+            >
+              <Send className="h-4 w-4 mr-2" />
+              Send Campaign
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Recent Messages & Campaigns */}
+        <div className="space-y-6">
           <Card className="vip-glass border-vip-gold/20">
             <CardHeader>
               <CardTitle className="text-vip-black">Recent Messages</CardTitle>
@@ -244,6 +317,40 @@ const Email = () => {
                 >
                   View All Messages
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="vip-glass border-vip-gold/20">
+            <CardHeader>
+              <CardTitle className="text-vip-black">Recent Campaigns</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {[
+                  { name: 'VVIP Event Invitation', sent: '234 recipients', status: 'Active', rate: '92.1%' },
+                  { name: 'Monthly Newsletter', sent: '847 recipients', status: 'Completed', rate: '85.7%' },
+                  { name: 'Service Update', sent: '156 recipients', status: 'Draft', rate: '-' },
+                ].map((campaign, index) => (
+                  <div key={index} className="p-3 border border-vip-gold/20 rounded-lg">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-semibold text-vip-black">{campaign.name}</h4>
+                        <p className="text-sm text-vip-gold/80">{campaign.sent}</p>
+                      </div>
+                      <div className="text-right">
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          campaign.status === 'Active' ? 'bg-ios-green text-white' :
+                          campaign.status === 'Completed' ? 'bg-ios-blue text-white' :
+                          'bg-vip-gold text-black'
+                        }`}>
+                          {campaign.status}
+                        </span>
+                        <p className="text-xs text-vip-gold/60 mt-1">Open: {campaign.rate}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>

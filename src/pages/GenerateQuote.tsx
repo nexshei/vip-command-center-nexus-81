@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Search, Plus, Trash2, FileText, Mail, Save, Calculator, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { AddClientModal } from '@/components/modals/AddClientModal';
+import { useRealtimeQuery } from "@/hooks/useRealtimeQuery";
 
 interface QuoteItem {
   id: string;
@@ -16,14 +19,28 @@ interface QuoteItem {
   total: number;
 }
 
+interface Client {
+  id: string;
+  full_name: string;
+  email?: string;
+  phone?: string;
+  company?: string;
+}
+
 const GenerateQuote = () => {
   const [selectedClient, setSelectedClient] = useState('');
+  const [selectedClientId, setSelectedClientId] = useState('');
+  const [clientSearchTerm, setClientSearchTerm] = useState('');
+  const [showAddClient, setShowAddClient] = useState(false);
   const [quoteItems, setQuoteItems] = useState<QuoteItem[]>([]);
   const [customItemName, setCustomItemName] = useState('');
   const [customItemPrice, setCustomItemPrice] = useState('');
   const [discountType, setDiscountType] = useState('percentage');
   const [discountValue, setDiscountValue] = useState('');
   const { toast } = useToast();
+
+  // Fetch existing clients from database
+  const { data: clientsData, isLoading: clientsLoading } = useRealtimeQuery("clients");
 
   const predefinedServices = [
     { id: '1', name: 'VIP Airport Transfer', price: 15000 },
@@ -33,12 +50,49 @@ const GenerateQuote = () => {
     { id: '5', name: 'Catering Services', price: 8000 },
   ];
 
-  const mockClients = [
-    'Hon. Peter Maina',
-    'Dr. Sarah Wanjiku', 
-    'Mr. James Kimani',
-    'Ms. Grace Mutua'
-  ];
+  // Type guard for safe client data usage
+  const getValidClients = (): Client[] => {
+    if (!Array.isArray(clientsData) || clientsData.length === 0) {
+      return [];
+    }
+    
+    const firstItem = clientsData[0];
+    if (firstItem === null || firstItem === undefined || typeof firstItem !== 'object') {
+      return [];
+    }
+    
+    if ('id' in firstItem && 'full_name' in firstItem) {
+      return clientsData as unknown as Client[];
+    }
+    
+    return [];
+  };
+
+  const validClients = getValidClients();
+
+  // Filter clients based on search term
+  const filteredClients = validClients.filter((client: Client) => 
+    client.full_name.toLowerCase().includes(clientSearchTerm.toLowerCase()) ||
+    (client.company || '').toLowerCase().includes(clientSearchTerm.toLowerCase()) ||
+    (client.email || '').toLowerCase().includes(clientSearchTerm.toLowerCase())
+  );
+
+  const handleClientSelection = (clientName: string) => {
+    const selectedClientData = validClients.find((client: Client) => client.full_name === clientName);
+    setSelectedClient(clientName);
+    setSelectedClientId(selectedClientData?.id || '');
+    setClientSearchTerm(clientName);
+  };
+
+  const handleClientAdded = (newClient: Client) => {
+    setSelectedClient(newClient.full_name);
+    setSelectedClientId(newClient.id);
+    setClientSearchTerm(newClient.full_name);
+    toast({
+      title: "Client Added",
+      description: `${newClient.full_name} has been added and selected.`,
+    });
+  };
 
   const addPredefinedItem = (serviceId: string) => {
     const service = predefinedServices.find(s => s.id === serviceId);
@@ -184,7 +238,7 @@ const GenerateQuote = () => {
   return (
     <div className="min-h-screen bg-black text-vip-gold p-6">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header with prominent action buttons */}
+        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-4xl font-serif font-bold text-vip-gold mb-2">Generate Professional Quote</h1>
@@ -225,23 +279,61 @@ const GenerateQuote = () => {
               </CardHeader>
               <CardContent className="p-6">
                 <div className="space-y-4">
-                  <Label className="text-vip-gold font-semibold text-base">Choose Client *</Label>
+                  <Label className="text-vip-gold font-semibold text-base">Search & Select Client *</Label>
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-vip-gold/60" />
-                    <Select value={selectedClient} onValueChange={setSelectedClient}>
-                      <SelectTrigger className="pl-12 h-12 border-2 border-vip-gold/30 focus:border-vip-gold text-vip-gold text-base bg-black">
-                        <SelectValue placeholder="Search and select client..." />
-                      </SelectTrigger>
-                      <SelectContent className="bg-black border-2 border-vip-gold">
-                        {mockClients.map((client) => (
-                          <SelectItem key={client} value={client} className="text-vip-gold hover:bg-vip-gold/20">
-                            {client}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Input
+                      placeholder="Search clients by name, company, or email..."
+                      value={clientSearchTerm}
+                      onChange={(e) => setClientSearchTerm(e.target.value)}
+                      className="pl-12 h-12 border-2 border-vip-gold/30 focus:border-vip-gold text-vip-gold text-base bg-black"
+                    />
                   </div>
-                  <Button variant="outline" className="border-2 border-vip-gold text-vip-gold hover:bg-vip-gold hover:text-black bg-transparent">
+                  
+                  {/* Client Search Results */}
+                  {clientSearchTerm && filteredClients.length > 0 && (
+                    <div className="max-h-48 overflow-y-auto border-2 border-vip-gold/30 rounded-lg bg-gray-800">
+                      {filteredClients.map((client: Client) => (
+                        <div
+                          key={client.id}
+                          onClick={() => handleClientSelection(client.full_name)}
+                          className="p-3 hover:bg-vip-gold/20 cursor-pointer border-b border-vip-gold/20 last:border-b-0"
+                        >
+                          <div className="flex items-center">
+                            <Users className="h-4 w-4 mr-2 text-vip-gold" />
+                            <div>
+                              <p className="text-vip-gold font-medium">{client.full_name}</p>
+                              {client.company && (
+                                <p className="text-vip-gold/60 text-sm">{client.company}</p>
+                              )}
+                              {client.email && (
+                                <p className="text-vip-gold/60 text-xs">{client.email}</p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {clientSearchTerm && filteredClients.length === 0 && !clientsLoading && (
+                    <div className="text-center py-4 text-vip-gold/60">
+                      No clients found matching "{clientSearchTerm}"
+                    </div>
+                  )}
+
+                  {selectedClient && (
+                    <div className="flex items-center text-sm text-green-600 bg-green-50 p-3 rounded-lg">
+                      <Users className="h-4 w-4 mr-2" />
+                      Selected: {selectedClient}
+                    </div>
+                  )}
+
+                  <Button 
+                    onClick={() => setShowAddClient(true)}
+                    variant="outline" 
+                    className="border-2 border-vip-gold text-vip-gold hover:bg-vip-gold hover:text-black bg-transparent"
+                  >
                     <Plus className="h-4 w-4 mr-2" />
                     Add New Client
                   </Button>
@@ -255,7 +347,6 @@ const GenerateQuote = () => {
                 <CardTitle className="text-vip-gold text-xl">Step 2: Add Services & Items</CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-6">
-                {/* Quick Add Services */}
                 <div className="space-y-4">
                   <Label className="text-vip-gold font-semibold text-base">Quick Add Services</Label>
                   <Select onValueChange={addPredefinedItem}>
@@ -272,7 +363,6 @@ const GenerateQuote = () => {
                   </Select>
                 </div>
 
-                {/* Custom Item */}
                 <div className="space-y-4 p-4 border-2 border-vip-gold/30 rounded-lg bg-gray-800">
                   <Label className="text-vip-gold font-semibold text-base">Add Custom Item</Label>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -301,7 +391,6 @@ const GenerateQuote = () => {
               </CardContent>
             </Card>
 
-            {/* Step 3: Review Items */}
             {quoteItems.length > 0 && (
               <Card className="bg-gray-900 border border-vip-gold/30 shadow-xl">
                 <CardHeader className="bg-vip-gold/10 border-b border-vip-gold/30">
@@ -340,7 +429,6 @@ const GenerateQuote = () => {
                     ))}
                   </div>
 
-                  {/* Discount Section */}
                   <div className="mt-6 pt-6 border-t-2 border-vip-gold/30">
                     <div className="space-y-4">
                       <Label className="text-vip-gold font-semibold text-base">Apply Discount (Optional)</Label>
@@ -371,7 +459,6 @@ const GenerateQuote = () => {
 
           {/* Quote Summary & Actions */}
           <div className="space-y-6">
-            {/* Financial Summary */}
             <Card className="bg-gray-900 border border-vip-gold/30 shadow-xl">
               <CardHeader className="bg-vip-gold/10 border-b border-vip-gold/30">
                 <CardTitle className="flex items-center text-vip-gold text-xl">
@@ -419,7 +506,6 @@ const GenerateQuote = () => {
               </CardContent>
             </Card>
 
-            {/* Actions */}
             <Card className="bg-gray-900 border border-vip-gold/30 shadow-xl">
               <CardHeader className="bg-vip-gold/10 border-b border-vip-gold/30">
                 <CardTitle className="text-vip-gold text-xl">Quote Actions</CardTitle>
@@ -445,7 +531,6 @@ const GenerateQuote = () => {
               </CardContent>
             </Card>
 
-            {/* Quote Preview */}
             {selectedClient && quoteItems.length > 0 && (
               <Card className="bg-gray-900 border border-vip-gold/30 shadow-xl">
                 <CardHeader className="bg-vip-gold/10 border-b border-vip-gold/30">
@@ -486,6 +571,13 @@ const GenerateQuote = () => {
             )}
           </div>
         </div>
+
+        {/* Add Client Modal */}
+        <AddClientModal 
+          open={showAddClient} 
+          onOpenChange={setShowAddClient}
+          onClientAdded={handleClientAdded}
+        />
       </div>
     </div>
   );
