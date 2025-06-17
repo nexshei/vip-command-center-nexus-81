@@ -231,39 +231,6 @@ export type Database = {
         }
         Relationships: []
       }
-      gallery_photos: {
-        Row: {
-          alt_text: string | null
-          category: string
-          created_at: string
-          display_order: number | null
-          id: string
-          is_featured: boolean | null
-          src: string
-          updated_at: string
-        }
-        Insert: {
-          alt_text?: string | null
-          category: string
-          created_at?: string
-          display_order?: number | null
-          id?: string
-          is_featured?: boolean | null
-          src: string
-          updated_at?: string
-        }
-        Update: {
-          alt_text?: string | null
-          category?: string
-          created_at?: string
-          display_order?: number | null
-          id?: string
-          is_featured?: boolean | null
-          src?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       inventory: {
         Row: {
           created_at: string | null
