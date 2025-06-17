@@ -11,7 +11,7 @@ import {
   SidebarMenuItem,
   SidebarHeader
 } from "@/components/ui/sidebar";
-import { Home, Calendar, FileText, Users, Settings, Plus } from "lucide-react";
+import { Home, Calendar, FileText, Users, Settings, Plus, Package, Mail, UserCheck } from "lucide-react";
 import { useNavigate, useLocation } from 'react-router-dom';
 import { cn } from "@/lib/utils";
 
@@ -49,6 +49,24 @@ export const VipSidebar = () => {
       icon: Users,
       path: '/clients',
       description: 'Manage VVIP client database'
+    },
+    {
+      name: 'Inventory',
+      icon: Package,
+      path: '/inventory',
+      description: 'Track protocol equipment'
+    },
+    {
+      name: 'Email',
+      icon: Mail,
+      path: '/email',
+      description: 'Send and track communications'
+    },
+    {
+      name: 'VVIP Subscribers',
+      icon: UserCheck,
+      path: '/subscribers',
+      description: 'Manage subscription members'
     },
     {
       name: 'Settings',

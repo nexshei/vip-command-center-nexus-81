@@ -1,361 +1,252 @@
 
 import React, { useState } from 'react';
+import { useRealtimeQuery } from '@/hooks/useRealtimeQuery';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Mail, SendHorizontal, Inbox, Archive, Users, Search, Send, MessageSquare } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { Mail, Send, Inbox, Search, Calendar } from 'lucide-react';
 
 const Email = () => {
-  const [to, setTo] = useState('');
-  const [subject, setSubject] = useState('');
-  const [message, setMessage] = useState('');
+  const [isComposing, setIsComposing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [recipientGroup, setRecipientGroup] = useState('');
-  const [campaignSubject, setCampaignSubject] = useState('');
-  const [campaignMessage, setCampaignMessage] = useState('');
+  const [emailForm, setEmailForm] = useState({
+    to_email: '',
+    subject: '',
+    body: ''
+  });
   const { toast } = useToast();
 
-  const handleSendMessage = () => {
-    if (!to || !subject || !message) {
+  const { data: emails, isLoading, error, refetch } = useRealtimeQuery('emails', {
+    orderBy: 'sent_at',
+  });
+
+  const filteredEmails = emails?.filter((email: any) =>
+    email.to_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    email.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    email.from_email?.toLowerCase().includes(searchTerm.toLowerCase())
+  ) || [];
+
+  const handleSendEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!emailForm.to_email || !emailForm.subject || !emailForm.body) {
       toast({
-        title: "Missing Information",
+        title: "Error",
         description: "Please fill in all required fields.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
 
-    console.log('Sending email:', { to, subject, message });
-    
-    toast({
-      title: "Message Sent Successfully",
-      description: `Email sent to ${to}`,
-    });
+    try {
+      const { error } = await supabase
+        .from('emails')
+        .insert([{
+          from_email: 'admin@sirole-vvip.com',
+          to_email: emailForm.to_email,
+          subject: emailForm.subject,
+          body: emailForm.body,
+          status: 'sent',
+          sent_at: new Date().toISOString()
+        }]);
 
-    // Clear form
-    setTo('');
-    setSubject('');
-    setMessage('');
-  };
+      if (error) throw error;
 
-  const handleSendCampaign = () => {
-    if (!recipientGroup || !campaignSubject || !campaignMessage) {
       toast({
-        title: "Missing Information",
-        description: "Please fill in all campaign fields.",
-        variant: "destructive"
+        title: "Email Sent",
+        description: `Email sent successfully to ${emailForm.to_email}`,
       });
-      return;
-    }
 
-    console.log('Sending campaign:', { recipientGroup, campaignSubject, campaignMessage });
-    
-    toast({
-      title: "Campaign Sent Successfully",
-      description: `Campaign sent to ${recipientGroup} group`,
-    });
-
-    // Clear form
-    setRecipientGroup('');
-    setCampaignSubject('');
-    setCampaignMessage('');
-  };
-
-  const handleSaveDraft = () => {
-    if (!to && !subject && !message) {
+      setEmailForm({ to_email: '', subject: '', body: '' });
+      setIsComposing(false);
+      refetch();
+    } catch (error: any) {
       toast({
-        title: "Nothing to Save",
-        description: "Please enter some content before saving draft.",
-        variant: "destructive"
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
       });
-      return;
     }
-
-    console.log('Saving draft:', { to, subject, message });
-    
-    toast({
-      title: "Draft Saved",
-      description: "Your message has been saved as draft.",
-    });
   };
 
-  const handleViewAllMessages = () => {
-    console.log('Viewing all messages');
-    toast({
-      title: "Loading Messages",
-      description: "Opening message archive...",
-    });
-  };
-
-  const handleMessageClick = (from: string) => {
-    console.log('Opening message from:', from);
-    toast({
-      title: "Opening Message",
-      description: `Loading message from ${from}`,
-    });
+  const getStatusColor = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'sent':
+        return 'bg-green-500/20 text-green-400 border-green-500/30';
+      case 'pending':
+        return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+      case 'failed':
+        return 'bg-red-500/20 text-red-400 border-red-500/30';
+      default:
+        return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+    }
   };
 
   return (
-    <div className="space-y-6 p-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-serif font-bold text-vip-black">Email & Communications</h1>
-          <p className="text-vip-gold/80 mt-2">Manage VIP client communications and campaigns</p>
+    <div className="p-6 max-w-7xl mx-auto bg-black min-h-screen">
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-serif font-bold text-vip-gold">Email Management</h1>
+            <p className="text-vip-gold/70 mt-1">Send and track VVIP communications</p>
+          </div>
+          <Button 
+            onClick={() => setIsComposing(!isComposing)}
+            className="bg-vip-gold text-black hover:bg-vip-gold/90"
+          >
+            <Mail className="h-4 w-4 mr-2" />
+            {isComposing ? 'Cancel' : 'Compose Email'}
+          </Button>
         </div>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-vip-gold/60" />
-          <Input
-            placeholder="Search messages..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 w-64 border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
-          />
-        </div>
-      </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-6 md:grid-cols-5">
-        <Card className="vip-glass border-vip-gold/20 cursor-pointer hover:bg-vip-gold/5 transition-colors">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80 flex items-center">
-              <Inbox className="h-4 w-4 mr-2" />
-              Inbox
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-vip-black">24</div>
-            <p className="text-xs text-vip-gold/60">New messages</p>
-          </CardContent>
-        </Card>
-        
-        <Card className="vip-glass border-vip-gold/20 cursor-pointer hover:bg-vip-gold/5 transition-colors">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80 flex items-center">
-              <SendHorizontal className="h-4 w-4 mr-2" />
-              Sent Today
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-vip-black">12</div>
-            <p className="text-xs text-vip-gold/60">Messages sent</p>
-          </CardContent>
-        </Card>
-
-        <Card className="vip-glass border-vip-gold/20 cursor-pointer hover:bg-vip-gold/5 transition-colors">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">Open Rate</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-vip-black">87.3%</div>
-            <p className="text-xs text-ios-green">+2.1% improvement</p>
-          </CardContent>
-        </Card>
-
-        <Card className="vip-glass border-vip-gold/20 cursor-pointer hover:bg-vip-gold/5 transition-colors">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">Click Rate</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-vip-black">23.8%</div>
-            <p className="text-xs text-ios-green">+1.5% increase</p>
-          </CardContent>
-        </Card>
-
-        <Card className="vip-glass border-vip-gold/20 cursor-pointer hover:bg-vip-gold/5 transition-colors">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">Active Campaigns</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-vip-black">8</div>
-            <p className="text-xs text-vip-gold/60">Running campaigns</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Individual Email Composition */}
-        <Card className="vip-glass border-vip-gold/20">
-          <CardHeader>
-            <CardTitle className="text-vip-black flex items-center">
-              <Mail className="h-5 w-5 mr-2 text-vip-gold" />
-              Compose Individual Message
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-vip-black block mb-2">To *</label>
-              <Input
-                placeholder="Enter VIP client email..."
-                value={to}
-                onChange={(e) => setTo(e.target.value)}
-                className="border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
-                required
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium text-vip-black block mb-2">Subject *</label>
-              <Input
-                placeholder="Enter message subject..."
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                className="border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
-                required
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium text-vip-black block mb-2">Message *</label>
-              <Textarea
-                placeholder="Type your message here..."
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                rows={6}
-                className="border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
-                required
-              />
-            </div>
-            <div className="flex justify-end space-x-3 pt-4 border-t border-vip-gold/20">
-              <Button 
-                type="button"
-                variant="outline" 
-                onClick={handleSaveDraft}
-                className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
-              >
-                Save Draft
-              </Button>
-              <Button 
-                type="button"
-                onClick={handleSendMessage}
-                className="bg-vip-gold text-white hover:bg-vip-gold-dark"
-              >
-                <SendHorizontal className="h-4 w-4 mr-2" />
-                Send Message
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Campaign Email */}
-        <Card className="vip-glass border-vip-gold/20">
-          <CardHeader>
-            <CardTitle className="text-vip-black flex items-center">
-              <MessageSquare className="h-5 w-5 mr-2 text-vip-gold" />
-              Send Campaign Message
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Select value={recipientGroup} onValueChange={setRecipientGroup}>
-              <SelectTrigger className="border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black">
-                <SelectValue placeholder="Select recipient group" />
-              </SelectTrigger>
-              <SelectContent className="bg-white border-vip-gold/30">
-                <SelectItem value="vvip">VVIP Clients</SelectItem>
-                <SelectItem value="vip">VIP Clients</SelectItem>
-                <SelectItem value="premium">Premium Clients</SelectItem>
-                <SelectItem value="all">All Clients</SelectItem>
-              </SelectContent>
-            </Select>
-            <Input 
-              placeholder="Campaign subject line" 
-              value={campaignSubject}
-              onChange={(e) => setCampaignSubject(e.target.value)}
-              className="border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
-            />
-            <Textarea 
-              placeholder="Your campaign message..." 
-              rows={6} 
-              value={campaignMessage}
-              onChange={(e) => setCampaignMessage(e.target.value)}
-              className="border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
-            />
-            <Button 
-              onClick={handleSendCampaign}
-              className="w-full bg-vip-gold text-white hover:bg-vip-gold-dark"
-            >
-              <Send className="h-4 w-4 mr-2" />
-              Send Campaign
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Recent Messages & Campaigns */}
-        <div className="space-y-6">
-          <Card className="vip-glass border-vip-gold/20">
+        {isComposing && (
+          <Card className="bg-black border-vip-gold/30 mb-6">
             <CardHeader>
-              <CardTitle className="text-vip-black">Recent Messages</CardTitle>
+              <CardTitle className="text-vip-gold flex items-center">
+                <Send className="h-5 w-5 mr-2" />
+                Compose New Email
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {[
-                  { from: 'Hon. Mary Wanjiku', subject: 'Protocol Meeting', time: '2 hours ago' },
-                  { from: 'Dr. James Kiprotich', subject: 'Event Coordination', time: '5 hours ago' },
-                  { from: 'Ms. Grace Njeri', subject: 'VIP Service Request', time: '1 day ago' },
-                ].map((message, index) => (
-                  <div 
-                    key={index} 
-                    className="p-3 border border-vip-gold/20 rounded-lg vip-glass-light cursor-pointer hover:bg-vip-gold/5 transition-colors"
-                    onClick={() => handleMessageClick(message.from)}
+              <form onSubmit={handleSendEmail} className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-vip-gold">To</label>
+                  <Input
+                    type="email"
+                    placeholder="recipient@example.com"
+                    value={emailForm.to_email}
+                    onChange={(e) => setEmailForm({ ...emailForm, to_email: e.target.value })}
+                    className="border-vip-gold/30 bg-black text-vip-gold"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-vip-gold">Subject</label>
+                  <Input
+                    placeholder="Email subject"
+                    value={emailForm.subject}
+                    onChange={(e) => setEmailForm({ ...emailForm, subject: e.target.value })}
+                    className="border-vip-gold/30 bg-black text-vip-gold"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-vip-gold">Message</label>
+                  <Textarea
+                    placeholder="Compose your message..."
+                    value={emailForm.body}
+                    onChange={(e) => setEmailForm({ ...emailForm, body: e.target.value })}
+                    className="border-vip-gold/30 bg-black text-vip-gold min-h-[120px]"
+                    required
+                  />
+                </div>
+                <div className="flex space-x-3">
+                  <Button type="submit" className="bg-vip-gold text-black hover:bg-vip-gold/90">
+                    <Send className="h-4 w-4 mr-2" />
+                    Send Email
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setIsComposing(false)}
+                    className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
                   >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-semibold text-sm text-vip-black">{message.from}</h4>
-                        <p className="text-xs text-vip-gold/80">{message.subject}</p>
-                      </div>
-                      <span className="text-xs text-vip-gold/60">{message.time}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-4">
-                <Button 
-                  onClick={handleViewAllMessages}
-                  variant="outline" 
-                  className="w-full border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
-                >
-                  View All Messages
-                </Button>
-              </div>
+                    Cancel
+                  </Button>
+                </div>
+              </form>
             </CardContent>
           </Card>
+        )}
 
-          <Card className="vip-glass border-vip-gold/20">
-            <CardHeader>
-              <CardTitle className="text-vip-black">Recent Campaigns</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {[
-                  { name: 'VVIP Event Invitation', sent: '234 recipients', status: 'Active', rate: '92.1%' },
-                  { name: 'Monthly Newsletter', sent: '847 recipients', status: 'Completed', rate: '85.7%' },
-                  { name: 'Service Update', sent: '156 recipients', status: 'Draft', rate: '-' },
-                ].map((campaign, index) => (
-                  <div key={index} className="p-3 border border-vip-gold/20 rounded-lg">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-semibold text-vip-black">{campaign.name}</h4>
-                        <p className="text-sm text-vip-gold/80">{campaign.sent}</p>
-                      </div>
-                      <div className="text-right">
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          campaign.status === 'Active' ? 'bg-ios-green text-white' :
-                          campaign.status === 'Completed' ? 'bg-ios-blue text-white' :
-                          'bg-vip-gold text-black'
-                        }`}>
-                          {campaign.status}
-                        </span>
-                        <p className="text-xs text-vip-gold/60 mt-1">Open: {campaign.rate}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+        <div className="flex items-center space-x-4 mb-6">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-vip-gold/60" />
+            <Input
+              placeholder="Search emails..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 border-vip-gold/30 bg-black text-vip-gold"
+            />
+          </div>
+          <Badge variant="outline" className="border-vip-gold/30 text-vip-gold">
+            <Inbox className="h-3 w-3 mr-1" />
+            {filteredEmails.length} Emails
+          </Badge>
         </div>
       </div>
+
+      {isLoading && (
+        <Card className="bg-black border-vip-gold/30">
+          <CardContent className="p-8 text-center">
+            <div className="text-vip-gold/70">Loading emails...</div>
+          </CardContent>
+        </Card>
+      )}
+
+      {error && (
+        <Card className="bg-black border-red-500/30">
+          <CardContent className="p-8 text-center">
+            <div className="text-red-400">Error loading emails: {error.message}</div>
+          </CardContent>
+        </Card>
+      )}
+
+      {!isLoading && !error && (
+        <div className="space-y-4">
+          {filteredEmails.map((email: any) => (
+            <Card key={email.id} className="bg-black border-vip-gold/30 hover:border-vip-gold/50 transition-colors">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <Mail className="h-4 w-4 text-vip-gold/60" />
+                      <span className="text-sm font-medium text-vip-gold">
+                        From: {email.from_email}
+                      </span>
+                      <span className="text-sm text-vip-gold/70">
+                        To: {email.to_email}
+                      </span>
+                      <Badge className={getStatusColor(email.status)}>
+                        {email.status}
+                      </Badge>
+                    </div>
+                    <h3 className="text-lg font-medium text-vip-gold mb-2">{email.subject}</h3>
+                    <p className="text-sm text-vip-gold/80 line-clamp-2">{email.body}</p>
+                  </div>
+                  <div className="flex items-center text-xs text-vip-gold/50 ml-4">
+                    <Calendar className="h-3 w-3 mr-1" />
+                    {new Date(email.sent_at).toLocaleString()}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+
+          {filteredEmails.length === 0 && !isLoading && (
+            <Card className="bg-black border-vip-gold/30">
+              <CardContent className="p-8 text-center">
+                <Inbox className="h-12 w-12 text-vip-gold/40 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-vip-gold mb-2">No Emails Found</h3>
+                <p className="text-vip-gold/70 mb-4">
+                  {searchTerm ? 'No emails match your search criteria.' : 'Start sending VVIP communications.'}
+                </p>
+                <Button 
+                  onClick={() => setIsComposing(true)}
+                  className="bg-vip-gold text-black hover:bg-vip-gold/90"
+                >
+                  <Mail className="h-4 w-4 mr-2" />
+                  Send First Email
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
     </div>
   );
 };
