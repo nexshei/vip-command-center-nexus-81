@@ -34,8 +34,14 @@ const Gallery = () => {
     orderBy: "display_order" 
   });
 
-  // Safely cast the data to the expected type
-  const photos = (photosData as GalleryPhoto[]) || [];
+  // Safely handle the data - only use it if it's not an error and is an array
+  const photos: GalleryPhoto[] = React.useMemo(() => {
+    if (!photosData || error || !Array.isArray(photosData)) {
+      return [];
+    }
+    // Type assertion is safe here because we've checked it's an array and no error
+    return photosData as GalleryPhoto[];
+  }, [photosData, error]);
 
   // Filter photos based on search and category
   const filteredPhotos = React.useMemo(() => {
