@@ -1,64 +1,284 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useRealtimeQuery } from "@/hooks/useRealtimeQuery";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Search, Mail, MessageSquare, Trash2, Eye, Reply } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const ContactSubmissions = () => {
-  const { data: submissions, isLoading, error } = useRealtimeQuery("contact_submissions", {
+  const [searchTerm, setSearchTerm] = useState('');
+  const { data: submissions, isLoading, error, refetch } = useRealtimeQuery("contact_submissions", {
     orderBy: "created_at",
   });
+  const { toast } = useToast();
+
+  const filteredSubmissions = (submissions || []).filter((submission: any) =>
+    submission.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    submission.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    submission.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    submission.message?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleDeleteSubmission = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this contact submission?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('contact_submissions')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Submission Deleted",
+        description: "The contact submission has been deleted successfully.",
+      });
+      
+      refetch();
+    } catch (error: any) {
+      toast({
+        title: "Delete Failed",
+        description: error.message || "An error occurred while deleting.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleViewDetails = (submission: any) => {
+    toast({
+      title: "Contact Details",
+      description: `Opening detailed view for ${submission.name}'s message.`,
+    });
+  };
+
+  const handleReply = (submission: any) => {
+    // Create a mailto link for quick reply
+    const mailtoLink = `mailto:${submission.email}?subject=Re: ${submission.subject || 'Your Contact Submission'}&body=Dear ${submission.name},%0D%0A%0D%0AThank you for contacting us.%0D%0A%0D%0ABest regards,%0D%0AVVIP Protocol Team`;
+    window.open(mailtoLink, '_blank');
+    
+    toast({
+      title: "Email Client Opened",
+      description: `Opening email client to reply to ${submission.name}.`,
+    });
+  };
 
   return (
-    <div className="max-w-5xl mx-auto p-6">
-      <h1 className="text-2xl font-serif font-bold mb-4 text-vip-black">Contact Submissions</h1>
+    <div className="max-w-7xl mx-auto p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-serif font-bold text-vip-black">Contact Submissions</h1>
+          <p className="text-vip-gold/80 mt-2">View and manage all contact form submissions from your website</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="border-vip-gold text-vip-gold">
+            {filteredSubmissions.length} Total Messages
+          </Badge>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="grid gap-6 md:grid-cols-3">
+        <Card className="vip-glass border-vip-gold/20">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-vip-gold/80 flex items-center">
+              <MessageSquare className="h-4 w-4 mr-2" />
+              Total Messages
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-vip-black">{submissions?.length || 0}</div>
+            <p className="text-xs text-vip-gold/60">All time submissions</p>
+          </CardContent>
+        </Card>
+        
+        <Card className="vip-glass border-vip-gold/20">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-vip-gold/80 flex items-center">
+              <Mail className="h-4 w-4 mr-2" />
+              Recent Today
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-vip-black">
+              {submissions?.filter((s: any) => {
+                const today = new Date().toDateString();
+                return new Date(s.created_at).toDateString() === today;
+              }).length || 0}
+            </div>
+            <p className="text-xs text-vip-gold/60">Today's messages</p>
+          </CardContent>
+        </Card>
+
+        <Card className="vip-glass border-vip-gold/20">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-vip-gold/80">Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={() => refetch()} 
+              variant="outline" 
+              size="sm"
+              className="border-vip-gold text-vip-gold hover:bg-vip-gold/10"
+            >
+              Refresh Data
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Search */}
       <Card className="vip-glass border-vip-gold/20">
         <CardHeader>
-          <CardTitle className="text-vip-gold">All Received Messages</CardTitle>
+          <CardTitle className="text-vip-black">Search Messages</CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading && <div className="py-6 text-center text-vip-gold/70">Loading...</div>}
-          {error && (
-            <div className="py-6 text-center text-vip-red">
-              {error.message}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-vip-gold/60" />
+            <Input
+              placeholder="Search by name, email, subject, or message content..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Messages Table */}
+      <Card className="vip-glass border-vip-gold/20">
+        <CardHeader>
+          <CardTitle className="text-vip-gold flex items-center">
+            <Mail className="h-5 w-5 mr-2" />
+            All Contact Messages from Database
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoading && (
+            <div className="py-8 text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-vip-gold mx-auto mb-4"></div>
+              <p className="text-vip-gold/70">Loading contact submissions from database...</p>
             </div>
           )}
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead>
-                <tr className="bg-vip-gold/10">
-                  <th className="px-4 py-2 text-left">#</th>
-                  <th className="px-4 py-2 text-left">Name</th>
-                  <th className="px-4 py-2 text-left">Email</th>
-                  <th className="px-4 py-2 text-left">Subject</th>
-                  <th className="px-4 py-2 text-left">Message</th>
-                  <th className="px-4 py-2 text-left">Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(submissions || []).map((submission: any, idx: number) => (
-                  <tr key={submission.id} className="border-t border-vip-gold/10">
-                    <td className="px-4 py-2">{idx + 1}</td>
-                    <td className="px-4 py-2">{submission.name}</td>
-                    <td className="px-4 py-2">{submission.email}</td>
-                    <td className="px-4 py-2">{submission.subject || "-"}</td>
-                    <td className="px-4 py-2 max-w-xs whitespace-pre-wrap">{submission.message}</td>
-                    <td className="px-4 py-2">
-                      {submission.created_at
-                        ? new Date(submission.created_at).toLocaleString()
-                        : "-"}
-                    </td>
-                  </tr>
-                ))}
-                {!isLoading && (!submissions || submissions.length === 0) && (
-                  <tr>
-                    <td colSpan={6} className="text-center text-vip-gold/60 py-8">
-                      No messages received yet.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+          
+          {error && (
+            <div className="py-6 text-center text-red-500">
+              Error loading submissions: {error.message}
+            </div>
+          )}
+
+          {!isLoading && !error && (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>#</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Subject</TableHead>
+                    <TableHead>Message Preview</TableHead>
+                    <TableHead>Date Received</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredSubmissions.map((submission: any, idx: number) => (
+                    <TableRow key={submission.id} className="hover:bg-vip-gold/5">
+                      <TableCell className="font-medium">{idx + 1}</TableCell>
+                      <TableCell className="font-medium">{submission.name}</TableCell>
+                      <TableCell>
+                        <a 
+                          href={`mailto:${submission.email}`} 
+                          className="text-vip-gold hover:underline"
+                        >
+                          {submission.email}
+                        </a>
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {submission.subject || "No Subject"}
+                      </TableCell>
+                      <TableCell className="max-w-xs">
+                        <div className="truncate text-sm text-gray-600">
+                          {submission.message?.substring(0, 80)}
+                          {submission.message?.length > 80 && "..."}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          {submission.created_at
+                            ? new Date(submission.created_at).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })
+                            : "-"}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex space-x-2">
+                          <Button
+                            onClick={() => handleViewDetails(submission)}
+                            variant="outline"
+                            size="sm"
+                            title="View Details"
+                          >
+                            <Eye className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            onClick={() => handleReply(submission)}
+                            variant="outline"
+                            size="sm"
+                            title="Reply via Email"
+                            className="border-green-300 text-green-600 hover:bg-green-50"
+                          >
+                            <Reply className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            onClick={() => handleDeleteSubmission(submission.id)}
+                            variant="outline"
+                            size="sm"
+                            title="Delete Submission"
+                            className="border-red-300 text-red-600 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+
+              {filteredSubmissions.length === 0 && !isLoading && (
+                <div className="text-center py-12">
+                  <MessageSquare className="h-12 w-12 text-vip-gold/30 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-vip-black mb-2">No Contact Submissions</h3>
+                  <p className="text-vip-gold/60">
+                    {searchTerm 
+                      ? "No messages match your search criteria." 
+                      : "No contact form submissions have been received yet."}
+                  </p>
+                  {searchTerm && (
+                    <Button
+                      onClick={() => setSearchTerm('')}
+                      variant="outline"
+                      className="mt-4 border-vip-gold text-vip-gold hover:bg-vip-gold/10"
+                    >
+                      Clear Search
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

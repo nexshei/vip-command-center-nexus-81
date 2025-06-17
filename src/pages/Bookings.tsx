@@ -107,8 +107,8 @@ const Bookings = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-vip-black">List Events & Quotes</h1>
-          <p className="text-vip-gold/80 mt-2">Manage all VVIP bookings and quotes</p>
+          <h1 className="text-3xl font-serif font-bold text-vip-black">Bookings & Quotes</h1>
+          <p className="text-vip-gold/80 mt-2">Manage all VVIP bookings and quotes from the database</p>
         </div>
         <div className="flex gap-3">
           <Button onClick={() => navigate('/create-booking')} className="bg-vip-gold text-white hover:bg-vip-gold-dark">
@@ -220,13 +220,17 @@ const Bookings = () => {
             <CardHeader>
               <CardTitle className="flex items-center text-vip-black">
                 <Calendar className="h-5 w-5 mr-2 text-vip-gold" />
-                VVIP Bookings
+                VVIP Bookings from Database
               </CardTitle>
             </CardHeader>
             <CardContent>
               {bookingsLoading ? (
                 <div className="text-center py-8">
-                  <p className="text-vip-gold/60">Loading bookings...</p>
+                  <p className="text-vip-gold/60">Loading bookings from database...</p>
+                </div>
+              ) : bookingsError ? (
+                <div className="text-center py-8">
+                  <p className="text-red-500">Error loading bookings: {bookingsError.message}</p>
                 </div>
               ) : (
                 <Table>
@@ -286,7 +290,7 @@ const Bookings = () => {
                   </TableBody>
                 </Table>
               )}
-              {!bookingsLoading && filteredBookings.length === 0 && (
+              {!bookingsLoading && !bookingsError && filteredBookings.length === 0 && (
                 <div className="text-center py-8">
                   <p className="text-vip-gold/60">No bookings found matching your search.</p>
                 </div>
@@ -300,13 +304,17 @@ const Bookings = () => {
             <CardHeader>
               <CardTitle className="flex items-center text-vip-black">
                 <FileText className="h-5 w-5 mr-2 text-vip-gold" />
-                Generated Quotes
+                Generated Quotes from Database
               </CardTitle>
             </CardHeader>
             <CardContent>
               {quotesLoading ? (
                 <div className="text-center py-8">
-                  <p className="text-vip-gold/60">Loading quotes...</p>
+                  <p className="text-vip-gold/60">Loading quotes from database...</p>
+                </div>
+              ) : quotesError ? (
+                <div className="text-center py-8">
+                  <p className="text-red-500">Error loading quotes: {quotesError.message}</p>
                 </div>
               ) : (
                 <Table>
@@ -366,7 +374,7 @@ const Bookings = () => {
                   </TableBody>
                 </Table>
               )}
-              {!quotesLoading && filteredQuotes.length === 0 && (
+              {!quotesLoading && !quotesError && filteredQuotes.length === 0 && (
                 <div className="text-center py-8">
                   <p className="text-vip-gold/60">No quotes found matching your search.</p>
                 </div>

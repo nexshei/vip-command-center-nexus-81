@@ -12,10 +12,11 @@ interface EditItemModalProps {
   onOpenChange: (open: boolean) => void;
   item: any;
   onSuccess?: () => void;
+  onItemUpdated?: (item: any) => void;
   type: 'inventory' | 'client' | 'staff';
 }
 
-export const EditItemModal = ({ open, onOpenChange, item, onSuccess, type }: EditItemModalProps) => {
+export const EditItemModal = ({ open, onOpenChange, item, onSuccess, onItemUpdated, type }: EditItemModalProps) => {
   const [formData, setFormData] = useState<any>({});
   const { toast } = useToast();
 
@@ -43,6 +44,10 @@ export const EditItemModal = ({ open, onOpenChange, item, onSuccess, type }: Edi
 
     if (onSuccess) {
       onSuccess();
+    }
+    
+    if (onItemUpdated) {
+      onItemUpdated(updatedItem);
     }
 
     onOpenChange(false);
