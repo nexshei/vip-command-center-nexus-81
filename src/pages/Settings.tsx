@@ -6,16 +6,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
+import DataExportCard from '@/components/reports/DataExportCard';
 import { 
   Settings, 
   User, 
   Bell, 
   Shield, 
-  Database, 
   Mail, 
   Key,
-  Download,
-  Upload,
   Save
 } from 'lucide-react';
 
@@ -24,38 +22,14 @@ const SystemSettings = () => {
   const [smsNotifications, setSmsNotifications] = useState(false);
   const [autoBackup, setAutoBackup] = useState(true);
 
-  const handleExportData = () => {
-    // Create a sample data export
-    const reportData = {
-      timestamp: new Date().toISOString(),
-      totalClients: 156,
-      totalBookings: 48,
-      revenue: "2.8M KSH",
-      systemHealth: "Operational"
-    };
-    
-    const dataStr = JSON.stringify(reportData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `vip-dashboard-report-${new Date().toISOString().split('T')[0]}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
-
   return (
     <div className="space-y-6 p-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-serif font-bold text-vip-black">System Settings</h1>
-          <p className="text-vip-gold/80 mt-2">Configure your VIP dashboard preferences and system settings</p>
+          <p className="text-vip-gold/80 mt-2">Configure your VIP dashboard preferences and export data</p>
         </div>
-        <Button onClick={handleExportData} className="bg-vip-gold text-white hover:bg-vip-gold-dark">
-          <Download className="h-4 w-4 mr-2" />
-          Export Report
-        </Button>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -187,33 +161,8 @@ const SystemSettings = () => {
           </CardContent>
         </Card>
 
-        {/* System Management */}
-        <Card className="bg-white border border-vip-gold/20 shadow-sm">
-          <CardHeader className="border-b border-vip-gold/10">
-            <CardTitle className="flex items-center text-vip-black">
-              <Database className="h-5 w-5 mr-2 text-vip-gold" />
-              System Management
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6 space-y-4">
-            <Button variant="outline" className="w-full border-vip-gold/30 text-vip-black hover:bg-vip-gold/10">
-              <Download className="h-4 w-4 mr-2" />
-              Backup Database
-            </Button>
-            <Button variant="outline" className="w-full border-vip-gold/30 text-vip-black hover:bg-vip-gold/10">
-              <Upload className="h-4 w-4 mr-2" />
-              Restore Database
-            </Button>
-            <Button variant="outline" className="w-full border-vip-gold/30 text-vip-black hover:bg-vip-gold/10">
-              <Settings className="h-4 w-4 mr-2" />
-              System Diagnostics
-            </Button>
-            <Button variant="outline" className="w-full border-vip-gold/30 text-vip-black hover:bg-vip-gold/10">
-              <Mail className="h-4 w-4 mr-2" />
-              Email Configuration
-            </Button>
-          </CardContent>
-        </Card>
+        {/* Data Export Card */}
+        <DataExportCard />
       </div>
     </div>
   );
