@@ -12,6 +12,7 @@ export type SupabaseTable =
   | "communications"
   | "contact_submissions"
   | "emails"
+  | "gallery_photos"
   | "inventory"
   | "jobs"
   | "meeting_requests"

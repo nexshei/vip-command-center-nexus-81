@@ -20,6 +20,7 @@ import Analytics from "@/pages/Analytics";
 import CreateBooking from "@/pages/CreateBooking";
 import GenerateQuote from "@/pages/GenerateQuote";
 import Inventory from "@/pages/Inventory";
+import Gallery from "@/pages/Gallery";
 import Staff from "@/pages/Staff";
 import CareerPortal from "@/pages/CareerPortal";
 import Email from "@/pages/Email";
@@ -139,6 +140,11 @@ const AppRoutes = () => {
       <Route path="/inventory" element={
         <ProtectedRoute>
           <Inventory />
+        </ProtectedRoute>
+      } />
+      <Route path="/gallery" element={
+        <ProtectedRoute>
+          <Gallery />
         </ProtectedRoute>
       } />
       <Route path="/staff" element={
