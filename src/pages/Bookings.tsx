@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,15 +12,20 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useRealtimeQuery } from "@/hooks/useRealtimeQuery";
 import { NewBookingModal } from '@/components/modals/NewBookingModal';
+import { ViewEventDetailsModal } from '@/components/modals/ViewEventDetailsModal';
+import { EditEventModal } from '@/components/modals/EditEventModal';
 
 const Bookings = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   // Fetch live data from Supabase
-  const { data: bookingsData, isLoading: bookingsLoading, error: bookingsError } = useRealtimeQuery("bookings", { orderBy: "created_at" });
+  const { data: bookingsData, isLoading: bookingsLoading, error: bookingsError, refetch } = useRealtimeQuery("bookings", { orderBy: "created_at" });
 
   // Use real data or fallback to empty arrays
   const bookings = bookingsData || [];
@@ -117,18 +121,14 @@ const Bookings = () => {
     }
   };
 
-  const handleViewItem = (id: string) => {
-    toast({
-      title: "View Event Details",
-      description: "Opening detailed view of the event...",
-    });
+  const handleViewItem = (event: any) => {
+    setSelectedEvent(event);
+    setViewModalOpen(true);
   };
 
-  const handleEditItem = (id: string) => {
-    toast({
-      title: "Edit Event",
-      description: "Opening edit form for the event...",
-    });
+  const handleEditItem = (event: any) => {
+    setSelectedEvent(event);
+    setEditModalOpen(true);
   };
 
   const handleDeleteItem = async (id: string) => {
@@ -153,6 +153,10 @@ const Bookings = () => {
         variant: "destructive"
       });
     }
+  };
+
+  const handleEventUpdated = () => {
+    refetch();
   };
 
   // Calculate total revenue from completed events
@@ -348,7 +352,7 @@ const Bookings = () => {
                           <TableCell>
                             <div className="flex space-x-2">
                               <Button 
-                                onClick={() => handleViewItem(event.id)}
+                                onClick={() => handleViewItem(event)}
                                 variant="outline" 
                                 size="sm"
                                 className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
@@ -356,7 +360,7 @@ const Bookings = () => {
                                 <Eye className="h-3 w-3" />
                               </Button>
                               <Button 
-                                onClick={() => handleEditItem(event.id)}
+                                onClick={() => handleEditItem(event)}
                                 variant="outline" 
                                 size="sm"
                                 className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
@@ -436,7 +440,7 @@ const Bookings = () => {
                           <TableCell>
                             <div className="flex space-x-2">
                               <Button 
-                                onClick={() => handleViewItem(event.id)}
+                                onClick={() => handleViewItem(event)}
                                 variant="outline" 
                                 size="sm"
                                 className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
@@ -444,7 +448,7 @@ const Bookings = () => {
                                 <Eye className="h-3 w-3" />
                               </Button>
                               <Button 
-                                onClick={() => handleViewItem(event.id)}
+                                onClick={() => handleViewItem(event)}
                                 variant="outline" 
                                 size="sm"
                                 className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
@@ -468,6 +472,20 @@ const Bookings = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Modals */}
+      <ViewEventDetailsModal 
+        open={viewModalOpen}
+        onOpenChange={setViewModalOpen}
+        event={selectedEvent}
+      />
+      
+      <EditEventModal 
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        event={selectedEvent}
+        onEventUpdated={handleEventUpdated}
+      />
     </div>
   );
 };
