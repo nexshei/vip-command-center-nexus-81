@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Sidebar, 
@@ -11,7 +10,7 @@ import {
   SidebarMenuItem,
   SidebarHeader
 } from "@/components/ui/sidebar";
-import { Home, Calendar, FileText, Users, Settings, Plus, Package, Mail, UserCheck } from "lucide-react";
+import { Home, Calendar, FileText, Users, Settings, Plus, Package, Mail, UserCheck, MessageSquare } from "lucide-react";
 import { useNavigate, useLocation } from 'react-router-dom';
 import { cn } from "@/lib/utils";
 
@@ -49,6 +48,12 @@ export const VipSidebar = () => {
       icon: Users,
       path: '/clients',
       description: 'Manage VVIP client database'
+    },
+    {
+      name: 'Contact Messages',
+      icon: MessageSquare,
+      path: '/contact-submissions',
+      description: 'View contact form submissions'
     },
     {
       name: 'Inventory',
