@@ -36,18 +36,16 @@ const Gallery = () => {
   const [photoToDelete, setPhotoToDelete] = useState<GalleryPhoto | null>(null);
 
   // Type guard to check if an item is a valid GalleryPhoto
-  const isGalleryPhoto = (item: unknown): item is GalleryPhoto => {
+  const isGalleryPhoto = (item: any): item is GalleryPhoto => {
     return (
+      item &&
       typeof item === 'object' && 
-      item !== null && 
-      'id' in item && 
-      'src' in item && 
-      'category' in item &&
-      'created_at' in item &&
-      'updated_at' in item &&
-      typeof (item as any).id === 'string' &&
-      typeof (item as any).src === 'string' &&
-      typeof (item as any).category === 'string'
+      typeof item.id === 'string' &&
+      typeof item.src === 'string' &&
+      typeof item.category === 'string' &&
+      typeof item.created_at === 'string' &&
+      typeof item.updated_at === 'string' &&
+      typeof item.content_type === 'string'
     );
   };
 
@@ -60,6 +58,21 @@ const Gallery = () => {
     if (!photoToDelete) return;
 
     try {
+      // If the photo has a file stored in storage, delete it
+      if (photoToDelete.src.includes('gallery-photos/')) {
+        const fileName = photoToDelete.src.split('/').pop();
+        if (fileName) {
+          const { error: storageError } = await supabase.storage
+            .from('gallery-photos')
+            .remove([fileName]);
+          
+          if (storageError) {
+            console.error('Error deleting file from storage:', storageError);
+          }
+        }
+      }
+
+      // Delete the database record
       const { error } = await supabase
         .from('gallery_photos')
         .delete()
@@ -182,9 +195,16 @@ const Gallery = () => {
                     </p>
                   )}
                   
-                  <p className="text-xs text-vip-gold/60">
-                    Added: {new Date(photo.created_at).toLocaleDateString()}
-                  </p>
+                  <div className="flex justify-between items-center">
+                    <p className="text-xs text-vip-gold/60">
+                      Added: {new Date(photo.created_at).toLocaleDateString()}
+                    </p>
+                    {photo.file_size && (
+                      <p className="text-xs text-vip-gold/60">
+                        {(photo.file_size / 1024 / 1024).toFixed(1)} MB
+                      </p>
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </Card>
