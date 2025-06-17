@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,6 +9,7 @@ import { Search, Plus, Trash2, FileText, Mail, Save, Calculator, Users } from 'l
 import { useToast } from '@/hooks/use-toast';
 import { AddClientModal } from '@/components/modals/AddClientModal';
 import { useRealtimeQuery } from "@/hooks/useRealtimeQuery";
+import { supabase } from '@/integrations/supabase/client';
 
 interface QuoteItem {
   id: string;
@@ -37,6 +37,7 @@ const GenerateQuote = () => {
   const [customItemPrice, setCustomItemPrice] = useState('');
   const [discountType, setDiscountType] = useState('percentage');
   const [discountValue, setDiscountValue] = useState('');
+  const [showClientDropdown, setShowClientDropdown] = useState(false);
   const { toast } = useToast();
 
   // Fetch existing clients from database
@@ -57,10 +58,18 @@ const GenerateQuote = () => {
     }
     
     const firstItem = clientsData[0];
-    if (firstItem === null || firstItem === undefined || typeof firstItem !== 'object') {
+    
+    // Explicit null and undefined check
+    if (firstItem === null || firstItem === undefined) {
       return [];
     }
     
+    // Check if firstItem is an object
+    if (typeof firstItem !== 'object') {
+      return [];
+    }
+    
+    // Now TypeScript knows firstItem is not null and is an object
     if ('id' in firstItem && 'full_name' in firstItem) {
       return clientsData as unknown as Client[];
     }
@@ -77,21 +86,38 @@ const GenerateQuote = () => {
     (client.email || '').toLowerCase().includes(clientSearchTerm.toLowerCase())
   );
 
-  const handleClientSelection = (clientName: string) => {
-    const selectedClientData = validClients.find((client: Client) => client.full_name === clientName);
-    setSelectedClient(clientName);
-    setSelectedClientId(selectedClientData?.id || '');
-    setClientSearchTerm(clientName);
+  const handleClientSelection = (client: Client) => {
+    setSelectedClient(client.full_name);
+    setSelectedClientId(client.id);
+    setClientSearchTerm(client.full_name);
+    setShowClientDropdown(false);
   };
 
-  const handleClientAdded = (newClient: Client) => {
-    setSelectedClient(newClient.full_name);
-    setSelectedClientId(newClient.id);
-    setClientSearchTerm(newClient.full_name);
-    toast({
-      title: "Client Added",
-      description: `${newClient.full_name} has been added and selected.`,
-    });
+  const handleClientAdded = async (newClientData: any) => {
+    try {
+      const { data: newClient, error } = await supabase
+        .from('clients')
+        .insert([newClientData])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setSelectedClient(newClient.full_name);
+      setSelectedClientId(newClient.id);
+      setClientSearchTerm(newClient.full_name);
+      toast({
+        title: "Client Added",
+        description: `${newClient.full_name} has been added and selected.`,
+      });
+    } catch (error: any) {
+      console.error('Error adding client:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add client. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const addPredefinedItem = (serviceId: string) => {
@@ -285,36 +311,40 @@ const GenerateQuote = () => {
                     <Input
                       placeholder="Search clients by name, company, or email..."
                       value={clientSearchTerm}
-                      onChange={(e) => setClientSearchTerm(e.target.value)}
+                      onChange={(e) => {
+                        setClientSearchTerm(e.target.value);
+                        setShowClientDropdown(e.target.value.length > 0);
+                      }}
+                      onFocus={() => setShowClientDropdown(clientSearchTerm.length > 0)}
                       className="pl-12 h-12 border-2 border-vip-gold/30 focus:border-vip-gold text-vip-gold text-base bg-black"
                     />
-                  </div>
-                  
-                  {/* Client Search Results */}
-                  {clientSearchTerm && filteredClients.length > 0 && (
-                    <div className="max-h-48 overflow-y-auto border-2 border-vip-gold/30 rounded-lg bg-gray-800">
-                      {filteredClients.map((client: Client) => (
-                        <div
-                          key={client.id}
-                          onClick={() => handleClientSelection(client.full_name)}
-                          className="p-3 hover:bg-vip-gold/20 cursor-pointer border-b border-vip-gold/20 last:border-b-0"
-                        >
-                          <div className="flex items-center">
-                            <Users className="h-4 w-4 mr-2 text-vip-gold" />
-                            <div>
-                              <p className="text-vip-gold font-medium">{client.full_name}</p>
-                              {client.company && (
-                                <p className="text-vip-gold/60 text-sm">{client.company}</p>
-                              )}
-                              {client.email && (
-                                <p className="text-vip-gold/60 text-xs">{client.email}</p>
-                              )}
+                    
+                    {/* Client Search Results Dropdown */}
+                    {showClientDropdown && filteredClients.length > 0 && (
+                      <div className="absolute top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto border-2 border-vip-gold/30 rounded-lg bg-gray-800 z-50">
+                        {filteredClients.map((client: Client) => (
+                          <div
+                            key={client.id}
+                            onClick={() => handleClientSelection(client)}
+                            className="p-3 hover:bg-vip-gold/20 cursor-pointer border-b border-vip-gold/20 last:border-b-0"
+                          >
+                            <div className="flex items-center">
+                              <Users className="h-4 w-4 mr-2 text-vip-gold" />
+                              <div>
+                                <p className="text-vip-gold font-medium">{client.full_name}</p>
+                                {client.company && (
+                                  <p className="text-vip-gold/60 text-sm">{client.company}</p>
+                                )}
+                                {client.email && (
+                                  <p className="text-vip-gold/60 text-xs">{client.email}</p>
+                                )}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
                   {clientSearchTerm && filteredClients.length === 0 && !clientsLoading && (
                     <div className="text-center py-4 text-vip-gold/60">
