@@ -137,8 +137,8 @@ const GenerateQuote = () => {
       return [];
     }
     
-    // Check if firstItem has required properties
-    if ('id' in firstItem && 'full_name' in firstItem) {
+    // Check if firstItem has required properties with proper null checks
+    if (firstItem && typeof firstItem === 'object' && 'id' in firstItem && 'full_name' in firstItem) {
       return clientsData as unknown as Client[];
     }
     

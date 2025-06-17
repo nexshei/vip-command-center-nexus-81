@@ -1,8 +1,6 @@
-
-
 import React from 'react';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import VipSidebar from './VipSidebar';
+import { VipSidebar } from './VipSidebar';
 import { Search, Menu, User } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -79,4 +77,3 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 };
 
 export default DashboardLayout;
-
