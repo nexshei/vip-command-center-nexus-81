@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Menu } from "lucide-react"
@@ -6,11 +7,7 @@ import { Home, Calendar, FileText, Users, Settings, Plus } from "lucide-react"
 import { useNavigate } from 'react-router-dom';
 import { cn } from "@/lib/utils"
 
-interface VipSidebarProps {
-  onNavigate: (path: string) => void;
-}
-
-export const VipSidebar = ({ onNavigate }: VipSidebarProps) => {
+export const VipSidebar = () => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
