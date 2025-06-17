@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus } from 'lucide-react';
+import { Plus, DollarSign } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -18,7 +18,7 @@ export const NewBookingModal = () => {
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [notes, setNotes] = useState('');
-  const [revenue, setRevenue] = useState('');
+  const [serviceCharge, setServiceCharge] = useState('');
   const { toast } = useToast();
 
   const resetFormAndClose = () => {
@@ -27,8 +27,17 @@ export const NewBookingModal = () => {
     setDate('');
     setTime('');
     setNotes('');
-    setRevenue('');
+    setServiceCharge('');
     setIsOpen(false);
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-KE', {
+      style: 'currency',
+      currency: 'KES',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -47,7 +56,7 @@ export const NewBookingModal = () => {
             service_type: eventType,
             scheduled_at: scheduledAt,
             notes: notes,
-            revenue: revenue ? parseFloat(revenue) : 0,
+            revenue: serviceCharge ? parseFloat(serviceCharge) : 0,
             status: 'pending',
             approval_status: 'pending'
           }
@@ -143,15 +152,25 @@ export const NewBookingModal = () => {
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="revenue" className="text-sm font-medium text-vip-black">Expected Revenue (KSH)</Label>
+            <Label htmlFor="serviceCharge" className="text-sm font-medium text-vip-black flex items-center">
+              <DollarSign className="h-4 w-4 mr-1" />
+              Service Charge (KSH) *
+            </Label>
             <Input
-              id="revenue"
+              id="serviceCharge"
               type="number"
-              value={revenue}
-              onChange={(e) => setRevenue(e.target.value)}
-              placeholder="Enter expected revenue"
+              value={serviceCharge}
+              onChange={(e) => setServiceCharge(e.target.value)}
+              placeholder="Enter service charge amount"
+              required
+              min="1"
               className="w-full border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
             />
+            {serviceCharge && (
+              <p className="text-sm text-vip-gold">
+                Formatted: {formatCurrency(parseFloat(serviceCharge) || 0)}
+              </p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="notes" className="text-sm font-medium text-vip-black">Notes</Label>

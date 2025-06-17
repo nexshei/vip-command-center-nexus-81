@@ -10,7 +10,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Calendar as CalendarIcon, Clock, User, MapPin, Plus, CheckCircle, ArrowLeft, Save, AlertCircle } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, User, MapPin, Plus, CheckCircle, ArrowLeft, Save, AlertCircle, DollarSign } from 'lucide-react';
 import { AddClientModal } from '@/components/modals/AddClientModal';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -27,7 +27,7 @@ interface BookingFormData {
   time: string;
   location: string;
   notes: string;
-  estimatedCost: number;
+  serviceCharge: number;
   duration: number;
 }
 
@@ -49,7 +49,7 @@ const CreateBooking = () => {
     time: '',
     location: '',
     notes: '',
-    estimatedCost: 0,
+    serviceCharge: 0,
     duration: 2
   });
   
@@ -68,26 +68,26 @@ const CreateBooking = () => {
     { 
       category: 'Diplomatic Services',
       items: [
-        { value: 'diplomatic-meeting', label: 'Diplomatic Meeting', price: 75000, duration: 3, icon: '🏛️' },
-        { value: 'government-protocol', label: 'Government Protocol', price: 200000, duration: 6, icon: '⚖️' },
-        { value: 'state-reception', label: 'State Reception', price: 300000, duration: 8, icon: '🏆' },
+        { value: 'diplomatic-meeting', label: 'Diplomatic Meeting', icon: '🏛️' },
+        { value: 'government-protocol', label: 'Government Protocol', icon: '⚖️' },
+        { value: 'state-reception', label: 'State Reception', icon: '🏆' },
       ]
     },
     { 
       category: 'Corporate Events',
       items: [
-        { value: 'corporate-event', label: 'Corporate Event', price: 150000, duration: 4, icon: '🏢' },
-        { value: 'business-summit', label: 'Business Summit', price: 250000, duration: 6, icon: '📊' },
-        { value: 'executive-retreat', label: 'Executive Retreat', price: 220000, duration: 12, icon: '🌟' },
+        { value: 'corporate-event', label: 'Corporate Event', icon: '🏢' },
+        { value: 'business-summit', label: 'Business Summit', icon: '📊' },
+        { value: 'executive-retreat', label: 'Executive Retreat', icon: '🌟' },
       ]
     },
     { 
       category: 'Special Events',
       items: [
-        { value: 'cultural-exchange', label: 'Cultural Exchange', price: 100000, duration: 4, icon: '🎭' },
-        { value: 'charity-gala', label: 'Charity Gala', price: 180000, duration: 5, icon: '💎' },
-        { value: 'award-ceremony', label: 'Award Ceremony', price: 120000, duration: 3, icon: '🏅' },
-        { value: 'international-conference', label: 'International Conference', price: 350000, duration: 8, icon: '🌍' },
+        { value: 'cultural-exchange', label: 'Cultural Exchange', icon: '🎭' },
+        { value: 'charity-gala', label: 'Charity Gala', icon: '💎' },
+        { value: 'award-ceremony', label: 'Award Ceremony', icon: '🏅' },
+        { value: 'international-conference', label: 'International Conference', icon: '🌍' },
       ]
     }
   ];
@@ -147,6 +147,7 @@ const CreateBooking = () => {
       if (!formData.date) errors.date = 'Date is required';
       if (!formData.time) errors.time = 'Time is required';
       if (!formData.location.trim()) errors.location = 'Location is required';
+      if (formData.serviceCharge <= 0) errors.serviceCharge = 'Service charge must be greater than 0';
       
       // Validate date is not in the past
       if (formData.date && formData.time) {
@@ -177,19 +178,15 @@ const CreateBooking = () => {
     if (validationErrors[field]) {
       setValidationErrors(prev => ({ ...prev, [field]: '' }));
     }
+  };
 
-    // Auto-calculate estimated cost and duration when event type changes
-    if (field === 'eventType') {
-      const allEvents = eventTypes.flatMap(category => category.items);
-      const selectedEvent = allEvents.find(e => e.value === value);
-      if (selectedEvent) {
-        setFormData(prev => ({
-          ...prev,
-          estimatedCost: selectedEvent.price,
-          duration: selectedEvent.duration
-        }));
-      }
-    }
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-KE', {
+      style: 'currency',
+      currency: 'KES',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
   };
 
   const handleNextStep = () => {
@@ -245,8 +242,8 @@ const CreateBooking = () => {
             scheduled_at: scheduledAt.toISOString(),
             status: 'pending',
             approval_status: 'pending',
-            revenue: selectedEventType?.price || 0,
-            notes: `${formData.notes}\n\nLocation: ${formData.location}\nDuration: ${formData.duration} hours\nEstimated Cost: KSH ${formData.estimatedCost.toLocaleString()}`,
+            revenue: formData.serviceCharge,
+            notes: `${formData.notes}\n\nLocation: ${formData.location}\nDuration: ${formData.duration} hours\nService Charge: KSH ${formData.serviceCharge.toLocaleString()}`,
             client_id: formData.clientId || null
           }
         ])
@@ -263,7 +260,7 @@ const CreateBooking = () => {
             {
               requester_name: formData.clientName,
               requested_service: selectedEventType.label,
-              amount: selectedEventType.price,
+              amount: formData.serviceCharge,
               status: 'pending',
               quote_details: `Service: ${selectedEventType.label}\nDate: ${format(formData.date, 'PPP')}\nTime: ${formData.time}\nLocation: ${formData.location}\nDuration: ${formData.duration} hours\nNotes: ${formData.notes}`
             }
@@ -395,9 +392,11 @@ const CreateBooking = () => {
             <Badge variant="outline" className="bg-white text-blue-700 border-blue-300">
               {selectedEventType.icon} {selectedEventType.label}
             </Badge>
-            <div className="text-lg font-bold text-blue-900">
-              KSH {selectedEventType.price.toLocaleString()}
-            </div>
+          </div>
+        )}
+        {formData.serviceCharge > 0 && (
+          <div className="text-lg font-bold text-blue-900">
+            {formatCurrency(formData.serviceCharge)}
           </div>
         )}
         {formData.date && (
@@ -440,7 +439,7 @@ const CreateBooking = () => {
               <div><strong>Date:</strong> {formData.date ? format(formData.date, 'PPP') : ''}</div>
               <div><strong>Time:</strong> {formData.time}</div>
               <div><strong>Location:</strong> {formData.location}</div>
-              <div><strong>Amount:</strong> KSH {formData.estimatedCost.toLocaleString()}</div>
+              <div><strong>Service Charge:</strong> {formatCurrency(formData.serviceCharge)}</div>
             </div>
             <div className="flex gap-3">
               <Button onClick={() => navigate('/bookings')} className="flex-1">
@@ -458,7 +457,7 @@ const CreateBooking = () => {
                     time: '',
                     location: '',
                     notes: '',
-                    estimatedCost: 0,
+                    serviceCharge: 0,
                     duration: 2
                   });
                 }}
@@ -625,16 +624,10 @@ const CreateBooking = () => {
                                     : "border-gray-200 bg-white"
                                 )}
                               >
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center space-x-3">
-                                    <span className="text-2xl">{event.icon}</span>
-                                    <div>
-                                      <div className="font-medium text-gray-900">{event.label}</div>
-                                      <div className="text-sm text-gray-500">{event.duration}hrs duration</div>
-                                    </div>
-                                  </div>
-                                  <div className="text-right">
-                                    <div className="font-bold text-blue-600">KSH {event.price.toLocaleString()}</div>
+                                <div className="flex items-center space-x-3">
+                                  <span className="text-2xl">{event.icon}</span>
+                                  <div>
+                                    <div className="font-medium text-gray-900">{event.label}</div>
                                   </div>
                                 </div>
                               </div>
@@ -724,6 +717,28 @@ const CreateBooking = () => {
                     />
                     {validationErrors.location && (
                       <p className="text-red-500 text-xs mt-1">{validationErrors.location}</p>
+                    )}
+                  </div>
+
+                  {/* Service Charge */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-gray-700 flex items-center">
+                      <DollarSign className="h-4 w-4 mr-1" />
+                      Service Charge (KES) *
+                    </Label>
+                    <Input
+                      type="number"
+                      min="1"
+                      value={formData.serviceCharge || ''}
+                      onChange={(e) => handleInputChange('serviceCharge', parseInt(e.target.value) || 0)}
+                      placeholder="Enter service charge amount"
+                      className={`${validationErrors.serviceCharge ? 'border-red-500' : 'border-gray-300 focus:border-blue-500'}`}
+                    />
+                    {formData.serviceCharge > 0 && (
+                      <p className="text-sm text-blue-600">Formatted: {formatCurrency(formData.serviceCharge)}</p>
+                    )}
+                    {validationErrors.serviceCharge && (
+                      <p className="text-red-500 text-xs mt-1">{validationErrors.serviceCharge}</p>
                     )}
                   </div>
 
