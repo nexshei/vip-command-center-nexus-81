@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useRealtimeQuery } from '@/hooks/useRealtimeQuery';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -223,6 +222,7 @@ const Inventory = () => {
         open={editModalOpen}
         onOpenChange={setEditModalOpen}
         item={selectedItem}
+        type="inventory"
         onSuccess={() => {
           refetch();
           setEditModalOpen(false);
