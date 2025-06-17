@@ -13,20 +13,33 @@ import { GalleryStats } from '@/components/gallery/GalleryStats';
 import { Plus, Search, Filter, Images } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
+interface GalleryPhoto {
+  id: string;
+  src: string;
+  alt_text: string | null;
+  category: string;
+  display_order: number | null;
+  is_featured: boolean | null;
+  created_at: string;
+  updated_at: string;
+}
+
 const Gallery = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   // Fetch gallery photos with real-time updates
-  const { data: photos, isLoading, error, refetch } = useRealtimeQuery("gallery_photos", { 
+  const { data: photosData, isLoading, error, refetch } = useRealtimeQuery("gallery_photos", { 
     orderBy: "display_order" 
   });
 
+  // Safely cast the data to the expected type
+  const photos = (photosData as GalleryPhoto[]) || [];
+
   // Filter photos based on search and category
   const filteredPhotos = React.useMemo(() => {
-    if (!photos) return [];
+    if (!photos || photos.length === 0) return [];
     
     return photos.filter(photo => {
       const matchesSearch = !searchTerm || 
@@ -42,7 +55,7 @@ const Gallery = () => {
 
   // Get unique categories
   const categories = React.useMemo(() => {
-    if (!photos) return [];
+    if (!photos || photos.length === 0) return [];
     const uniqueCategories = [...new Set(photos.map(photo => photo.category))];
     return uniqueCategories.filter(Boolean);
   }, [photos]);
@@ -82,7 +95,7 @@ const Gallery = () => {
         </div>
 
         {/* Stats */}
-        <GalleryStats photos={photos || []} />
+        <GalleryStats photos={photos} />
 
         {/* Filters and Search */}
         <Card className="bg-black/50 border-vip-gold/30">

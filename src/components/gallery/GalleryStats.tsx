@@ -3,8 +3,19 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Images, Star, Grid, Tag } from 'lucide-react';
 
+interface GalleryPhoto {
+  id: string;
+  src: string;
+  alt_text: string | null;
+  category: string;
+  display_order: number | null;
+  is_featured: boolean | null;
+  created_at: string;
+  updated_at: string;
+}
+
 interface GalleryStatsProps {
-  photos: any[];
+  photos: GalleryPhoto[];
 }
 
 export const GalleryStats: React.FC<GalleryStatsProps> = ({ photos }) => {

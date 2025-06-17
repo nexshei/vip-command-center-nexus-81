@@ -8,16 +8,27 @@ import { Star, Edit, Trash2, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
+interface GalleryPhoto {
+  id: string;
+  src: string;
+  alt_text: string | null;
+  category: string;
+  display_order: number | null;
+  is_featured: boolean | null;
+  created_at: string;
+  updated_at: string;
+}
+
 interface GalleryGridProps {
-  photos: any[];
+  photos: GalleryPhoto[];
   onPhotoUpdated: () => void;
 }
 
 export const GalleryGrid: React.FC<GalleryGridProps> = ({ photos, onPhotoUpdated }) => {
-  const [selectedPhoto, setSelectedPhoto] = useState<any>(null);
+  const [selectedPhoto, setSelectedPhoto] = useState<GalleryPhoto | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleViewPhoto = (photo: any) => {
+  const handleViewPhoto = (photo: GalleryPhoto) => {
     setSelectedPhoto(photo);
     setIsModalOpen(true);
   };
@@ -47,7 +58,7 @@ export const GalleryGrid: React.FC<GalleryGridProps> = ({ photos, onPhotoUpdated
     }
   };
 
-  const handleToggleFeatured = async (photoId: string, currentFeatured: boolean) => {
+  const handleToggleFeatured = async (photoId: string, currentFeatured: boolean | null) => {
     try {
       const { error } = await supabase
         .from('gallery_photos')
