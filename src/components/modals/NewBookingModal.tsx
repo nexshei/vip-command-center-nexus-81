@@ -8,14 +8,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 export const NewBookingModal = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [clientName, setClientName] = useState('');
   const [eventType, setEventType] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [notes, setNotes] = useState('');
+  const [revenue, setRevenue] = useState('');
   const { toast } = useToast();
 
   const resetFormAndClose = () => {
@@ -24,19 +27,51 @@ export const NewBookingModal = () => {
     setDate('');
     setTime('');
     setNotes('');
+    setRevenue('');
     setIsOpen(false);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Creating booking:', { clientName, eventType, date, time, notes });
-    
-    toast({
-      title: "Booking Created",
-      description: `VVIP booking for ${clientName} has been scheduled successfully.`,
-    });
+    setIsLoading(true);
 
-    resetFormAndClose();
+    try {
+      // Combine date and time for scheduled_at
+      const scheduledAt = date && time ? `${date}T${time}:00` : null;
+
+      const { data, error } = await supabase
+        .from('bookings')
+        .insert([
+          {
+            client_name: clientName,
+            service_type: eventType,
+            scheduled_at: scheduledAt,
+            notes: notes,
+            revenue: revenue ? parseFloat(revenue) : 0,
+            status: 'pending',
+            approval_status: 'pending'
+          }
+        ])
+        .select();
+
+      if (error) throw error;
+
+      toast({
+        title: "Event Created Successfully",
+        description: `VVIP event for ${clientName} has been scheduled and is pending approval.`,
+      });
+
+      resetFormAndClose();
+    } catch (error: any) {
+      console.error('Error creating event:', error);
+      toast({
+        title: "Failed to Create Event",
+        description: error.message || "An error occurred while creating the event.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -44,12 +79,12 @@ export const NewBookingModal = () => {
       <DialogTrigger asChild>
         <Button className="bg-vip-gold text-white hover:bg-vip-gold-dark">
           <Plus className="h-4 w-4 mr-2" />
-          New Booking
+          Add New Event
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px] vip-glass border-vip-gold/20">
         <DialogHeader>
-          <DialogTitle className="text-vip-black text-xl font-semibold">Create New VVIP Booking</DialogTitle>
+          <DialogTitle className="text-vip-black text-xl font-semibold">Create New VVIP Event</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6 mt-4">
           <div className="space-y-2">
@@ -108,6 +143,17 @@ export const NewBookingModal = () => {
             </div>
           </div>
           <div className="space-y-2">
+            <Label htmlFor="revenue" className="text-sm font-medium text-vip-black">Expected Revenue (KSH)</Label>
+            <Input
+              id="revenue"
+              type="number"
+              value={revenue}
+              onChange={(e) => setRevenue(e.target.value)}
+              placeholder="Enter expected revenue"
+              className="w-full border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
+            />
+          </div>
+          <div className="space-y-2">
             <Label htmlFor="notes" className="text-sm font-medium text-vip-black">Notes</Label>
             <Textarea
               id="notes"
@@ -119,9 +165,21 @@ export const NewBookingModal = () => {
             />
           </div>
           <div className="flex justify-end gap-3 pt-6 border-t border-vip-gold/20">
-            <Button type="button" variant="outline" onClick={resetFormAndClose} className="px-6 border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10">Cancel</Button>
-            <Button type="submit" className="px-6 bg-vip-gold text-white hover:bg-vip-gold-dark">
-              Create Booking
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={resetFormAndClose} 
+              disabled={isLoading}
+              className="px-6 border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={isLoading}
+              className="px-6 bg-vip-gold text-white hover:bg-vip-gold-dark"
+            >
+              {isLoading ? 'Creating...' : 'Create Event'}
             </Button>
           </div>
         </form>

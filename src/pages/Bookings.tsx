@@ -7,11 +7,12 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Search, Plus, Calendar, Clock, User, MapPin, Eye, Edit, Trash2, FileText, DollarSign, TrendingUp, History } from 'lucide-react';
+import { Search, Plus, Calendar, Clock, User, MapPin, Eye, Edit, Trash2, FileText, DollarSign, TrendingUp, History, Check, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useRealtimeQuery } from "@/hooks/useRealtimeQuery";
+import { NewBookingModal } from '@/components/modals/NewBookingModal';
 
 const Bookings = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -31,6 +32,15 @@ const Bookings = () => {
       case 'pending': return 'bg-yellow-500 text-white';
       case 'completed': return 'bg-blue-500 text-white';
       case 'cancelled': return 'bg-red-500 text-white';
+      default: return 'bg-gray-500 text-white';
+    }
+  };
+
+  const getApprovalStatusColor = (status: string) => {
+    switch (status) {
+      case 'approved': return 'bg-green-500 text-white';
+      case 'pending': return 'bg-yellow-500 text-white';
+      case 'rejected': return 'bg-red-500 text-white';
       default: return 'bg-gray-500 text-white';
     }
   };
@@ -62,6 +72,50 @@ const Bookings = () => {
     if (!booking.scheduled_at) return true; // Include events without dates in previous
     return new Date(booking.scheduled_at) < now;
   });
+
+  const handleApproveEvent = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ approval_status: 'approved' })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Event Approved",
+        description: "The event has been approved successfully.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Approval Failed",
+        description: error.message || "An error occurred while approving.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleRejectEvent = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ approval_status: 'rejected' })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Event Rejected",
+        description: "The event has been rejected.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Rejection Failed",
+        description: error.message || "An error occurred while rejecting.",
+        variant: "destructive"
+      });
+    }
+  };
 
   const handleViewItem = (id: string) => {
     toast({
@@ -105,13 +159,13 @@ const Bookings = () => {
   const totalRevenue = previousEvents
     .filter((event: any) => event.status === 'completed')
     .reduce((sum: number, event: any) => {
-      // Assuming we'll add a cost/revenue field later, for now use a placeholder
       return sum + (event.revenue || 0);
     }, 0);
 
   const totalEvents = bookings.length;
   const confirmedEvents = bookings.filter((booking: any) => booking.status === 'confirmed').length;
   const completedEvents = previousEvents.filter((event: any) => event.status === 'completed').length;
+  const pendingApproval = bookings.filter((booking: any) => booking.approval_status === 'pending').length;
 
   return (
     <div className="space-y-6 p-6 max-w-7xl mx-auto">
@@ -121,10 +175,7 @@ const Bookings = () => {
           <h1 className="text-3xl font-serif font-bold text-vip-black">Events Management</h1>
           <p className="text-vip-gold/80 mt-2">Manage upcoming and previous VVIP events</p>
         </div>
-        <Button onClick={() => navigate('/create-booking')} className="bg-vip-gold text-white hover:bg-vip-gold-dark">
-          <Plus className="h-4 w-4 mr-2" />
-          Add New Event
-        </Button>
+        <NewBookingModal />
       </div>
 
       {/* Summary Stats */}
@@ -141,21 +192,21 @@ const Bookings = () => {
         
         <Card className="vip-glass border-vip-gold/20">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">Upcoming Events</CardTitle>
+            <CardTitle className="text-sm font-medium text-vip-gold/80">Pending Approval</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-black">{upcomingEvents.length}</div>
-            <p className="text-xs text-green-600">Scheduled ahead</p>
+            <div className="text-2xl font-bold text-vip-black">{pendingApproval}</div>
+            <p className="text-xs text-yellow-600">Awaiting approval</p>
           </CardContent>
         </Card>
 
         <Card className="vip-glass border-vip-gold/20">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">Completed Events</CardTitle>
+            <CardTitle className="text-sm font-medium text-vip-gold/80">Upcoming Events</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-black">{completedEvents}</div>
-            <p className="text-xs text-blue-600">Successfully finished</p>
+            <div className="text-2xl font-bold text-vip-black">{upcomingEvents.length}</div>
+            <p className="text-xs text-green-600">Scheduled ahead</p>
           </CardContent>
         </Card>
 
@@ -249,6 +300,7 @@ const Bookings = () => {
                       <TableHead>Date</TableHead>
                       <TableHead>Time</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>Approval</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -265,6 +317,33 @@ const Bookings = () => {
                             <Badge className={getStatusColor(event.status)}>
                               {event.status?.charAt(0).toUpperCase() + event.status?.slice(1) || 'Unknown'}
                             </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Badge className={getApprovalStatusColor(event.approval_status)}>
+                                {event.approval_status?.charAt(0).toUpperCase() + event.approval_status?.slice(1) || 'Unknown'}
+                              </Badge>
+                              {event.approval_status === 'pending' && (
+                                <div className="flex gap-1">
+                                  <Button 
+                                    onClick={() => handleApproveEvent(event.id)}
+                                    variant="outline" 
+                                    size="sm"
+                                    className="border-green-300 text-green-600 hover:bg-green-50"
+                                  >
+                                    <Check className="h-3 w-3" />
+                                  </Button>
+                                  <Button 
+                                    onClick={() => handleRejectEvent(event.id)}
+                                    variant="outline" 
+                                    size="sm"
+                                    className="border-red-300 text-red-600 hover:bg-red-50"
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
                           </TableCell>
                           <TableCell>
                             <div className="flex space-x-2">
