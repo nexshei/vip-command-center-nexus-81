@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -22,6 +21,7 @@ import Staff from "@/pages/Staff";
 import CareerPortal from "@/pages/CareerPortal";
 import Email from "@/pages/Email";
 import ContactSubmissions from "@/pages/ContactSubmissions";
+import Settings from "@/pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -156,6 +156,11 @@ const AppRoutes = () => {
       <Route path="/profile" element={
         <ProtectedRoute>
           <ProfilePage />
+        </ProtectedRoute>
+      } />
+      <Route path="/settings" element={
+        <ProtectedRoute>
+          <Settings />
         </ProtectedRoute>
       } />
       <Route path="/subscribers" element={
