@@ -2,167 +2,144 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { 
-  Briefcase, 
-  Plus, 
-  MapPin, 
-  Clock, 
-  DollarSign, 
-  Users,
-  Eye,
-  Edit,
-  Download,
-  FileText,
-  Mail,
-  Phone,
-  CheckCircle,
-  XCircle
-} from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Plus, Briefcase, Users, Eye, Edit, Trash2, Calendar, MapPin } from 'lucide-react';
+import { useRealtimeQuery } from '@/hooks/useRealtimeQuery';
+import { useToast } from '@/hooks/use-toast';
+import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
+import { ViewDetailsModal } from '@/components/modals/ViewDetailsModal';
+import { JobOpeningModal } from '@/components/modals/JobOpeningModal';
+import { supabase } from '@/integrations/supabase/client';
+
+interface Job {
+  id: string;
+  title: string;
+  department: string | null;
+  location: string | null;
+  description: string | null;
+  requirements: string[] | null;
+  employment_type: string;
+  salary_range: string | null;
+  application_deadline: string | null;
+  status: 'active' | 'closed' | 'draft';
+  created_at: string;
+  updated_at: string;
+}
+
+interface Application {
+  id: string;
+  full_name: string;
+  email: string;
+  phone: string | null;
+  position: string | null;
+  cover_letter: string | null;
+  cv_url: string | null;
+  professional_photo_url: string | null;
+  created_at: string;
+}
 
 const Careers = () => {
-  const [showJobForm, setShowJobForm] = useState(false);
-  const [selectedPosition, setSelectedPosition] = useState('');
+  const [activeTab, setActiveTab] = useState('jobs');
+  const [jobModal, setJobModal] = useState({ open: false, job: null });
+  const [deleteModal, setDeleteModal] = useState({ open: false, item: null, type: '' });
+  const [viewModal, setViewModal] = useState({ open: false, item: null, type: '' });
+  const { toast } = useToast();
 
-  // Mock job applications data
-  const jobApplications = [
-    {
-      id: 1,
-      fullName: "Alice Wanjiku Muthoni",
-      email: "alice.muthoni@email.com",
-      phone: "+254 712 345 678",
-      position: "Protocol Officer",
-      appliedDate: "2024-01-15",
-      status: "pending",
-      coverLetter: "I am passionate about diplomatic protocol and have 5 years experience...",
-      cv: "alice_cv.pdf",
-      photo: "alice_photo.jpg"
-    },
-    {
-      id: 2,
-      fullName: "John Kiprotich Mwangi",
-      email: "john.mwangi@email.com",
-      phone: "+254 722 456 789",
-      position: "Professional Usher",
-      appliedDate: "2024-01-18",
-      status: "approved",
-      coverLetter: "With my background in hospitality and event management...",
-      cv: "john_cv.pdf",
-      photo: "john_photo.jpg"
-    },
-    {
-      id: 3,
-      fullName: "Grace Achieng Odhiambo",
-      email: "grace.odhiambo@email.com",
-      phone: "+254 733 567 890",
-      position: "Event Manager",
-      appliedDate: "2024-01-20",
-      status: "rejected",
-      coverLetter: "I have successfully managed over 50 high-profile events...",
-      cv: "grace_cv.pdf",
-      photo: "grace_photo.jpg"
-    },
-    {
-      id: 4,
-      fullName: "Peter Kamau Ndung'u",
-      email: "peter.kamau@email.com",
-      phone: "+254 744 678 901",
-      position: "VVIP Security Specialist",
-      appliedDate: "2024-01-22",
-      status: "pending",
-      coverLetter: "Former military officer with extensive VIP protection experience...",
-      cv: "peter_cv.pdf",
-      photo: "peter_photo.jpg"
-    }
-  ];
+  // Fetch jobs and applications
+  const { data: jobsData, isLoading: jobsLoading, error: jobsError, refetch: refetchJobs } = useRealtimeQuery('careers', { orderBy: 'created_at' });
+  const { data: applicationsData, isLoading: applicationsLoading, error: applicationsError, refetch: refetchApplications } = useRealtimeQuery('career_applications', { orderBy: 'created_at' });
 
-  const availablePositions = [
-    {
-      id: 1,
-      title: "Protocol Officer",
-      description: "Lead diplomatic and corporate protocol services, ensuring adherence to international etiquette standards and managing high-profile events with precision.",
-      type: "Full-time",
-      location: "Nairobi",
-      requirements: [
-        "Bachelor's degree in International Relations, Communications, or related field",
-        "3+ years experience in protocol or diplomatic services",
-        "Excellent communication and interpersonal skills",
-        "Knowledge of international etiquette and cultural sensitivity",
-        "Fluency in English and Swahili; additional languages preferred"
-      ]
-    },
-    {
-      id: 2,
-      title: "Professional Usher",
-      description: "Provide exceptional guest reception and guidance services for VIP events and ceremonies.",
-      type: "Full-time / Part-time",
-      location: "Nairobi",
-      requirements: [
-        "Professional appearance and demeanor",
-        "Excellent customer service skills",
-        "Experience in hospitality or events",
-        "Multilingual capabilities preferred"
-      ]
-    },
-    {
-      id: 3,
-      title: "Event Manager",
-      description: "Plan, coordinate and execute high-profile events with attention to detail and excellence.",
-      type: "Full-time",
-      location: "Nairobi",
-      requirements: [
-        "Event management certification",
-        "5+ years in luxury event planning",
-        "Strong organizational skills",
-        "Vendor management experience"
-      ]
-    },
-    {
-      id: 4,
-      title: "VVIP Security Specialist",
-      description: "Provide discrete and professional security services for VIP clients and events.",
-      type: "Full-time",
-      location: "Nairobi",
-      requirements: [
-        "Security training certification",
-        "Military or law enforcement background",
-        "VIP protection experience",
-        "Physical fitness requirements"
-      ]
-    }
-  ];
+  // Type guards
+  const isJob = (item: any): item is Job => {
+    return item && typeof item === 'object' && typeof item.id === 'string' && typeof item.title === 'string';
+  };
+
+  const isApplication = (item: any): item is Application => {
+    return item && typeof item === 'object' && typeof item.id === 'string' && typeof item.full_name === 'string';
+  };
+
+  // Safely handle data
+  const jobs: Job[] = !jobsError && Array.isArray(jobsData) ? jobsData.filter(isJob) : [];
+  const applications: Application[] = !applicationsError && Array.isArray(applicationsData) ? applicationsData.filter(isApplication) : [];
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-500 text-white';
-      case 'approved': return 'bg-green-500 text-white';
-      case 'rejected': return 'bg-red-500 text-white';
-      default: return 'bg-gray-500 text-white';
+      case 'active': return 'bg-green-100 text-green-800';
+      case 'closed': return 'bg-red-100 text-red-800';
+      case 'draft': return 'bg-yellow-100 text-yellow-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const handleApproveApplication = (id: number) => {
-    console.log('Approving application:', id);
+  const handleAddJob = () => {
+    setJobModal({ open: true, job: null });
   };
 
-  const handleRejectApplication = (id: number) => {
-    console.log('Rejecting application:', id);
+  const handleEditJob = (job: Job) => {
+    setJobModal({ open: true, job });
   };
 
-  const handlePostJob = () => {
-    console.log('Posting new job');
-    setShowJobForm(false);
+  const handleDeleteJob = (job: Job) => {
+    setDeleteModal({ open: true, item: job, type: 'job' });
   };
 
-  const filteredApplications = selectedPosition 
-    ? jobApplications.filter(app => app.position === selectedPosition)
-    : jobApplications;
+  const handleViewJob = (job: Job) => {
+    setViewModal({ open: true, item: job, type: 'job' });
+  };
+
+  const handleViewApplication = (application: Application) => {
+    setViewModal({ open: true, item: application, type: 'application' });
+  };
+
+  const handleDeleteApplication = (application: Application) => {
+    setDeleteModal({ open: true, item: application, type: 'application' });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteModal.item) return;
+
+    try {
+      const table = deleteModal.type === 'job' ? 'careers' : 'career_applications';
+      const { error } = await supabase
+        .from(table)
+        .delete()
+        .eq('id', deleteModal.item.id);
+
+      if (error) throw error;
+
+      if (deleteModal.type === 'job') {
+        refetchJobs();
+      } else {
+        refetchApplications();
+      }
+
+      toast({
+        title: `${deleteModal.type === 'job' ? 'Job' : 'Application'} Deleted`,
+        description: `The ${deleteModal.type} has been successfully deleted.`,
+      });
+
+      setDeleteModal({ open: false, item: null, type: '' });
+    } catch (error) {
+      console.error('Error deleting:', error);
+      toast({
+        title: "Error",
+        description: `Failed to delete ${deleteModal.type}. Please try again.`,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleJobUpdated = () => {
+    refetchJobs();
+    toast({
+      title: "Job Updated",
+      description: "The job posting has been updated successfully.",
+    });
+  };
+
+  const activeJobs = jobs.filter(job => job.status === 'active').length;
+  const totalApplications = applications.length;
 
   return (
     <div className="space-y-6 p-6 max-w-7xl mx-auto">
@@ -170,319 +147,304 @@ const Careers = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-serif font-bold text-vip-black">Career Management</h1>
-          <p className="text-vip-gold/80 mt-2">Manage job applications and postings for VIP protocol positions</p>
+          <p className="text-vip-gold/80 mt-2">Manage job postings and view applications</p>
         </div>
-        <Button 
-          onClick={() => setShowJobForm(!showJobForm)}
-          className="bg-vip-gold text-white hover:bg-vip-gold-dark"
-        >
+        <Button onClick={handleAddJob} className="bg-vip-gold text-black hover:bg-vip-gold/90">
           <Plus className="h-4 w-4 mr-2" />
           Post New Job
         </Button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-6 md:grid-cols-4">
-        <Card className="bg-white border border-vip-gold/20 shadow-sm">
+      {/* Summary Stats */}
+      <div className="grid gap-6 md:grid-cols-3">
+        <Card className="vip-glass border-vip-gold/20">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">Total Applications</CardTitle>
+            <CardTitle className="text-sm font-medium text-vip-gold/80">Total Jobs</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-black">{jobApplications.length}</div>
-            <p className="text-xs text-vip-gold/60">All positions</p>
+            <div className="text-2xl font-bold text-vip-black">{jobs.length}</div>
+            <p className="text-xs text-vip-gold/60">Job postings</p>
           </CardContent>
         </Card>
         
-        <Card className="bg-white border border-vip-gold/20 shadow-sm">
+        <Card className="vip-glass border-vip-gold/20">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">Pending Review</CardTitle>
+            <CardTitle className="text-sm font-medium text-vip-gold/80">Active Jobs</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-black">
-              {jobApplications.filter(app => app.status === 'pending').length}
-            </div>
-            <p className="text-xs text-yellow-600">Needs attention</p>
+            <div className="text-2xl font-bold text-vip-black">{activeJobs}</div>
+            <p className="text-xs text-green-600">Currently accepting applications</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-white border border-vip-gold/20 shadow-sm">
+        <Card className="vip-glass border-vip-gold/20">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">Approved</CardTitle>
+            <CardTitle className="text-sm font-medium text-vip-gold/80">Applications</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-black">
-              {jobApplications.filter(app => app.status === 'approved').length}
-            </div>
-            <p className="text-xs text-green-600">Ready for hiring</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white border border-vip-gold/20 shadow-sm">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">Available Positions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-vip-black">{availablePositions.length}</div>
-            <p className="text-xs text-vip-gold/60">Active openings</p>
+            <div className="text-2xl font-bold text-vip-black">{totalApplications}</div>
+            <p className="text-xs text-blue-600">Total received</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Job Posting Form */}
-      {showJobForm && (
-        <Card className="bg-white border border-vip-gold/20 shadow-sm">
-          <CardHeader className="border-b border-vip-gold/10">
-            <CardTitle className="text-vip-black">Post New Job Opening</CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div className="grid gap-6 md:grid-cols-2">
-              <div className="grid gap-3">
-                <Label htmlFor="job-title" className="text-sm font-medium text-vip-black">Job Title</Label>
-                <Input 
-                  id="job-title" 
-                  placeholder="e.g., Senior Protocol Officer"
-                  className="border-vip-gold/30 bg-white text-vip-black focus:border-vip-gold"
-                />
-              </div>
-              <div className="grid gap-3">
-                <Label htmlFor="job-type" className="text-sm font-medium text-vip-black">Employment Type</Label>
-                <Select>
-                  <SelectTrigger className="border-vip-gold/30 bg-white text-vip-black focus:border-vip-gold">
-                    <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white border-vip-gold/20">
-                    <SelectItem value="full-time">Full-time</SelectItem>
-                    <SelectItem value="part-time">Part-time</SelectItem>
-                    <SelectItem value="contract">Contract</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-3">
-                <Label htmlFor="location" className="text-sm font-medium text-vip-black">Location</Label>
-                <Input 
-                  id="location" 
-                  placeholder="e.g., Nairobi, Kenya"
-                  className="border-vip-gold/30 bg-white text-vip-black focus:border-vip-gold"
-                />
-              </div>
-              <div className="grid gap-3">
-                <Label htmlFor="salary" className="text-sm font-medium text-vip-black">Salary Range</Label>
-                <Input 
-                  id="salary" 
-                  placeholder="e.g., KSH 150,000 - 200,000"
-                  className="border-vip-gold/30 bg-white text-vip-black focus:border-vip-gold"
-                />
-              </div>
-              <div className="col-span-2 grid gap-3">
-                <Label htmlFor="description" className="text-sm font-medium text-vip-black">Job Description</Label>
-                <Textarea 
-                  id="description" 
-                  placeholder="Detailed job description and responsibilities..."
-                  rows={4}
-                  className="border-vip-gold/30 bg-white text-vip-black focus:border-vip-gold"
-                />
-              </div>
-              <div className="col-span-2 grid gap-3">
-                <Label htmlFor="requirements" className="text-sm font-medium text-vip-black">Requirements</Label>
-                <Textarea 
-                  id="requirements" 
-                  placeholder="List the requirements for this position..."
-                  rows={3}
-                  className="border-vip-gold/30 bg-white text-vip-black focus:border-vip-gold"
-                />
-              </div>
-            </div>
-            <div className="flex justify-end space-x-3 mt-6">
-              <Button 
-                variant="outline" 
-                onClick={() => setShowJobForm(false)}
-                className="border-vip-gold/30 text-vip-black hover:bg-vip-gold/10"
-              >
-                Cancel
-              </Button>
-              <Button 
-                onClick={handlePostJob}
-                className="bg-vip-gold text-white hover:bg-vip-gold-dark"
-              >
-                Post Job Opening
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="jobs" className="flex items-center gap-2">
+            <Briefcase className="h-4 w-4" />
+            Job Postings
+          </TabsTrigger>
+          <TabsTrigger value="applications" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Applications
+          </TabsTrigger>
+        </TabsList>
 
-      {/* Applications Filter */}
-      <Card className="bg-white border border-vip-gold/20 shadow-sm">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center text-vip-black">
-              <Users className="h-5 w-5 mr-2 text-vip-gold" />
-              Job Applications ({filteredApplications.length})
-            </CardTitle>
-            <Select value={selectedPosition} onValueChange={setSelectedPosition}>
-              <SelectTrigger className="w-64 border-vip-gold/30 bg-white text-vip-black focus:border-vip-gold">
-                <SelectValue placeholder="Filter by position" />
-              </SelectTrigger>
-              <SelectContent className="bg-white border-vip-gold/20">
-                <SelectItem value="">All Positions</SelectItem>
-                {availablePositions.map((position) => (
-                  <SelectItem key={position.id} value={position.title}>
-                    {position.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow className="border-vip-gold/20">
-                <TableHead className="text-vip-black font-semibold">Candidate</TableHead>
-                <TableHead className="text-vip-black font-semibold">Position</TableHead>
-                <TableHead className="text-vip-black font-semibold">Applied Date</TableHead>
-                <TableHead className="text-vip-black font-semibold">Status</TableHead>
-                <TableHead className="text-vip-black font-semibold">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredApplications.map((application) => (
-                <TableRow key={application.id} className="border-vip-gold/10 hover:bg-vip-gold/5">
-                  <TableCell>
-                    <div>
-                      <div className="font-medium text-vip-black">{application.fullName}</div>
-                      <div className="flex items-center text-sm text-vip-gold/70 mt-1">
-                        <Mail className="h-3 w-3 mr-1" />
-                        {application.email}
-                      </div>
-                      <div className="flex items-center text-sm text-vip-gold/70">
-                        <Phone className="h-3 w-3 mr-1" />
-                        {application.phone}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-vip-black">{application.position}</TableCell>
-                  <TableCell className="text-vip-black">
-                    {new Date(application.appliedDate).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={getStatusColor(application.status)}>
-                      {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button variant="outline" size="sm" className="border-vip-gold/30 text-vip-black hover:bg-vip-gold/10">
-                            <Eye className="h-3 w-3" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-2xl">
-                          <DialogHeader>
-                            <DialogTitle className="text-vip-black">Application Details - {application.fullName}</DialogTitle>
-                          </DialogHeader>
-                          <div className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                              <div>
-                                <Label className="font-semibold text-vip-black">Position</Label>
-                                <p className="text-vip-gold/80">{application.position}</p>
-                              </div>
-                              <div>
-                                <Label className="font-semibold text-vip-black">Applied Date</Label>
-                                <p className="text-vip-gold/80">{new Date(application.appliedDate).toLocaleDateString()}</p>
-                              </div>
-                            </div>
-                            <div>
-                              <Label className="font-semibold text-vip-black">Cover Letter</Label>
-                              <p className="text-vip-gold/80 mt-1">{application.coverLetter}</p>
-                            </div>
-                            <div className="flex space-x-4">
-                              <Button variant="outline" className="flex items-center">
-                                <FileText className="h-4 w-4 mr-2" />
-                                Download CV
-                              </Button>
-                              <Button variant="outline" className="flex items-center">
-                                <Download className="h-4 w-4 mr-2" />
-                                Download Photo
-                              </Button>
-                            </div>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                      
-                      {application.status === 'pending' && (
-                        <>
-                          <Button 
-                            onClick={() => handleApproveApplication(application.id)}
-                            size="sm" 
-                            className="bg-green-500 text-white hover:bg-green-600"
-                          >
-                            <CheckCircle className="h-3 w-3" />
-                          </Button>
-                          <Button 
-                            onClick={() => handleRejectApplication(application.id)}
-                            size="sm" 
-                            className="bg-red-500 text-white hover:bg-red-600"
-                          >
-                            <XCircle className="h-3 w-3" />
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-
-      {/* Available Positions */}
-      <Card className="bg-white border border-vip-gold/20 shadow-sm">
-        <CardHeader className="border-b border-vip-gold/10">
-          <CardTitle className="flex items-center text-vip-black">
-            <Briefcase className="h-5 w-5 mr-2 text-vip-gold" />
-            Available Positions
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="divide-y divide-vip-gold/10">
-            {availablePositions.map((position) => (
-              <div key={position.id} className="p-6 hover:bg-vip-gold/5 transition-colors">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="text-lg font-semibold text-vip-black">{position.title}</h3>
-                      <Badge variant="outline" className="border-vip-gold/30 text-vip-black">
-                        {position.type}
-                      </Badge>
-                    </div>
-                    <p className="text-vip-gold/70 mb-3">{position.description}</p>
-                    <div className="flex items-center text-sm text-vip-gold/70 mb-3">
-                      <MapPin className="h-4 w-4 mr-1" />
-                      {position.location}
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-vip-black mb-2">Requirements:</h4>
-                      <ul className="list-disc list-inside text-sm text-vip-gold/70 space-y-1">
-                        {position.requirements.map((req, index) => (
-                          <li key={index}>{req}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                  <div className="flex space-x-2">
-                    <Button variant="outline" size="sm" className="border-vip-gold/30 text-vip-black hover:bg-vip-gold/10">
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                  </div>
+        <TabsContent value="jobs" className="space-y-4">
+          <Card className="vip-glass border-vip-gold/20">
+            <CardHeader>
+              <CardTitle className="flex items-center text-vip-black">
+                <Briefcase className="h-5 w-5 mr-2 text-vip-gold" />
+                Job Postings ({jobs.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {jobsLoading ? (
+                <div className="text-center py-8">
+                  <p className="text-vip-gold/60">Loading jobs...</p>
                 </div>
+              ) : jobs.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-vip-gold/60">No job postings yet. Create your first job posting to get started.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {jobs.map((job) => (
+                    <div key={job.id} className="p-4 border border-vip-gold/20 rounded-lg vip-glass-light hover:bg-vip-gold/5 transition-colors">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h3 className="font-semibold text-vip-black">{job.title}</h3>
+                            <Badge className={getStatusColor(job.status)}>
+                              {job.status}
+                            </Badge>
+                          </div>
+                          <div className="space-y-1 text-sm text-vip-gold/80">
+                            {job.department && (
+                              <p>Department: {job.department}</p>
+                            )}
+                            {job.location && (
+                              <div className="flex items-center gap-1">
+                                <MapPin className="h-3 w-3" />
+                                {job.location}
+                              </div>
+                            )}
+                            {job.employment_type && (
+                              <p>Type: {job.employment_type}</p>
+                            )}
+                            {job.salary_range && (
+                              <p>Salary: {job.salary_range}</p>
+                            )}
+                            {job.application_deadline && (
+                              <div className="flex items-center gap-1">
+                                <Calendar className="h-3 w-3" />
+                                Deadline: {new Date(job.application_deadline).toLocaleDateString()}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() => handleViewJob(job)}
+                            variant="outline"
+                            size="sm"
+                            className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            onClick={() => handleEditJob(job)}
+                            variant="outline"
+                            size="sm"
+                            className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            onClick={() => handleDeleteJob(job)}
+                            variant="outline"
+                            size="sm"
+                            className="border-red-300 text-red-600 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="applications" className="space-y-4">
+          <Card className="vip-glass border-vip-gold/20">
+            <CardHeader>
+              <CardTitle className="flex items-center text-vip-black">
+                <Users className="h-5 w-5 mr-2 text-vip-gold" />
+                Applications ({applications.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {applicationsLoading ? (
+                <div className="text-center py-8">
+                  <p className="text-vip-gold/60">Loading applications...</p>
+                </div>
+              ) : applications.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-vip-gold/60">No applications received yet.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {applications.map((application) => (
+                    <div key={application.id} className="p-4 border border-vip-gold/20 rounded-lg vip-glass-light hover:bg-vip-gold/5 transition-colors">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-vip-black mb-1">{application.full_name}</h3>
+                          <div className="space-y-1 text-sm text-vip-gold/80">
+                            <p>Email: {application.email}</p>
+                            {application.phone && <p>Phone: {application.phone}</p>}
+                            {application.position && <p>Position: {application.position}</p>}
+                            <p>Applied: {new Date(application.created_at).toLocaleDateString()}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() => handleViewApplication(application)}
+                            variant="outline"
+                            size="sm"
+                            className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            onClick={() => handleDeleteApplication(application)}
+                            variant="outline"
+                            size="sm"
+                            className="border-red-300 text-red-600 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* Modals */}
+      <JobOpeningModal
+        open={jobModal.open}
+        onOpenChange={(open) => setJobModal({ ...jobModal, open })}
+        job={jobModal.job}
+        onJobUpdated={handleJobUpdated}
+      />
+
+      <DeleteConfirmationModal
+        open={deleteModal.open}
+        onOpenChange={(open) => setDeleteModal({ ...deleteModal, open })}
+        title={`Delete ${deleteModal.type === 'job' ? 'Job' : 'Application'}`}
+        description={`Are you sure you want to delete this ${deleteModal.type}?`}
+        itemName={deleteModal.item?.title || deleteModal.item?.full_name || ''}
+        onConfirm={confirmDelete}
+      />
+
+      <ViewDetailsModal
+        open={viewModal.open}
+        onOpenChange={(open) => setViewModal({ ...viewModal, open })}
+        title={viewModal.type === 'job' ? 'Job Details' : 'Application Details'}
+      >
+        {viewModal.item && viewModal.type === 'job' && (
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-semibold text-vip-black">Title</h3>
+              <p className="text-vip-gold/80">{viewModal.item.title}</p>
+            </div>
+            {viewModal.item.department && (
+              <div>
+                <h3 className="font-semibold text-vip-black">Department</h3>
+                <p className="text-vip-gold/80">{viewModal.item.department}</p>
               </div>
-            ))}
+            )}
+            {viewModal.item.location && (
+              <div>
+                <h3 className="font-semibold text-vip-black">Location</h3>
+                <p className="text-vip-gold/80">{viewModal.item.location}</p>
+              </div>
+            )}
+            {viewModal.item.description && (
+              <div>
+                <h3 className="font-semibold text-vip-black">Description</h3>
+                <p className="text-vip-gold/80">{viewModal.item.description}</p>
+              </div>
+            )}
+            {viewModal.item.requirements && (
+              <div>
+                <h3 className="font-semibold text-vip-black">Requirements</h3>
+                <ul className="text-vip-gold/80 list-disc list-inside">
+                  {viewModal.item.requirements.map((req, index) => (
+                    <li key={index}>{req}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
-        </CardContent>
-      </Card>
+        )}
+        {viewModal.item && viewModal.type === 'application' && (
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-semibold text-vip-black">Full Name</h3>
+              <p className="text-vip-gold/80">{viewModal.item.full_name}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-vip-black">Email</h3>
+              <p className="text-vip-gold/80">{viewModal.item.email}</p>
+            </div>
+            {viewModal.item.phone && (
+              <div>
+                <h3 className="font-semibold text-vip-black">Phone</h3>
+                <p className="text-vip-gold/80">{viewModal.item.phone}</p>
+              </div>
+            )}
+            {viewModal.item.position && (
+              <div>
+                <h3 className="font-semibold text-vip-black">Position Applied For</h3>
+                <p className="text-vip-gold/80">{viewModal.item.position}</p>
+              </div>
+            )}
+            {viewModal.item.cover_letter && (
+              <div>
+                <h3 className="font-semibold text-vip-black">Cover Letter</h3>
+                <p className="text-vip-gold/80 whitespace-pre-wrap">{viewModal.item.cover_letter}</p>
+              </div>
+            )}
+            {viewModal.item.cv_url && (
+              <div>
+                <h3 className="font-semibold text-vip-black">CV</h3>
+                <a href={viewModal.item.cv_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                  View CV
+                </a>
+              </div>
+            )}
+          </div>
+        )}
+      </ViewDetailsModal>
     </div>
   );
 };

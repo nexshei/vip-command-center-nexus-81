@@ -8,6 +8,7 @@ export type SupabaseTable =
   | "analytics"
   | "bookings"
   | "career_applications"
+  | "careers"
   | "clients"
   | "communications"
   | "contact_submissions"

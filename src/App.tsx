@@ -20,6 +20,7 @@ import Analytics from "@/pages/Analytics";
 import CreateBooking from "@/pages/CreateBooking";
 import GenerateQuote from "@/pages/GenerateQuote";
 import Inventory from "@/pages/Inventory";
+import Careers from "@/pages/Careers";
 import Gallery from "@/pages/Gallery";
 import Staff from "@/pages/Staff";
 import CareerPortal from "@/pages/CareerPortal";
@@ -142,6 +143,11 @@ const AppRoutes = () => {
           <Inventory />
         </ProtectedRoute>
       } />
+      <Route path="/careers" element={
+        <ProtectedRoute>
+          <Careers />
+        </ProtectedRoute>
+      } />
       <Route path="/gallery" element={
         <ProtectedRoute>
           <Gallery />
@@ -165,11 +171,6 @@ const AppRoutes = () => {
       <Route path="/analytics" element={
         <ProtectedRoute>
           <Analytics />
-        </ProtectedRoute>
-      } />
-      <Route path="/careers" element={
-        <ProtectedRoute>
-          <CareerPortal />
         </ProtectedRoute>
       } />
       <Route path="/profile" element={

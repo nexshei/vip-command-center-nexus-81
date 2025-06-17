@@ -114,6 +114,51 @@ export type Database = {
         }
         Relationships: []
       }
+      careers: {
+        Row: {
+          application_deadline: string | null
+          created_at: string
+          department: string | null
+          description: string | null
+          employment_type: string | null
+          id: string
+          location: string | null
+          requirements: string[] | null
+          salary_range: string | null
+          status: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          application_deadline?: string | null
+          created_at?: string
+          department?: string | null
+          description?: string | null
+          employment_type?: string | null
+          id?: string
+          location?: string | null
+          requirements?: string[] | null
+          salary_range?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          application_deadline?: string | null
+          created_at?: string
+          department?: string | null
+          description?: string | null
+          employment_type?: string | null
+          id?: string
+          location?: string | null
+          requirements?: string[] | null
+          salary_range?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       clients: {
         Row: {
           company: string | null
