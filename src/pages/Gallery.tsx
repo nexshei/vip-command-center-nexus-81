@@ -32,8 +32,16 @@ const Gallery = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [photoToDelete, setPhotoToDelete] = useState<GalleryPhoto | null>(null);
 
-  // Fix TypeScript error by properly handling the data type
-  const galleryPhotos = (photos || []) as GalleryPhoto[];
+  // Properly handle the data type with type guard
+  const galleryPhotos: GalleryPhoto[] = Array.isArray(photos) 
+    ? photos.filter((item): item is GalleryPhoto => 
+        typeof item === 'object' && 
+        item !== null && 
+        'id' in item && 
+        'src' in item && 
+        'category' in item
+      )
+    : [];
 
   const handleDeletePhoto = async () => {
     if (!photoToDelete) return;
