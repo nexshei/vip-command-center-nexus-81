@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -230,22 +229,10 @@ const CreateBooking = () => {
   };
 
   const handleClientSelection = (clientName: string) => {
-    // Type guard to ensure clientsData is an array of clients
-    const isValidClientsData = (data: any): data is Client[] => {
-      return Array.isArray(data) && data.length > 0 && 
-             typeof data[0] === 'object' && 
-             'id' in data[0] && 
-             'full_name' in data[0];
-    };
-
-    if (isValidClientsData(clientsData)) {
-      const selectedClient = clientsData.find((client: Client) => client.full_name === clientName);
-      handleInputChange('clientName', clientName);
-      handleInputChange('clientId', selectedClient?.id || '');
-    } else {
-      handleInputChange('clientName', clientName);
-      handleInputChange('clientId', '');
-    }
+    const validClients = getValidClients();
+    const selectedClient = validClients.find((client: Client) => client.full_name === clientName);
+    handleInputChange('clientName', clientName);
+    handleInputChange('clientId', selectedClient?.id || '');
   };
 
   // Type guard for safe client data usage
@@ -256,17 +243,12 @@ const CreateBooking = () => {
     
     const firstItem = clientsData[0];
     
-    // Explicit null and undefined check
-    if (firstItem === null || firstItem === undefined) {
+    // Check for null/undefined and ensure it's an object with required properties
+    if (!firstItem || typeof firstItem !== 'object') {
       return [];
     }
     
-    // Check if firstItem is an object
-    if (typeof firstItem !== 'object') {
-      return [];
-    }
-    
-    // Now TypeScript knows firstItem is not null and is an object
+    // Check if firstItem has required properties
     if ('id' in firstItem && 'full_name' in firstItem) {
       return clientsData as unknown as Client[];
     }

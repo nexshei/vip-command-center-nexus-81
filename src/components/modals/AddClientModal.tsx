@@ -22,6 +22,7 @@ export const AddClientModal = ({ open, onOpenChange, onClientAdded }: AddClientM
   const [phone, setPhone] = useState('');
   const [eventType, setEventType] = useState('');
   const [company, setCompany] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const isOpen = open ?? internalOpen;
@@ -29,59 +30,73 @@ export const AddClientModal = ({ open, onOpenChange, onClientAdded }: AddClientM
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!name.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Client name is required.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
     console.log('Adding client:', { name, email, phone, eventType, company });
     
     try {
-      // Insert into Supabase
+      // Insert into Supabase with explicit column mapping
       const { data, error } = await supabase
         .from('clients')
-        .insert([
-          {
-            full_name: name,
-            email: email,
-            phone: phone,
-            company: company,
-            notes: eventType,
-          }
-        ])
+        .insert({
+          full_name: name.trim(),
+          email: email.trim() || null,
+          phone: phone.trim() || null,
+          company: company.trim() || null,
+          notes: eventType || null,
+        })
         .select()
         .single();
 
       if (error) {
         console.error('Error adding client:', error);
         toast({
-          title: "Error",
-          description: "Failed to add client. Please try again.",
+          title: "Error Adding Client",
+          description: error.message || "Failed to add client. Please try again.",
           variant: "destructive"
         });
         return;
       }
 
+      console.log('Client added successfully:', data);
+      
       toast({
-        title: "Client Added",
+        title: "Client Added Successfully",
         description: `${name} has been added to your VVIP client database.`,
       });
 
       // Call the onClientAdded callback if provided
-      if (onClientAdded) {
+      if (onClientAdded && data) {
         onClientAdded(data);
       }
-    } catch (error) {
-      console.error('Error adding client:', error);
+
+      // Reset form and close modal
+      setName('');
+      setEmail('');
+      setPhone('');
+      setEventType('');
+      setCompany('');
+      setIsOpen(false);
+
+    } catch (error: any) {
+      console.error('Unexpected error adding client:', error);
       toast({
-        title: "Error",
-        description: "Failed to add client. Please try again.",
+        title: "Unexpected Error",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setIsSubmitting(false);
     }
-
-    // Reset form and close modal
-    setName('');
-    setEmail('');
-    setPhone('');
-    setEventType('');
-    setCompany('');
-    setIsOpen(false);
   };
 
   const handleCancel = () => {
@@ -119,12 +134,13 @@ export const AddClientModal = ({ open, onOpenChange, onClientAdded }: AddClientM
               placeholder="Enter full name"
               className="w-full border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
               required
+              disabled={isSubmitting}
             />
           </div>
           
           <div className="space-y-2">
             <Label htmlFor="email" className="text-sm font-medium text-vip-black">
-              Email Address *
+              Email Address
             </Label>
             <Input
               id="email"
@@ -133,13 +149,13 @@ export const AddClientModal = ({ open, onOpenChange, onClientAdded }: AddClientM
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter email address"
               className="w-full border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
-              required
+              disabled={isSubmitting}
             />
           </div>
           
           <div className="space-y-2">
             <Label htmlFor="phone" className="text-sm font-medium text-vip-black">
-              Phone Number *
+              Phone Number
             </Label>
             <Input
               id="phone"
@@ -147,15 +163,15 @@ export const AddClientModal = ({ open, onOpenChange, onClientAdded }: AddClientM
               onChange={(e) => setPhone(e.target.value)}
               placeholder="Enter phone number"
               className="w-full border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
-              required
+              disabled={isSubmitting}
             />
           </div>
           
           <div className="space-y-2">
             <Label htmlFor="eventType" className="text-sm font-medium text-vip-black">
-              Event Type *
+              Preferred Event Type
             </Label>
-            <Select value={eventType} onValueChange={setEventType} required>
+            <Select value={eventType} onValueChange={setEventType} disabled={isSubmitting}>
               <SelectTrigger className="w-full border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black">
                 <SelectValue placeholder="Select event type" />
               </SelectTrigger>
@@ -184,6 +200,7 @@ export const AddClientModal = ({ open, onOpenChange, onClientAdded }: AddClientM
               onChange={(e) => setCompany(e.target.value)}
               placeholder="Enter company or organization"
               className="w-full border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
+              disabled={isSubmitting}
             />
           </div>
           
@@ -193,14 +210,26 @@ export const AddClientModal = ({ open, onOpenChange, onClientAdded }: AddClientM
               variant="outline" 
               onClick={handleCancel}
               className="px-6 border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+              disabled={isSubmitting}
             >
               Cancel
             </Button>
             <Button 
               type="submit" 
               className="px-6 bg-vip-gold text-white hover:bg-vip-gold-dark"
+              disabled={isSubmitting}
             >
-              Add Client
+              {isSubmitting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Adding...
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Client
+                </>
+              )}
             </Button>
           </div>
         </form>

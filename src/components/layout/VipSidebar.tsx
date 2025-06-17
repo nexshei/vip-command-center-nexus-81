@@ -1,219 +1,94 @@
+import React, { useState } from 'react';
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Menu } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Home, Calendar, FileText, Users, Settings, Plus } from "lucide-react"
+import { useNavigate } from 'react-router-dom';
+import { cn } from "@/lib/utils"
 
-import React from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate, useLocation } from 'react-router-dom';
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from '@/components/ui/sidebar';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import {
-  Crown,
-  LayoutDashboard,
-  Calendar,
-  Briefcase,
-  BarChart3,
-  Bell,
-  LogOut,
-  Star,
-  Mail,
-  CreditCard,
-  UserCheck,
-  FileText,
-  Zap,
-  Plus,
-  Package,
-  User
-} from 'lucide-react';
+interface VipSidebarProps {
+  onNavigate: (path: string) => void;
+}
 
-const VipSidebar = () => {
-  const { user, logout } = useAuth();
+export const VipSidebar = ({ onNavigate }: VipSidebarProps) => {
+  const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
 
-  const superAdminMenuItems = [
+  const navigationItems = [
     {
-      title: "Dashboard",
-      url: "/dashboard",
-      icon: LayoutDashboard,
+      name: 'Dashboard',
+      icon: Home,
+      path: '/',
+      description: 'Overview of all VIP services'
     },
     {
-      title: "Create Booking",
-      url: "/create-booking",
+      name: 'Create Booking',
       icon: Plus,
+      path: '/create-booking',
+      description: 'Schedule new VVIP events'
     },
     {
-      title: "Generate Quote",
-      url: "/generate-quote",
-      icon: FileText,
-    },
-    {
-      title: "Bookings & Events",
-      url: "/bookings",
+      name: 'List Events',
       icon: Calendar,
+      path: '/bookings',
+      description: 'View and manage all bookings'
     },
     {
-      title: "Inventory",
-      url: "/inventory", 
-      icon: Package,
+      name: 'Generate Quote',
+      icon: FileText,
+      path: '/generate-quote',
+      description: 'Create custom service quotes'
     },
     {
-      title: "Staff",
-      url: "/staff",
-      icon: UserCheck,
+      name: 'Clients',
+      icon: Users,
+      path: '/clients',
+      description: 'Manage VVIP client database'
     },
     {
-      title: "VVIP Subscriptions",
-      url: "/subscriptions",
-      icon: CreditCard,
-    },
-    {
-      title: "Career Portal",
-      url: "/careers",
-      icon: Briefcase,
-    },
-    {
-      title: "Email & Communications",
-      url: "/email",
-      icon: Mail,
-    },
-    {
-      title: "Analytics & Reports",
-      url: "/analytics",
-      icon: BarChart3,
+      name: 'Settings',
+      icon: Settings,
+      path: '/settings',
+      description: 'Configure system settings'
     },
   ];
-
-  const protocolAdminMenuItems = [
-    {
-      title: "Dashboard",
-      url: "/dashboard",
-      icon: LayoutDashboard,
-    },
-    {
-      title: "Create Booking",
-      url: "/create-booking",
-      icon: Plus,
-    },
-    {
-      title: "Generate Quote",
-      url: "/generate-quote",
-      icon: FileText,
-    },
-    {
-      title: "Bookings & Events",
-      url: "/bookings",
-      icon: Calendar,
-    },
-    {
-      title: "Inventory",
-      url: "/inventory",
-      icon: Package,
-    },
-    {
-      title: "Staff",
-      url: "/staff",
-      icon: UserCheck,
-    },
-    {
-      title: "Email & Communications",
-      url: "/email",
-      icon: Mail,
-    },
-    {
-      title: "Analytics & Reports",
-      url: "/analytics",
-      icon: BarChart3,
-    },
-  ];
-
-  const menuItems = user?.role === 'super_admin' ? superAdminMenuItems : protocolAdminMenuItems;
-
-  const handleNavigation = (url: string) => {
-    navigate(url);
-  };
 
   return (
-    <Sidebar className="border-r border-gray-200 bg-black">
-      <SidebarHeader className="p-6 border-b border-gray-800">
-        <div className="flex items-center space-x-3">
-          <div className="relative">
-            <img 
-              src="/lovable-uploads/af24075c-d7ee-41bc-a3d3-d50d1b766753.png" 
-              alt="Sir Dennis Olele VVIP Protocol" 
-              className="h-12 w-12 object-contain animate-professional-pulse"
-            />
-          </div>
-          <div>
-            <h2 className="text-lg font-serif font-bold text-vip-gold">Sir Dennis Olele</h2>
-            <p className="text-xs text-vip-gold/70">VVIP Protocol Dashboard</p>
-          </div>
-        </div>
-      </SidebarHeader>
-
-      <SidebarContent className="px-4">
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-vip-gold/80 font-medium mb-3">
-            {user?.role === 'super_admin' ? 'Super Admin' : 'Protocol Admin'}
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton 
-                    className={`hover:bg-vip-gold/10 hover:text-vip-gold transition-all duration-200 rounded-lg ${
-                      location.pathname === item.url ? 'bg-vip-gold text-black' : 'text-vip-gold/80'
-                    }`}
-                    onClick={() => handleNavigation(item.url)}
-                  >
-                    <div className="flex items-center space-x-3 p-3 w-full">
-                      <item.icon className="h-5 w-5" />
-                      <span className="font-medium">{item.title}</span>
-                    </div>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-
-      <SidebarFooter className="p-4 border-t border-gray-800">
-        <div className="flex items-center space-x-3 p-3 rounded-lg bg-gray-900 border border-gray-700">
-          <div className="h-10 w-10 rounded-full bg-vip-gold flex items-center justify-center">
-            <span className="text-black font-bold text-sm">DO</span>
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-vip-gold truncate">
-              Sir Dennis Olele
-            </p>
-            <p className="text-xs text-vip-gold/70 truncate">
-              {user?.email}
-            </p>
-          </div>
-        </div>
-        
-        <Button 
-          onClick={logout}
-          variant="ghost" 
-          className="w-full justify-start text-vip-gold/80 hover:text-vip-gold hover:bg-vip-gold/10 mt-2"
-        >
-          <LogOut className="h-4 w-4 mr-2" />
-          Sign Out
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button variant="ghost" size="sm" className="md:hidden">
+          <Menu />
         </Button>
-      </SidebarFooter>
-    </Sidebar>
+      </SheetTrigger>
+      <SheetContent side="left" className="p-0 pt-10 w-64">
+        <div className="flex flex-col h-full">
+          <div className="px-4 mb-4">
+            <h2 className="text-2xl font-bold">VVIP Panel</h2>
+            <p className="text-sm text-muted-foreground">
+              Manage exclusive services
+            </p>
+          </div>
+          <div className="space-y-1 flex-1 p-2">
+            {navigationItems.map((item) => (
+              <Button
+                key={item.name}
+                variant="ghost"
+                className={cn("w-full justify-start font-normal",
+                  window.location.pathname === item.path ? "bg-secondary hover:bg-secondary" : "hover:bg-accent hover:text-accent-foreground")}
+                onClick={() => {
+                  navigate(item.path);
+                  setOpen(false);
+                }}
+              >
+                <div className="flex items-center space-x-2">
+                  <item.icon className="h-4 w-4" />
+                  <span>{item.name}</span>
+                </div>
+              </Button>
+            ))}
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 };
-
-export default VipSidebar;

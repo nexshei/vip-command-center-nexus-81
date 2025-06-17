@@ -1,23 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Trash2, FileText, Mail, Save, Calculator, Users } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Textarea } from '@/components/ui/textarea';
+import { FileText, Calculator, User, Plus, Save, ArrowLeft } from 'lucide-react';
 import { AddClientModal } from '@/components/modals/AddClientModal';
-import { useRealtimeQuery } from "@/hooks/useRealtimeQuery";
+import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-
-interface QuoteItem {
-  id: string;
-  name: string;
-  quantity: number;
-  unitPrice: number;
-  total: number;
-}
+import { useRealtimeQuery } from '@/hooks/useRealtimeQuery';
 
 interface Client {
   id: string;
@@ -28,28 +21,108 @@ interface Client {
 }
 
 const GenerateQuote = () => {
-  const [selectedClient, setSelectedClient] = useState('');
-  const [selectedClientId, setSelectedClientId] = useState('');
-  const [clientSearchTerm, setClientSearchTerm] = useState('');
+  const [clientName, setClientName] = useState('');
+  const [serviceType, setServiceType] = useState('');
+  const [quoteDetails, setQuoteDetails] = useState('');
+  const [amount, setAmount] = useState<number | undefined>(undefined);
   const [showAddClient, setShowAddClient] = useState(false);
-  const [quoteItems, setQuoteItems] = useState<QuoteItem[]>([]);
-  const [customItemName, setCustomItemName] = useState('');
-  const [customItemPrice, setCustomItemPrice] = useState('');
-  const [discountType, setDiscountType] = useState('percentage');
-  const [discountValue, setDiscountValue] = useState('');
-  const [showClientDropdown, setShowClientDropdown] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Fetch existing clients from database
   const { data: clientsData, isLoading: clientsLoading } = useRealtimeQuery("clients");
 
-  const predefinedServices = [
-    { id: '1', name: 'VIP Airport Transfer', price: 15000 },
-    { id: '2', name: 'Executive Meeting Setup', price: 25000 },
-    { id: '3', name: 'Luxury Event Planning', price: 150000 },
-    { id: '4', name: 'Private Security Detail', price: 50000 },
-    { id: '5', name: 'Catering Services', price: 8000 },
+  const serviceOptions = [
+    { value: 'diplomatic-meeting', label: 'Diplomatic Meeting' },
+    { value: 'corporate-event', label: 'Corporate Event' },
+    { value: 'government-protocol', label: 'Government Protocol' },
+    { value: 'state-reception', label: 'State Reception' },
+    { value: 'business-summit', label: 'Business Summit' },
+    { value: 'cultural-exchange', label: 'Cultural Exchange' },
+    { value: 'charity-gala', label: 'Charity Gala' },
+    { value: 'award-ceremony', label: 'Award Ceremony' },
+    { value: 'executive-retreat', label: 'Executive Retreat' },
+    { value: 'international-conference', label: 'International Conference' },
   ];
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!clientName || !serviceType || !amount) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const { data, error } = await supabase
+        .from('quotes')
+        .insert([
+          {
+            requester_name: clientName,
+            requested_service: serviceType,
+            amount: amount,
+            quote_details: quoteDetails,
+            status: 'pending'
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating quote:', error);
+        toast({
+          title: "Error",
+          description: "Failed to generate quote. Please try again.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      toast({
+        title: "Quote Generated",
+        description: "Quote has been successfully generated.",
+      });
+
+      // Reset form
+      setClientName('');
+      setServiceType('');
+      setQuoteDetails('');
+      setAmount(undefined);
+
+      // Navigate to quotes page
+      navigate('/bookings');
+
+    } catch (error) {
+      console.error('Error generating quote:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate quote. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCancel = () => {
+    // Navigate back to the bookings page
+    navigate('/bookings');
+  };
+
+  const handleClientAdded = (newClient: Client) => {
+    setClientName(newClient.full_name);
+    toast({
+      title: "Client Added",
+      description: `${newClient.full_name} has been added to your client list.`,
+    });
+  };
 
   // Type guard for safe client data usage
   const getValidClients = (): Client[] => {
@@ -59,17 +132,12 @@ const GenerateQuote = () => {
     
     const firstItem = clientsData[0];
     
-    // Explicit null and undefined check
-    if (firstItem === null || firstItem === undefined) {
+    // Check for null/undefined and ensure it's an object with required properties
+    if (!firstItem || typeof firstItem !== 'object') {
       return [];
     }
     
-    // Check if firstItem is an object
-    if (typeof firstItem !== 'object') {
-      return [];
-    }
-    
-    // Now TypeScript knows firstItem is not null and is an object
+    // Check if firstItem has required properties
     if ('id' in firstItem && 'full_name' in firstItem) {
       return clientsData as unknown as Client[];
     }
@@ -79,532 +147,163 @@ const GenerateQuote = () => {
 
   const validClients = getValidClients();
 
-  // Filter clients based on search term
-  const filteredClients = validClients.filter((client: Client) => 
-    client.full_name.toLowerCase().includes(clientSearchTerm.toLowerCase()) ||
-    (client.company || '').toLowerCase().includes(clientSearchTerm.toLowerCase()) ||
-    (client.email || '').toLowerCase().includes(clientSearchTerm.toLowerCase())
-  );
-
-  const handleClientSelection = (client: Client) => {
-    setSelectedClient(client.full_name);
-    setSelectedClientId(client.id);
-    setClientSearchTerm(client.full_name);
-    setShowClientDropdown(false);
-  };
-
-  const handleClientAdded = async (newClientData: any) => {
-    try {
-      const { data: newClient, error } = await supabase
-        .from('clients')
-        .insert([newClientData])
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      setSelectedClient(newClient.full_name);
-      setSelectedClientId(newClient.id);
-      setClientSearchTerm(newClient.full_name);
-      toast({
-        title: "Client Added",
-        description: `${newClient.full_name} has been added and selected.`,
-      });
-    } catch (error: any) {
-      console.error('Error adding client:', error);
-      toast({
-        title: "Error",
-        description: "Failed to add client. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const addPredefinedItem = (serviceId: string) => {
-    const service = predefinedServices.find(s => s.id === serviceId);
-    if (service) {
-      const newItem: QuoteItem = {
-        id: Date.now().toString(),
-        name: service.name,
-        quantity: 1,
-        unitPrice: service.price,
-        total: service.price
-      };
-      setQuoteItems([...quoteItems, newItem]);
-      toast({
-        title: "Service Added",
-        description: `${service.name} added to quote.`,
-      });
-    }
-  };
-
-  const addCustomItem = () => {
-    if (!customItemName.trim()) {
-      toast({
-        title: "Missing Item Name",
-        description: "Please enter an item name.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    if (!customItemPrice || parseFloat(customItemPrice) <= 0) {
-      toast({
-        title: "Invalid Price",
-        description: "Please enter a valid price.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const newItem: QuoteItem = {
-      id: Date.now().toString(),
-      name: customItemName.trim(),
-      quantity: 1,
-      unitPrice: parseFloat(customItemPrice),
-      total: parseFloat(customItemPrice)
-    };
-    setQuoteItems([...quoteItems, newItem]);
-    setCustomItemName('');
-    setCustomItemPrice('');
-    toast({
-      title: "Custom Item Added",
-      description: `${customItemName} added to quote.`,
-    });
-  };
-
-  const updateItemQuantity = (id: string, quantity: number) => {
-    setQuoteItems(items => 
-      items.map(item => 
-        item.id === id 
-          ? { ...item, quantity, total: item.unitPrice * quantity }
-          : item
-      )
-    );
-  };
-
-  const removeItem = (id: string) => {
-    setQuoteItems(items => items.filter(item => item.id !== id));
-    toast({
-      title: "Item Removed",
-      description: "Item has been removed from the quote.",
-    });
-  };
-
-  const subtotal = quoteItems.reduce((sum, item) => sum + item.total, 0);
-  const discountAmount = discountType === 'percentage' 
-    ? (subtotal * (parseFloat(discountValue) || 0)) / 100
-    : parseFloat(discountValue) || 0;
-  const finalTotal = subtotal - discountAmount;
-
-  const handleGenerateQuote = () => {
-    if (!selectedClient) {
-      toast({
-        title: "Client Required",
-        description: "Please select a client before generating the quote.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (quoteItems.length === 0) {
-      toast({
-        title: "No Items",
-        description: "Please add at least one item to generate a quote.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    toast({
-      title: "Quote Generated Successfully",
-      description: `Quote for ${selectedClient} has been created with ${quoteItems.length} items totaling KSh ${finalTotal.toLocaleString()}.`,
-    });
-  };
-
-  const handleGeneratePDF = () => {
-    if (!selectedClient || quoteItems.length === 0) {
-      toast({
-        title: "Cannot Generate PDF",
-        description: "Please select a client and add items first.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    toast({
-      title: "PDF Generated",
-      description: "Quote PDF has been generated successfully.",
-    });
-  };
-
-  const handleSendEmail = () => {
-    if (!selectedClient || quoteItems.length === 0) {
-      toast({
-        title: "Cannot Send Email",
-        description: "Please complete the quote first.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    toast({
-      title: "Quote Sent",
-      description: "Quote has been sent to client via email.",
-    });
-  };
-
-  const handleSaveDraft = () => {
-    toast({
-      title: "Draft Saved",
-      description: "Quote draft has been saved successfully.",
-    });
-  };
-
   return (
-    <div className="min-h-screen bg-black text-vip-gold p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4">
+      <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-4xl font-serif font-bold text-vip-gold mb-2">Generate Professional Quote</h1>
-            <p className="text-vip-gold/70 text-lg">Create detailed quotes for VIP services and events</p>
-          </div>
+        <div className="flex items-center justify-between bg-white rounded-lg p-6 shadow-sm border">
           <div className="flex items-center space-x-4">
-            <Button 
-              onClick={handleSaveDraft} 
-              variant="outline" 
-              size="lg"
-              className="border-2 border-vip-gold text-vip-gold hover:bg-vip-gold hover:text-black transition-all duration-300 px-6 py-3 text-base font-medium bg-transparent"
+            <Button
+              variant="outline"
+              onClick={handleCancel}
+              className="h-10 w-10 p-0"
             >
-              <Save className="h-5 w-5 mr-2" />
-              Save Draft
+              <ArrowLeft className="h-4 w-4" />
             </Button>
-            <Button 
-              onClick={handleGenerateQuote} 
-              size="lg"
-              className="bg-vip-gold text-black hover:bg-vip-gold-light px-8 py-3 text-base font-medium shadow-lg"
-              disabled={!selectedClient || quoteItems.length === 0}
-            >
-              <Calculator className="h-5 w-5 mr-2" />
-              Generate Quote
-            </Button>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Generate New Quote</h1>
+              <p className="text-gray-600 mt-1">Create a new service quote for a VVIP client</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <p className="text-sm text-gray-500">All fields marked with * are required</p>
           </div>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-3">
-          {/* Quote Builder */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Step 1: Client Selection */}
-            <Card className="bg-gray-900 border border-vip-gold/30 shadow-xl">
-              <CardHeader className="bg-vip-gold/10 border-b border-vip-gold/30">
-                <CardTitle className="flex items-center text-vip-gold text-xl">
-                  <Users className="h-6 w-6 mr-3" />
-                  Step 1: Select Client
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  <Label className="text-vip-gold font-semibold text-base">Search & Select Client *</Label>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-vip-gold/60" />
-                    <Input
-                      placeholder="Search clients by name, company, or email..."
-                      value={clientSearchTerm}
-                      onChange={(e) => {
-                        setClientSearchTerm(e.target.value);
-                        setShowClientDropdown(e.target.value.length > 0);
-                      }}
-                      onFocus={() => setShowClientDropdown(clientSearchTerm.length > 0)}
-                      className="pl-12 h-12 border-2 border-vip-gold/30 focus:border-vip-gold text-vip-gold text-base bg-black"
-                    />
-                    
-                    {/* Client Search Results Dropdown */}
-                    {showClientDropdown && filteredClients.length > 0 && (
-                      <div className="absolute top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto border-2 border-vip-gold/30 rounded-lg bg-gray-800 z-50">
-                        {filteredClients.map((client: Client) => (
-                          <div
-                            key={client.id}
-                            onClick={() => handleClientSelection(client)}
-                            className="p-3 hover:bg-vip-gold/20 cursor-pointer border-b border-vip-gold/20 last:border-b-0"
-                          >
-                            <div className="flex items-center">
-                              <Users className="h-4 w-4 mr-2 text-vip-gold" />
-                              <div>
-                                <p className="text-vip-gold font-medium">{client.full_name}</p>
-                                {client.company && (
-                                  <p className="text-vip-gold/60 text-sm">{client.company}</p>
-                                )}
-                                {client.email && (
-                                  <p className="text-vip-gold/60 text-xs">{client.email}</p>
-                                )}
+        {/* Main Form */}
+        <Card className="bg-white shadow-sm border-0">
+          <CardHeader className="border-b bg-gray-50">
+            <CardTitle className="text-gray-900 flex items-center">
+              <FileText className="h-5 w-5 mr-2 text-blue-600" />
+              Quote Details
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Client Name */}
+              <div className="space-y-2">
+                <Label htmlFor="clientName" className="text-sm font-medium text-gray-700">
+                  Client Name *
+                </Label>
+                <div className="flex gap-3">
+                  <div className="flex-1">
+                    <Select value={clientName} onValueChange={setClientName}>
+                      <SelectTrigger className="bg-white border-gray-300 focus:border-blue-500">
+                        <SelectValue placeholder="Select client" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white border-gray-200 z-50">
+                        {clientsLoading ? (
+                          <SelectItem value="loading" disabled>Loading clients...</SelectItem>
+                        ) : validClients.length > 0 ? (
+                          validClients.map((client: Client) => (
+                            <SelectItem key={client.id} value={client.full_name} className="hover:bg-blue-50">
+                              <div className="flex items-center">
+                                <User className="h-4 w-4 mr-2 text-blue-600" />
+                                {client.full_name}
                               </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="no-clients" disabled>No clients found</SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
                   </div>
-
-                  {clientSearchTerm && filteredClients.length === 0 && !clientsLoading && (
-                    <div className="text-center py-4 text-vip-gold/60">
-                      No clients found matching "{clientSearchTerm}"
-                    </div>
-                  )}
-
-                  {selectedClient && (
-                    <div className="flex items-center text-sm text-green-600 bg-green-50 p-3 rounded-lg">
-                      <Users className="h-4 w-4 mr-2" />
-                      Selected: {selectedClient}
-                    </div>
-                  )}
-
-                  <Button 
+                  <Button
+                    type="button"
                     onClick={() => setShowAddClient(true)}
-                    variant="outline" 
-                    className="border-2 border-vip-gold text-vip-gold hover:bg-vip-gold hover:text-black bg-transparent"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4"
                   >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add New Client
+                    <Plus className="h-4 w-4 mr-1" />
+                    Add New
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
 
-            {/* Step 2: Add Services */}
-            <Card className="bg-gray-900 border border-vip-gold/30 shadow-xl">
-              <CardHeader className="bg-vip-gold/10 border-b border-vip-gold/30">
-                <CardTitle className="text-vip-gold text-xl">Step 2: Add Services & Items</CardTitle>
-              </CardHeader>
-              <CardContent className="p-6 space-y-6">
-                <div className="space-y-4">
-                  <Label className="text-vip-gold font-semibold text-base">Quick Add Services</Label>
-                  <Select onValueChange={addPredefinedItem}>
-                    <SelectTrigger className="h-12 border-2 border-vip-gold/30 focus:border-vip-gold text-vip-gold text-base bg-black">
-                      <SelectValue placeholder="Select a service to add..." />
-                    </SelectTrigger>
-                    <SelectContent className="bg-black border-2 border-vip-gold">
-                      {predefinedServices.map((service) => (
-                        <SelectItem key={service.id} value={service.id} className="text-vip-gold hover:bg-vip-gold/20">
-                          {service.name} - KSh {service.price.toLocaleString()}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-4 p-4 border-2 border-vip-gold/30 rounded-lg bg-gray-800">
-                  <Label className="text-vip-gold font-semibold text-base">Add Custom Item</Label>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Input
-                      placeholder="Item name"
-                      value={customItemName}
-                      onChange={(e) => setCustomItemName(e.target.value)}
-                      className="md:col-span-2 h-12 border-2 border-vip-gold/30 focus:border-vip-gold text-vip-gold bg-black"
-                    />
-                    <Input
-                      placeholder="Price (KSh)"
-                      type="number"
-                      value={customItemPrice}
-                      onChange={(e) => setCustomItemPrice(e.target.value)}
-                      className="h-12 border-2 border-vip-gold/30 focus:border-vip-gold text-vip-gold bg-black"
-                    />
-                  </div>
-                  <Button 
-                    onClick={addCustomItem}
-                    className="w-full bg-vip-gold text-black hover:bg-vip-gold-light h-12 text-base font-medium"
-                  >
-                    <Plus className="h-5 w-5 mr-2" />
-                    Add Custom Item
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {quoteItems.length > 0 && (
-              <Card className="bg-gray-900 border border-vip-gold/30 shadow-xl">
-                <CardHeader className="bg-vip-gold/10 border-b border-vip-gold/30">
-                  <CardTitle className="text-vip-gold text-xl">Step 3: Review Quote Items</CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="space-y-4">
-                    {quoteItems.map((item) => (
-                      <div key={item.id} className="flex items-center space-x-4 p-4 border-2 border-vip-gold/30 rounded-lg bg-gray-800">
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-vip-gold text-base">{item.name}</h4>
-                          <p className="text-vip-gold/70">KSh {item.unitPrice.toLocaleString()} each</p>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Label className="text-vip-gold font-medium">Qty:</Label>
-                          <Input
-                            type="number"
-                            min="1"
-                            value={item.quantity}
-                            onChange={(e) => updateItemQuantity(item.id, parseInt(e.target.value) || 1)}
-                            className="w-20 h-10 border-2 border-vip-gold/30 focus:border-vip-gold text-vip-gold text-center bg-black"
-                          />
-                        </div>
-                        <div className="text-right min-w-[120px]">
-                          <p className="font-bold text-vip-gold text-lg">KSh {item.total.toLocaleString()}</p>
-                        </div>
-                        <Button
-                          onClick={() => removeItem(item.id)}
-                          variant="outline"
-                          size="sm"
-                          className="border-red-300 text-red-600 hover:bg-red-50 hover:border-red-500 bg-transparent"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+              {/* Service Type */}
+              <div className="space-y-2">
+                <Label htmlFor="serviceType" className="text-sm font-medium text-gray-700">
+                  Service Type *
+                </Label>
+                <Select value={serviceType} onValueChange={setServiceType}>
+                  <SelectTrigger className="bg-white border-gray-300 focus:border-blue-500">
+                    <SelectValue placeholder="Select service type" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-gray-200 z-50">
+                    {serviceOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.label} className="hover:bg-blue-50">
+                        {option.label}
+                      </SelectItem>
                     ))}
-                  </div>
+                  </SelectContent>
+                </Select>
+              </div>
 
-                  <div className="mt-6 pt-6 border-t-2 border-vip-gold/30">
-                    <div className="space-y-4">
-                      <Label className="text-vip-gold font-semibold text-base">Apply Discount (Optional)</Label>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <Select value={discountType} onValueChange={setDiscountType}>
-                          <SelectTrigger className="h-12 border-2 border-vip-gold/30 focus:border-vip-gold text-vip-gold bg-black">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="bg-black border-2 border-vip-gold">
-                            <SelectItem value="percentage" className="text-vip-gold">Percentage (%)</SelectItem>
-                            <SelectItem value="fixed" className="text-vip-gold">Fixed Amount (KSh)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <Input
-                          placeholder={discountType === 'percentage' ? '10' : '5000'}
-                          type="number"
-                          value={discountValue}
-                          onChange={(e) => setDiscountValue(e.target.value)}
-                          className="md:col-span-2 h-12 border-2 border-vip-gold/30 focus:border-vip-gold text-vip-gold bg-black"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+              {/* Amount */}
+              <div className="space-y-2">
+                <Label htmlFor="amount" className="text-sm font-medium text-gray-700">
+                  Amount (KSH) *
+                </Label>
+                <Input
+                  id="amount"
+                  type="number"
+                  value={amount !== undefined ? amount.toString() : ''}
+                  onChange={(e) => setAmount(e.target.value ? parseFloat(e.target.value) : undefined)}
+                  placeholder="Enter amount"
+                  className="bg-white border-gray-300 focus:border-blue-500"
+                />
+              </div>
 
-          {/* Quote Summary & Actions */}
-          <div className="space-y-6">
-            <Card className="bg-gray-900 border border-vip-gold/30 shadow-xl">
-              <CardHeader className="bg-vip-gold/10 border-b border-vip-gold/30">
-                <CardTitle className="flex items-center text-vip-gold text-xl">
-                  <Calculator className="h-6 w-6 mr-3" />
-                  Quote Summary
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6 space-y-4">
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-vip-gold/70 font-medium">Items:</span>
-                    <span className="font-semibold text-vip-gold text-lg">{quoteItems.length}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-vip-gold/70 font-medium">Subtotal:</span>
-                    <span className="font-semibold text-vip-gold text-lg">KSh {subtotal.toLocaleString()}</span>
-                  </div>
-                  {discountValue && (
-                    <div className="flex justify-between items-center">
-                      <span className="text-vip-gold/70 font-medium">
-                        Discount ({discountType === 'percentage' ? `${discountValue}%` : 'Fixed'}):
-                      </span>
-                      <span className="font-semibold text-red-400 text-lg">-KSh {discountAmount.toLocaleString()}</span>
-                    </div>
+              {/* Quote Details */}
+              <div className="space-y-2">
+                <Label htmlFor="quoteDetails" className="text-sm font-medium text-gray-700">
+                  Quote Details
+                </Label>
+                <Textarea
+                  id="quoteDetails"
+                  value={quoteDetails}
+                  onChange={(e) => setQuoteDetails(e.target.value)}
+                  placeholder="Enter quote details..."
+                  rows={4}
+                  className="bg-white border-gray-300 focus:border-blue-500 placeholder:text-gray-400"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleCancel}
+                  disabled={isSubmitting}
+                  className="px-6 border-gray-300 text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-6 bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Calculator className="h-4 w-4 mr-2" />
+                      Generate Quote
+                    </>
                   )}
-                  <div className="border-t-2 border-vip-gold/30 pt-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xl font-bold text-vip-gold">Total:</span>
-                      <span className="text-2xl font-bold text-vip-gold">KSh {finalTotal.toLocaleString()}</span>
-                    </div>
-                  </div>
-                </div>
-                
-                {selectedClient && quoteItems.length > 0 && (
-                  <Badge className="bg-green-600 text-white w-full justify-center py-2 text-base">
-                    Quote Ready to Generate
-                  </Badge>
-                )}
-                
-                {(!selectedClient || quoteItems.length === 0) && (
-                  <Badge variant="outline" className="border-2 border-vip-gold/30 text-vip-gold/70 w-full justify-center py-2 text-base bg-transparent">
-                    Complete Steps Above
-                  </Badge>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gray-900 border border-vip-gold/30 shadow-xl">
-              <CardHeader className="bg-vip-gold/10 border-b border-vip-gold/30">
-                <CardTitle className="text-vip-gold text-xl">Quote Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="p-6 space-y-4">
-                <Button 
-                  onClick={handleGeneratePDF} 
-                  className="w-full bg-vip-gold text-black hover:bg-vip-gold-light h-12 text-base font-medium"
-                  disabled={!selectedClient || quoteItems.length === 0}
-                >
-                  <FileText className="h-5 w-5 mr-2" />
-                  Download PDF
                 </Button>
-                <Button 
-                  onClick={handleSendEmail} 
-                  variant="outline" 
-                  className="w-full border-2 border-vip-gold text-vip-gold hover:bg-vip-gold hover:text-black h-12 text-base font-medium bg-transparent"
-                  disabled={!selectedClient || quoteItems.length === 0}
-                >
-                  <Mail className="h-5 w-5 mr-2" />
-                  Email to Client
-                </Button>
-              </CardContent>
-            </Card>
-
-            {selectedClient && quoteItems.length > 0 && (
-              <Card className="bg-gray-900 border border-vip-gold/30 shadow-xl">
-                <CardHeader className="bg-vip-gold/10 border-b border-vip-gold/30">
-                  <CardTitle className="text-vip-gold text-xl">Quote Preview</CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="space-y-4 p-4 bg-gray-800 border-2 border-vip-gold/30 rounded-lg text-vip-gold">
-                    <div className="text-center border-b-2 border-vip-gold/30 pb-4">
-                      <h3 className="font-bold text-xl text-vip-gold">Sir Dennis Olele VVIP Protocol</h3>
-                      <p className="text-vip-gold/70 text-base">Professional Quote</p>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <p className="text-base"><strong>Client:</strong> {selectedClient}</p>
-                      <p className="text-base"><strong>Date:</strong> {new Date().toLocaleDateString()}</p>
-                      <p className="text-base"><strong>Quote #:</strong> Q{Date.now().toString().slice(-6)}</p>
-                    </div>
-
-                    <div className="space-y-3">
-                      <h4 className="font-semibold text-base">Services:</h4>
-                      {quoteItems.map((item) => (
-                        <div key={item.id} className="flex justify-between text-sm">
-                          <span>{item.name} (x{item.quantity})</span>
-                          <span className="font-medium">KSh {item.total.toLocaleString()}</span>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="border-t-2 border-vip-gold/30 pt-3">
-                      <div className="flex justify-between font-bold text-lg">
-                        <span>Total:</span>
-                        <span className="text-vip-gold">KSh {finalTotal.toLocaleString()}</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </div>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
 
         {/* Add Client Modal */}
-        <AddClientModal 
-          open={showAddClient} 
+        <AddClientModal
+          open={showAddClient}
           onOpenChange={setShowAddClient}
           onClientAdded={handleClientAdded}
         />

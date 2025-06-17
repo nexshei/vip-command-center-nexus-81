@@ -5,65 +5,34 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Plus, Calendar, Clock, User, MapPin, Eye, Edit, Trash2 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Search, Plus, Calendar, Clock, User, MapPin, Eye, Edit, Trash2, FileText, DollarSign } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { NewBookingModal } from '@/components/modals/NewBookingModal';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { useRealtimeQuery } from "@/hooks/useRealtimeQuery";
 
 const Bookings = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [newBookingOpen, setNewBookingOpen] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  // Fetch live data from Supabase "bookings" table
-  const { data: bookingsData, isLoading, error } = useRealtimeQuery("bookings", { orderBy: "created_at" });
+  // Fetch live data from Supabase
+  const { data: bookingsData, isLoading: bookingsLoading, error: bookingsError } = useRealtimeQuery("bookings", { orderBy: "created_at" });
+  const { data: quotesData, isLoading: quotesLoading, error: quotesError } = useRealtimeQuery("quotes", { orderBy: "created_at" });
 
-  // Mock bookings for fallback
-  const mockBookings = [
-    {
-      id: '1',
-      client_name: 'Hon. Margaret Wanjiku',
-      service_type: 'Diplomatic Meeting',
-      scheduled_at: '2024-01-25T10:00:00Z',
-      status: 'confirmed',
-      notes: 'Meeting with Ambassador',
-      created_at: '2024-01-20'
-    },
-    {
-      id: '2',
-      client_name: 'Dr. David Kimani',
-      service_type: 'Corporate Event',
-      scheduled_at: '2024-01-28T14:30:00Z',
-      status: 'pending',
-      notes: 'Board meeting preparation',
-      created_at: '2024-01-22'
-    },
-    {
-      id: '3',
-      client_name: 'Ms. Grace Muthoni',
-      service_type: 'State Reception',
-      scheduled_at: '2024-01-30T18:00:00Z',
-      status: 'confirmed',
-      notes: 'State dinner arrangements',
-      created_at: '2024-01-23'
-    }
-  ];
-
-  // Use real data if available, otherwise use mock data
-  const bookings = bookingsData && bookingsData.length > 0 ? bookingsData : mockBookings;
-
-  const totalBookings = bookings.length;
-  const confirmedBookings = bookings.filter((booking: any) => booking.status === 'confirmed').length;
-  const pendingBookings = bookings.filter((booking: any) => booking.status === 'pending').length;
-  const completedBookings = bookings.filter((booking: any) => booking.status === 'completed').length;
+  // Use real data or fallback to empty arrays
+  const bookings = bookingsData || [];
+  const quotes = quotesData || [];
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'confirmed': return 'bg-ios-green text-white';
-      case 'pending': return 'bg-ios-orange text-white';
-      case 'completed': return 'bg-ios-blue text-white';
-      case 'cancelled': return 'bg-ios-red text-white';
+      case 'confirmed': return 'bg-green-500 text-white';
+      case 'pending': return 'bg-yellow-500 text-white';
+      case 'completed': return 'bg-blue-500 text-white';
+      case 'cancelled': return 'bg-red-500 text-white';
       default: return 'bg-gray-500 text-white';
     }
   };
@@ -83,43 +52,74 @@ const Bookings = () => {
     return matchesSearch && matchesStatus;
   });
 
-  const handleViewBooking = (bookingId: string) => {
-    console.log('Viewing booking:', bookingId);
+  const filteredQuotes = quotes.filter((quote: any) => {
+    const matchesSearch = quote.requester_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         quote.requested_service?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || quote.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const handleViewItem = (id: string, type: 'booking' | 'quote') => {
     toast({
-      title: "View Booking Details",
-      description: "Opening detailed view of the booking...",
+      title: `View ${type === 'booking' ? 'Booking' : 'Quote'} Details`,
+      description: `Opening detailed view of the ${type}...`,
     });
   };
 
-  const handleEditBooking = (bookingId: string) => {
-    console.log('Editing booking:', bookingId);
+  const handleEditItem = (id: string, type: 'booking' | 'quote') => {
     toast({
-      title: "Edit Booking",
-      description: "Opening edit form for the booking...",
+      title: `Edit ${type === 'booking' ? 'Booking' : 'Quote'}`,
+      description: `Opening edit form for the ${type}...`,
     });
   };
 
-  const handleDeleteBooking = (bookingId: string) => {
-    console.log('Deleting booking:', bookingId);
-    toast({
-      title: "Delete Booking",
-      description: "Booking has been deleted successfully.",
-      variant: "destructive"
-    });
+  const handleDeleteItem = async (id: string, type: 'booking' | 'quote') => {
+    if (!confirm(`Are you sure you want to delete this ${type}?`)) return;
+
+    try {
+      const { error } = await supabase
+        .from(type === 'booking' ? 'bookings' : 'quotes')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: `${type === 'booking' ? 'Booking' : 'Quote'} Deleted`,
+        description: `The ${type} has been deleted successfully.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Delete Failed",
+        description: error.message || "An error occurred while deleting.",
+        variant: "destructive"
+      });
+    }
   };
+
+  const totalBookings = bookings.length;
+  const totalQuotes = quotes.length;
+  const confirmedBookings = bookings.filter((booking: any) => booking.status === 'confirmed').length;
+  const pendingItems = [...bookings, ...quotes].filter((item: any) => item.status === 'pending').length;
 
   return (
     <div className="space-y-6 p-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-vip-black">Manage VVIP appointments and protocol events</h1>
-          <p className="text-vip-gold/80 mt-2">Schedule and manage exclusive VVIP events and appointments</p>
+          <h1 className="text-3xl font-serif font-bold text-vip-black">List Events & Quotes</h1>
+          <p className="text-vip-gold/80 mt-2">Manage all VVIP bookings and quotes</p>
         </div>
-        <Button onClick={() => setNewBookingOpen(true)} className="bg-vip-gold text-white hover:bg-vip-gold-dark">
-          <Plus className="h-4 w-4 mr-2" />
-          New Booking
-        </Button>
+        <div className="flex gap-3">
+          <Button onClick={() => navigate('/create-booking')} className="bg-vip-gold text-white hover:bg-vip-gold-dark">
+            <Plus className="h-4 w-4 mr-2" />
+            New Booking
+          </Button>
+          <Button onClick={() => navigate('/generate-quote')} variant="outline" className="border-vip-gold text-vip-gold hover:bg-vip-gold/10">
+            <FileText className="h-4 w-4 mr-2" />
+            New Quote
+          </Button>
+        </div>
       </div>
 
       {/* Summary Stats */}
@@ -136,11 +136,21 @@ const Bookings = () => {
         
         <Card className="vip-glass border-vip-gold/20">
           <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-vip-gold/80">Total Quotes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-vip-black">{totalQuotes}</div>
+            <p className="text-xs text-vip-gold/60">All quotations</p>
+          </CardContent>
+        </Card>
+
+        <Card className="vip-glass border-vip-gold/20">
+          <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-vip-gold/80">Confirmed</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-vip-black">{confirmedBookings}</div>
-            <p className="text-xs text-ios-green">Ready to proceed</p>
+            <p className="text-xs text-green-600">Ready to proceed</p>
           </CardContent>
         </Card>
 
@@ -149,18 +159,8 @@ const Bookings = () => {
             <CardTitle className="text-sm font-medium text-vip-gold/80">Pending</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-black">{pendingBookings}</div>
-            <p className="text-xs text-ios-orange">Awaiting confirmation</p>
-          </CardContent>
-        </Card>
-
-        <Card className="vip-glass border-vip-gold/20">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">Completed</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-vip-black">{completedBookings}</div>
-            <p className="text-xs text-ios-blue">Successfully executed</p>
+            <div className="text-2xl font-bold text-vip-black">{pendingItems}</div>
+            <p className="text-xs text-yellow-600">Awaiting action</p>
           </CardContent>
         </Card>
       </div>
@@ -168,7 +168,7 @@ const Bookings = () => {
       {/* Search & Filters */}
       <Card className="vip-glass border-vip-gold/20">
         <CardHeader>
-          <CardTitle className="text-vip-black">Search & Filter Bookings</CardTitle>
+          <CardTitle className="text-vip-black">Search & Filter</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
@@ -195,103 +195,186 @@ const Bookings = () => {
               </SelectContent>
             </Select>
 
-            <Button variant="outline" className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10">
+            <Button variant="outline" onClick={() => { setSearchTerm(''); setStatusFilter('all'); }} className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10">
               Clear Filters
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Bookings List */}
-      <Card className="vip-glass border-vip-gold/20">
-        <CardHeader>
-          <CardTitle className="flex items-center text-vip-black">
-            <Calendar className="h-5 w-5 mr-2 text-vip-gold" />
-            VVIP Bookings ({filteredBookings.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading && (
-            <div className="text-center py-8">
-              <p className="text-vip-gold/60">Loading bookings...</p>
-            </div>
-          )}
-          {error && (
-            <div className="text-center py-8">
-              <p className="text-vip-red">{error.message}</p>
-            </div>
-          )}
-          <div className="space-y-4">
-            {filteredBookings.map((booking: any) => {
-              const { date, time } = formatDateTime(booking.scheduled_at || new Date().toISOString());
-              return (
-                <div key={booking.id} className="flex items-center justify-between p-4 border border-vip-gold/20 rounded-lg vip-glass-light hover:bg-vip-gold/5 transition-colors">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="font-semibold text-vip-black">{booking.client_name}</h3>
-                      <Badge className={getStatusColor(booking.status)}>
-                        {booking.status?.charAt(0).toUpperCase() + booking.status?.slice(1)}
-                      </Badge>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-vip-gold/80">
-                      <div className="flex items-center">
-                        <User className="h-3 w-3 mr-1" />
-                        {booking.service_type}
-                      </div>
-                      <div className="flex items-center">
-                        <Calendar className="h-3 w-3 mr-1" />
-                        {date}
-                      </div>
-                      <div className="flex items-center">
-                        <Clock className="h-3 w-3 mr-1" />
-                        {time}
-                      </div>
-                    </div>
-                    {booking.notes && (
-                      <p className="text-xs text-vip-gold/60 mt-1">{booking.notes}</p>
-                    )}
-                  </div>
-                  <div className="flex space-x-2">
-                    <Button 
-                      onClick={() => handleViewBooking(booking.id)}
-                      variant="outline" 
-                      size="sm" 
-                      className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
-                    >
-                      <Eye className="h-3 w-3 mr-1" />
-                      View
-                    </Button>
-                    <Button 
-                      onClick={() => handleEditBooking(booking.id)}
-                      variant="outline" 
-                      size="sm" 
-                      className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
-                    >
-                      <Edit className="h-3 w-3 mr-1" />
-                      Edit
-                    </Button>
-                    <Button 
-                      onClick={() => handleDeleteBooking(booking.id)}
-                      variant="outline" 
-                      size="sm" 
-                      className="border-red-300 text-red-600 hover:bg-red-50"
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </div>
-              );
-            })}
-            {!isLoading && filteredBookings.length === 0 && (
-              <div className="text-center py-8">
-                <p className="text-vip-gold/60">No bookings found matching your search.</p>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Tabs for Bookings and Quotes */}
+      <Tabs defaultValue="bookings" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="bookings" className="flex items-center gap-2">
+            <Calendar className="h-4 w-4" />
+            Bookings ({filteredBookings.length})
+          </TabsTrigger>
+          <TabsTrigger value="quotes" className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Quotes ({filteredQuotes.length})
+          </TabsTrigger>
+        </TabsList>
 
-      <NewBookingModal />
+        <TabsContent value="bookings">
+          <Card className="vip-glass border-vip-gold/20">
+            <CardHeader>
+              <CardTitle className="flex items-center text-vip-black">
+                <Calendar className="h-5 w-5 mr-2 text-vip-gold" />
+                VVIP Bookings
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {bookingsLoading ? (
+                <div className="text-center py-8">
+                  <p className="text-vip-gold/60">Loading bookings...</p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Client</TableHead>
+                      <TableHead>Service</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Time</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredBookings.map((booking: any) => {
+                      const { date, time } = formatDateTime(booking.scheduled_at || new Date().toISOString());
+                      return (
+                        <TableRow key={booking.id}>
+                          <TableCell className="font-medium">{booking.client_name}</TableCell>
+                          <TableCell>{booking.service_type}</TableCell>
+                          <TableCell>{date}</TableCell>
+                          <TableCell>{time}</TableCell>
+                          <TableCell>
+                            <Badge className={getStatusColor(booking.status)}>
+                              {booking.status?.charAt(0).toUpperCase() + booking.status?.slice(1)}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex space-x-2">
+                              <Button 
+                                onClick={() => handleViewItem(booking.id, 'booking')}
+                                variant="outline" 
+                                size="sm"
+                              >
+                                <Eye className="h-3 w-3" />
+                              </Button>
+                              <Button 
+                                onClick={() => handleEditItem(booking.id, 'booking')}
+                                variant="outline" 
+                                size="sm"
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                              <Button 
+                                onClick={() => handleDeleteItem(booking.id, 'booking')}
+                                variant="outline" 
+                                size="sm"
+                                className="border-red-300 text-red-600 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              )}
+              {!bookingsLoading && filteredBookings.length === 0 && (
+                <div className="text-center py-8">
+                  <p className="text-vip-gold/60">No bookings found matching your search.</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="quotes">
+          <Card className="vip-glass border-vip-gold/20">
+            <CardHeader>
+              <CardTitle className="flex items-center text-vip-black">
+                <FileText className="h-5 w-5 mr-2 text-vip-gold" />
+                Generated Quotes
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {quotesLoading ? (
+                <div className="text-center py-8">
+                  <p className="text-vip-gold/60">Loading quotes...</p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Client</TableHead>
+                      <TableHead>Service</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredQuotes.map((quote: any) => {
+                      const { date } = formatDateTime(quote.created_at || new Date().toISOString());
+                      return (
+                        <TableRow key={quote.id}>
+                          <TableCell className="font-medium">{quote.requester_name}</TableCell>
+                          <TableCell>{quote.requested_service}</TableCell>
+                          <TableCell>KSH {quote.amount?.toLocaleString()}</TableCell>
+                          <TableCell>{date}</TableCell>
+                          <TableCell>
+                            <Badge className={getStatusColor(quote.status)}>
+                              {quote.status?.charAt(0).toUpperCase() + quote.status?.slice(1)}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex space-x-2">
+                              <Button 
+                                onClick={() => handleViewItem(quote.id, 'quote')}
+                                variant="outline" 
+                                size="sm"
+                              >
+                                <Eye className="h-3 w-3" />
+                              </Button>
+                              <Button 
+                                onClick={() => handleEditItem(quote.id, 'quote')}
+                                variant="outline" 
+                                size="sm"
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                              <Button 
+                                onClick={() => handleDeleteItem(quote.id, 'quote')}
+                                variant="outline" 
+                                size="sm"
+                                className="border-red-300 text-red-600 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              )}
+              {!quotesLoading && filteredQuotes.length === 0 && (
+                <div className="text-center py-8">
+                  <p className="text-vip-gold/60">No quotes found matching your search.</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
