@@ -305,6 +305,7 @@ export type Database = {
           location: string | null
           phone: string
           protocol_officers: string | null
+          status: string | null
           vision: string | null
         }
         Insert: {
@@ -317,6 +318,7 @@ export type Database = {
           location?: string | null
           phone: string
           protocol_officers?: string | null
+          status?: string | null
           vision?: string | null
         }
         Update: {
@@ -329,6 +331,7 @@ export type Database = {
           location?: string | null
           phone?: string
           protocol_officers?: string | null
+          status?: string | null
           vision?: string | null
         }
         Relationships: []
