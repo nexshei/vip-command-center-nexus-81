@@ -40,7 +40,7 @@ const Gallery = () => {
       return [];
     }
     // Type assertion is safe here because we've checked it's an array and no error
-    return photosData as GalleryPhoto[];
+    return photosData as unknown as GalleryPhoto[];
   }, [photosData, error]);
 
   // Filter photos based on search and category
