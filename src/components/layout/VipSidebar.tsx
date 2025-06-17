@@ -33,16 +33,16 @@ export const VipSidebar = () => {
       description: 'Schedule new VVIP events'
     },
     {
-      name: 'List Bookings',
-      icon: List,
-      path: '/list-bookings',
-      description: 'View all bookings from admin dashboard'
-    },
-    {
       name: 'Bookings & Quotes',
       icon: Calendar,
       path: '/bookings',
-      description: 'View and manage all bookings'
+      description: 'View and manage all bookings and events'
+    },
+    {
+      name: 'List Bookings',
+      icon: List,
+      path: '/list-bookings',
+      description: 'View meeting requests from frontend'
     },
     {
       name: 'Generate Quote',
