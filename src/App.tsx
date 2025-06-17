@@ -10,6 +10,7 @@ import LoginForm from "@/components/auth/LoginForm";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import Dashboard from "@/pages/Dashboard";
 import Bookings from "@/pages/Bookings";
+import ListBookings from "@/pages/ListBookings";
 import Clients from "@/pages/Clients";
 import Subscriptions from "@/pages/Subscriptions";
 import Subscribers from "@/pages/Subscribers";
@@ -123,6 +124,11 @@ const AppRoutes = () => {
       <Route path="/bookings" element={
         <ProtectedRoute>
           <Bookings />
+        </ProtectedRoute>
+      } />
+      <Route path="/list-bookings" element={
+        <ProtectedRoute>
+          <ListBookings />
         </ProtectedRoute>
       } />
       <Route path="/clients" element={

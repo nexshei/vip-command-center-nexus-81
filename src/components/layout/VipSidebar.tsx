@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   Sidebar, 
@@ -10,7 +11,7 @@ import {
   SidebarMenuItem,
   SidebarHeader
 } from "@/components/ui/sidebar";
-import { Home, Calendar, FileText, Users, Settings, Plus, Package, Mail, UserCheck, MessageSquare } from "lucide-react";
+import { Home, Calendar, FileText, Users, Settings, Plus, Package, Mail, UserCheck, MessageSquare, List } from "lucide-react";
 import { useNavigate, useLocation } from 'react-router-dom';
 import { cn } from "@/lib/utils";
 
@@ -32,7 +33,13 @@ export const VipSidebar = () => {
       description: 'Schedule new VVIP events'
     },
     {
-      name: 'List Events',
+      name: 'List Bookings',
+      icon: List,
+      path: '/list-bookings',
+      description: 'View all bookings from admin dashboard'
+    },
+    {
+      name: 'Bookings & Quotes',
       icon: Calendar,
       path: '/bookings',
       description: 'View and manage all bookings'
