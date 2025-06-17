@@ -41,7 +41,7 @@ interface Application {
 
 const Careers = () => {
   const [activeTab, setActiveTab] = useState('jobs');
-  const [jobModal, setJobModal] = useState({ open: false, job: null });
+  const [jobModal, setJobModal] = useState({ open: false, jobData: null });
   const [deleteModal, setDeleteModal] = useState({ open: false, item: null, type: '' });
   const [viewModal, setViewModal] = useState({ open: false, item: null, type: '' });
   const { toast } = useToast();
@@ -73,11 +73,11 @@ const Careers = () => {
   };
 
   const handleAddJob = () => {
-    setJobModal({ open: true, job: null });
+    setJobModal({ open: true, jobData: null });
   };
 
   const handleEditJob = (job: Job) => {
-    setJobModal({ open: true, job });
+    setJobModal({ open: true, jobData: job });
   };
 
   const handleDeleteJob = (job: Job) => {
@@ -352,7 +352,7 @@ const Careers = () => {
       <JobOpeningModal
         open={jobModal.open}
         onOpenChange={(open) => setJobModal({ ...jobModal, open })}
-        job={jobModal.job}
+        job={jobModal.jobData}
         onJobUpdated={handleJobUpdated}
       />
 

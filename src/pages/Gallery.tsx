@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { useRealtimeQuery } from '@/hooks/useRealtimeQuery';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, Trash2 } from 'lucide-react';
-import { AddPhotoModal } from '@/components/modals/AddPhotoModal';
-import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
-import { supabase } from '@/integrations/supabase/client';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Plus, Search, Eye, Edit, Trash2, Image as ImageIcon, Star } from 'lucide-react';
+import { useRealtimeQuery } from '@/hooks/useRealtimeQuery';
 import { useToast } from '@/hooks/use-toast';
+import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
+import { AddPhotoModal } from '@/components/modals/AddPhotoModal';
+import { supabase } from '@/integrations/supabase/client';
 
 interface GalleryPhoto {
   id: string;
@@ -19,220 +20,243 @@ interface GalleryPhoto {
   updated_at: string;
   is_featured: boolean | null;
   display_order: number | null;
-  content_type: string;
-  file_size: number | null;
-  image_data: string | null;
 }
 
 const Gallery = () => {
-  const { data: photosData, isLoading, error, refetch } = useRealtimeQuery('gallery_photos', {
-    orderBy: 'display_order'
-  });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [photoModal, setPhotoModal] = useState({ open: false, photo: null });
+  const [deleteModal, setDeleteModal] = useState({ open: false, photo: null });
   const { toast } = useToast();
 
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [photoToDelete, setPhotoToDelete] = useState<GalleryPhoto | null>(null);
+  // Fetch gallery photos
+  const { data: photosData, isLoading: photosLoading, error: photosError, refetch } = useRealtimeQuery('gallery_photos', { orderBy: 'display_order' });
 
-  // Type guard to check if an item is a valid GalleryPhoto
+  // Type guard
   const isGalleryPhoto = (item: any): item is GalleryPhoto => {
-    return (
-      item &&
-      typeof item === 'object' && 
-      typeof item.id === 'string' &&
-      typeof item.src === 'string' &&
-      typeof item.category === 'string' &&
-      typeof item.created_at === 'string' &&
-      typeof item.updated_at === 'string' &&
-      typeof item.content_type === 'string'
-    );
+    return item && typeof item === 'object' && typeof item.id === 'string' && typeof item.src === 'string';
   };
 
-  // Safely handle the data type with proper type checking
-  const galleryPhotos: GalleryPhoto[] = !error && Array.isArray(photosData)
-    ? photosData.filter(isGalleryPhoto)
-    : [];
+  // Safely handle data
+  const photos: GalleryPhoto[] = !photosError && Array.isArray(photosData) ? photosData.filter(isGalleryPhoto) : [];
 
-  console.log('Gallery photos data:', photosData);
-  console.log('Filtered gallery photos:', galleryPhotos);
+  const filteredPhotos = photos.filter(photo => {
+    const matchesSearch = photo.alt_text?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         photo.category.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === 'all' || photo.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
-  const handleDeletePhoto = async () => {
-    if (!photoToDelete) return;
+  const categories = Array.from(new Set(photos.map(photo => photo.category)));
+  const featuredPhotos = photos.filter(photo => photo.is_featured).length;
+
+  const handleAddPhoto = () => {
+    setPhotoModal({ open: true, photo: null });
+  };
+
+  const handleEditPhoto = (photo: GalleryPhoto) => {
+    setPhotoModal({ open: true, photo });
+  };
+
+  const handleDeletePhoto = (photo: GalleryPhoto) => {
+    setDeleteModal({ open: true, photo });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteModal.photo) return;
 
     try {
-      // If the photo has a file stored in storage, delete it
-      if (photoToDelete.src.includes('gallery-photos/')) {
-        const fileName = photoToDelete.src.split('/').pop();
-        if (fileName) {
-          const { error: storageError } = await supabase.storage
-            .from('gallery-photos')
-            .remove([fileName]);
-          
-          if (storageError) {
-            console.error('Error deleting file from storage:', storageError);
-          }
-        }
-      }
-
-      // Delete the database record
       const { error } = await supabase
         .from('gallery_photos')
         .delete()
-        .eq('id', photoToDelete.id);
+        .eq('id', deleteModal.photo.id);
 
       if (error) throw error;
 
+      refetch();
       toast({
-        title: "Photo deleted",
-        description: "The photo has been successfully removed from the gallery.",
+        title: "Photo Deleted",
+        description: "The photo has been successfully deleted from the gallery.",
       });
 
-      refetch();
+      setDeleteModal({ open: false, photo: null });
     } catch (error) {
       console.error('Error deleting photo:', error);
       toast({
         title: "Error",
-        description: "Failed to delete the photo. Please try again.",
+        description: "Failed to delete photo. Please try again.",
         variant: "destructive",
       });
     }
   };
 
-  const openDeleteModal = (photo: GalleryPhoto) => {
-    setPhotoToDelete(photo);
-    setIsDeleteModalOpen(true);
+  const handlePhotoUpdated = () => {
+    refetch();
+    toast({
+      title: "Gallery Updated",
+      description: "The photo has been updated successfully.",
+    });
   };
 
-  if (error) {
-    return (
-      <div className="p-6">
-        <div className="text-center">
-          <h2 className="text-2xl font-serif text-red-500 mb-2">Error Loading Gallery</h2>
-          <p className="text-gray-600">Unable to load photos. Please try again later.</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6 p-6 max-w-7xl mx-auto">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-vip-black">Photo Gallery</h1>
-          <p className="text-vip-gold/80 mt-2">Manage your VVIP protocol photo collection</p>
+          <h1 className="text-3xl font-serif font-bold text-vip-black">Gallery Management</h1>
+          <p className="text-vip-gold/80 mt-2">Manage your photo gallery and showcase your best work</p>
         </div>
-        <Button 
-          onClick={() => setIsAddModalOpen(true)}
-          className="bg-vip-gold text-black hover:bg-vip-gold/90"
-        >
+        <Button onClick={handleAddPhoto} className="bg-vip-gold text-black hover:bg-vip-gold/90">
           <Plus className="h-4 w-4 mr-2" />
           Add Photo
         </Button>
       </div>
 
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {[...Array(8)].map((_, i) => (
-            <Card key={i} className="vip-glass border-vip-gold/20">
-              <CardContent className="p-4">
-                <Skeleton className="w-full h-48 mb-4" />
-                <Skeleton className="h-4 w-3/4 mb-2" />
-                <Skeleton className="h-3 w-1/2" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : galleryPhotos.length === 0 ? (
-        <div className="text-center py-16">
-          <div className="inline-block p-8 vip-glass border border-vip-gold/20 rounded-lg">
-            <h2 className="text-xl font-semibold text-vip-gold mb-2">No Photos Found</h2>
-            <p className="text-vip-gold/70">Your gallery is currently empty. Add some photos to get started.</p>
-          </div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {galleryPhotos.map((photo) => (
-            <Card key={photo.id} className="vip-glass border-vip-gold/20 hover:border-vip-gold/40 transition-colors group">
-              <CardContent className="p-4">
-                <div className="relative mb-4">
-                  <img
-                    src={photo.src}
-                    alt={photo.alt_text || 'Gallery photo'}
-                    className="w-full h-48 object-cover rounded-md"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = '/placeholder.svg';
-                    }}
-                  />
-                  {photo.is_featured && (
-                    <Badge className="absolute top-2 left-2 bg-vip-gold text-black">
-                      Featured
-                    </Badge>
-                  )}
-                  <Button
-                    size="icon"
-                    variant="destructive"
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => openDeleteModal(photo)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Badge variant="outline" className="text-vip-gold border-vip-gold/30">
-                      {photo.category}
-                    </Badge>
-                    {photo.display_order && (
-                      <span className="text-xs text-vip-gold/60">
-                        Order: {photo.display_order}
-                      </span>
-                    )}
-                  </div>
-                  
-                  {photo.alt_text && (
-                    <p className="text-sm text-vip-gold/80 line-clamp-2">
-                      {photo.alt_text}
-                    </p>
-                  )}
-                  
-                  <div className="flex justify-between items-center">
-                    <p className="text-xs text-vip-gold/60">
-                      Added: {new Date(photo.created_at).toLocaleDateString()}
-                    </p>
-                    {photo.file_size && (
-                      <p className="text-xs text-vip-gold/60">
-                        {(photo.file_size / 1024 / 1024).toFixed(1)} MB
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+      {/* Summary Stats */}
+      <div className="grid gap-6 md:grid-cols-3">
+        <Card className="vip-glass border-vip-gold/20">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-vip-gold/80">Total Photos</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-vip-black">{photos.length}</div>
+            <p className="text-xs text-vip-gold/60">In gallery</p>
+          </CardContent>
+        </Card>
+        
+        <Card className="vip-glass border-vip-gold/20">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-vip-gold/80">Categories</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-vip-black">{categories.length}</div>
+            <p className="text-xs text-blue-600">Different categories</p>
+          </CardContent>
+        </Card>
 
+        <Card className="vip-glass border-vip-gold/20">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-vip-gold/80">Featured</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-vip-black">{featuredPhotos}</div>
+            <p className="text-xs text-yellow-600">Featured photos</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filters */}
+      <Card className="vip-glass border-vip-gold/20">
+        <CardContent className="p-4">
+          <div className="flex gap-4 items-center">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-vip-gold/50" />
+              <Input
+                placeholder="Search photos..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 border-vip-gold/30"
+              />
+            </div>
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger className="w-48 border-vip-gold/30">
+                <SelectValue placeholder="Filter by category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories.map(category => (
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Gallery Grid */}
+      <Card className="vip-glass border-vip-gold/20">
+        <CardHeader>
+          <CardTitle className="flex items-center text-vip-black">
+            <ImageIcon className="h-5 w-5 mr-2 text-vip-gold" />
+            Photo Gallery ({filteredPhotos.length})
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {photosLoading ? (
+            <div className="text-center py-8">
+              <p className="text-vip-gold/60">Loading photos...</p>
+            </div>
+          ) : filteredPhotos.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-vip-gold/60">No photos found. Add your first photo to get started.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {filteredPhotos.map((photo) => (
+                <div key={photo.id} className="relative group rounded-lg overflow-hidden border border-vip-gold/20 vip-glass-light hover:shadow-lg transition-all">
+                  <div className="aspect-square relative">
+                    <img
+                      src={photo.src}
+                      alt={photo.alt_text || 'Gallery photo'}
+                      className="w-full h-full object-cover"
+                    />
+                    {photo.is_featured && (
+                      <div className="absolute top-2 right-2">
+                        <Badge className="bg-yellow-100 text-yellow-800">
+                          <Star className="h-3 w-3 mr-1" />
+                          Featured
+                        </Badge>
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                      <Button
+                        onClick={() => handleEditPhoto(photo)}
+                        variant="outline"
+                        size="sm"
+                        className="bg-white/90 border-vip-gold/30 text-vip-black hover:bg-white"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        onClick={() => handleDeletePhoto(photo)}
+                        variant="outline"
+                        size="sm"
+                        className="bg-white/90 border-red-300 text-red-600 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="p-3">
+                    <Badge className="mb-2">{photo.category}</Badge>
+                    {photo.alt_text && (
+                      <p className="text-sm text-vip-gold/80 truncate">{photo.alt_text}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Modals */}
       <AddPhotoModal
-        open={isAddModalOpen}
-        onOpenChange={setIsAddModalOpen}
-        onPhotoAdded={() => {
-          refetch();
-          toast({
-            title: "Photo added",
-            description: "The photo has been successfully added to the gallery.",
-          });
-        }}
+        open={photoModal.open}
+        onOpenChange={(open) => setPhotoModal({ ...photoModal, open })}
+        photo={photoModal.photo}
+        onPhotoUpdated={handlePhotoUpdated}
       />
 
       <DeleteConfirmationModal
-        open={isDeleteModalOpen}
-        onOpenChange={setIsDeleteModalOpen}
+        open={deleteModal.open}
+        onOpenChange={(open) => setDeleteModal({ ...deleteModal, open })}
         title="Delete Photo"
-        description="Are you sure you want to delete this photo?"
-        itemName={photoToDelete?.alt_text || 'Untitled Photo'}
-        onConfirm={handleDeletePhoto}
+        description="Are you sure you want to delete this photo from the gallery?"
+        itemName={deleteModal.photo?.alt_text || 'Photo'}
+        onConfirm={confirmDelete}
       />
     </div>
   );
