@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -12,11 +11,11 @@ interface EditItemModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   item: any;
-  onItemUpdated: (updatedItem: any) => void;
+  onSuccess?: () => void;
   type: 'inventory' | 'client' | 'staff';
 }
 
-export const EditItemModal = ({ open, onOpenChange, item, onItemUpdated, type }: EditItemModalProps) => {
+export const EditItemModal = ({ open, onOpenChange, item, onSuccess, type }: EditItemModalProps) => {
   const [formData, setFormData] = useState<any>({});
   const { toast } = useToast();
 
@@ -35,14 +34,16 @@ export const EditItemModal = ({ open, onOpenChange, item, onItemUpdated, type }:
       updated_at: new Date().toISOString(),
     };
 
-    onItemUpdated(updatedItem);
-
     toast({
       title: "Item Updated",
       description: `${type === 'inventory' ? formData.item_name || formData.name : 
                    type === 'client' ? formData.full_name : 
                    formData.full_name} has been updated successfully.`,
     });
+
+    if (onSuccess) {
+      onSuccess();
+    }
 
     onOpenChange(false);
   };
