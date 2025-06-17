@@ -1,21 +1,29 @@
 
-import React, { useState } from 'react';
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Menu } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Home, Calendar, FileText, Users, Settings, Plus } from "lucide-react"
-import { useNavigate } from 'react-router-dom';
-import { cn } from "@/lib/utils"
+import React from 'react';
+import { 
+  Sidebar, 
+  SidebarContent, 
+  SidebarGroup, 
+  SidebarGroupContent, 
+  SidebarGroupLabel, 
+  SidebarMenu, 
+  SidebarMenuButton, 
+  SidebarMenuItem,
+  SidebarHeader
+} from "@/components/ui/sidebar";
+import { Home, Calendar, FileText, Users, Settings, Plus } from "lucide-react";
+import { useNavigate, useLocation } from 'react-router-dom';
+import { cn } from "@/lib/utils";
 
 export const VipSidebar = () => {
-  const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const navigationItems = [
     {
       name: 'Dashboard',
       icon: Home,
-      path: '/',
+      path: '/dashboard',
       description: 'Overview of all VIP services'
     },
     {
@@ -51,41 +59,51 @@ export const VipSidebar = () => {
   ];
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button variant="ghost" size="sm" className="md:hidden">
-          <Menu />
-        </Button>
-      </SheetTrigger>
-      <SheetContent side="left" className="p-0 pt-10 w-64">
-        <div className="flex flex-col h-full">
-          <div className="px-4 mb-4">
-            <h2 className="text-2xl font-bold">VVIP Panel</h2>
-            <p className="text-sm text-muted-foreground">
-              Manage exclusive services
-            </p>
-          </div>
-          <div className="space-y-1 flex-1 p-2">
-            {navigationItems.map((item) => (
-              <Button
-                key={item.name}
-                variant="ghost"
-                className={cn("w-full justify-start font-normal",
-                  window.location.pathname === item.path ? "bg-secondary hover:bg-secondary" : "hover:bg-accent hover:text-accent-foreground")}
-                onClick={() => {
-                  navigate(item.path);
-                  setOpen(false);
-                }}
-              >
-                <div className="flex items-center space-x-2">
-                  <item.icon className="h-4 w-4" />
-                  <span>{item.name}</span>
-                </div>
-              </Button>
-            ))}
+    <Sidebar className="border-r border-vip-gold/30 bg-black">
+      <SidebarHeader className="p-4 border-b border-vip-gold/30">
+        <div className="flex items-center space-x-3">
+          <img 
+            src="/lovable-uploads/af24075c-d7ee-41bc-a3d3-d50d1b766753.png" 
+            alt="Sir Dennis Olele VVIP Protocol" 
+            className="h-8 w-8 object-contain"
+          />
+          <div>
+            <h2 className="text-lg font-serif font-bold text-vip-gold">VVIP Panel</h2>
+            <p className="text-xs text-vip-gold/70">Manage exclusive services</p>
           </div>
         </div>
-      </SheetContent>
-    </Sheet>
+      </SidebarHeader>
+      
+      <SidebarContent className="bg-black">
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-vip-gold/80 font-medium">
+            Navigation
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {navigationItems.map((item) => (
+                <SidebarMenuItem key={item.name}>
+                  <SidebarMenuButton 
+                    asChild
+                    className={cn(
+                      "w-full text-vip-gold/80 hover:text-vip-gold hover:bg-vip-gold/10 transition-colors",
+                      location.pathname === item.path && "bg-vip-gold/20 text-vip-gold font-medium"
+                    )}
+                  >
+                    <button
+                      onClick={() => navigate(item.path)}
+                      className="flex items-center space-x-3 w-full text-left"
+                    >
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.name}</span>
+                    </button>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+    </Sidebar>
   );
 };

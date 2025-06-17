@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { VipSidebar } from './VipSidebar';
-import { Search, Menu, User } from 'lucide-react';
+import { Search, User } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -26,9 +27,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           <header className="border-b border-vip-gold/30 bg-black/98 backdrop-blur-md sticky top-0 z-40 shadow-lg">
             <div className="flex items-center justify-between px-6 py-4">
               <div className="flex items-center space-x-4">
-                <SidebarTrigger className="text-vip-gold hover:text-vip-gold-light transition-colors p-2 rounded-lg hover:bg-vip-gold/10">
-                  <Menu className="h-5 w-5" />
-                </SidebarTrigger>
+                <SidebarTrigger className="text-vip-gold hover:text-vip-gold-light transition-colors p-2 rounded-lg hover:bg-vip-gold/10" />
                 
                 {/* Professional Logo */}
                 <div className="flex items-center space-x-3">
