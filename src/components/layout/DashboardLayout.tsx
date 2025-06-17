@@ -2,22 +2,15 @@
 import React from 'react';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { VipSidebar } from './VipSidebar';
-import { Search, User } from 'lucide-react';
+import { UserMenu } from './UserMenu';
+import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
-  const navigate = useNavigate();
-
-  const handleViewProfile = () => {
-    navigate('/profile');
-  };
-
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-black">
@@ -53,14 +46,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               </div>
               
               <div className="flex items-center space-x-4">
-                <Button
-                  onClick={handleViewProfile}
-                  variant="ghost"
-                  className="text-vip-gold hover:text-vip-gold-light hover:bg-vip-gold/10 transition-colors"
-                >
-                  <User className="h-5 w-5 mr-2" />
-                  View Profile
-                </Button>
+                <UserMenu />
               </div>
             </div>
           </header>
