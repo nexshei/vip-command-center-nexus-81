@@ -11,7 +11,7 @@ import {
   SidebarMenuItem,
   SidebarHeader
 } from "@/components/ui/sidebar";
-import { Home, Calendar, FileText, Users, Settings, Plus, Package, Mail, UserCheck, MessageSquare, List, Image } from "lucide-react";
+import { Home, Calendar, FileText, Users, Settings, Plus, Package, Mail, UserCheck, MessageSquare, List, Image, UserCog } from "lucide-react";
 import { useNavigate, useLocation } from 'react-router-dom';
 import { cn } from "@/lib/utils";
 
@@ -73,6 +73,12 @@ export const VipSidebar = () => {
       icon: Image,
       path: '/gallery',
       description: 'Manage photo gallery'
+    },
+    {
+      name: 'Staff',
+      icon: UserCog,
+      path: '/staff',
+      description: 'Manage staff members'
     },
     {
       name: 'Email',

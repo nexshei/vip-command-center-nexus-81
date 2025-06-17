@@ -235,9 +235,12 @@ export type Database = {
         Row: {
           alt_text: string | null
           category: string
+          content_type: string
           created_at: string
           display_order: number | null
+          file_size: number | null
           id: string
+          image_data: string | null
           is_featured: boolean | null
           src: string
           updated_at: string
@@ -245,9 +248,12 @@ export type Database = {
         Insert: {
           alt_text?: string | null
           category: string
+          content_type?: string
           created_at?: string
           display_order?: number | null
+          file_size?: number | null
           id?: string
+          image_data?: string | null
           is_featured?: boolean | null
           src: string
           updated_at?: string
@@ -255,9 +261,12 @@ export type Database = {
         Update: {
           alt_text?: string | null
           category?: string
+          content_type?: string
           created_at?: string
           display_order?: number | null
+          file_size?: number | null
           id?: string
+          image_data?: string | null
           is_featured?: boolean | null
           src?: string
           updated_at?: string
