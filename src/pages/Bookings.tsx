@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Search, Plus, Calendar, Clock, User, MapPin, Eye, Edit, Trash2, FileText, DollarSign } from 'lucide-react';
+import { Search, Plus, Calendar, Clock, User, MapPin, Eye, Edit, Trash2, FileText, DollarSign, TrendingUp, History } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,11 +21,9 @@ const Bookings = () => {
 
   // Fetch live data from Supabase
   const { data: bookingsData, isLoading: bookingsLoading, error: bookingsError } = useRealtimeQuery("bookings", { orderBy: "created_at" });
-  const { data: quotesData, isLoading: quotesLoading, error: quotesError } = useRealtimeQuery("quotes", { orderBy: "created_at" });
 
   // Use real data or fallback to empty arrays
   const bookings = bookingsData || [];
-  const quotes = quotesData || [];
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -38,6 +36,7 @@ const Bookings = () => {
   };
 
   const formatDateTime = (dateTimeString: string) => {
+    if (!dateTimeString) return { date: 'Not set', time: 'Not set' };
     const date = new Date(dateTimeString);
     return {
       date: date.toLocaleDateString(),
@@ -52,41 +51,46 @@ const Bookings = () => {
     return matchesSearch && matchesStatus;
   });
 
-  const filteredQuotes = quotes.filter((quote: any) => {
-    const matchesSearch = quote.requester_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         quote.requested_service?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || quote.status === statusFilter;
-    return matchesSearch && matchesStatus;
+  // Separate upcoming and previous events
+  const now = new Date();
+  const upcomingEvents = filteredBookings.filter((booking: any) => {
+    if (!booking.scheduled_at) return false;
+    return new Date(booking.scheduled_at) >= now;
   });
 
-  const handleViewItem = (id: string, type: 'booking' | 'quote') => {
+  const previousEvents = filteredBookings.filter((booking: any) => {
+    if (!booking.scheduled_at) return true; // Include events without dates in previous
+    return new Date(booking.scheduled_at) < now;
+  });
+
+  const handleViewItem = (id: string) => {
     toast({
-      title: `View ${type === 'booking' ? 'Booking' : 'Quote'} Details`,
-      description: `Opening detailed view of the ${type}...`,
+      title: "View Event Details",
+      description: "Opening detailed view of the event...",
     });
   };
 
-  const handleEditItem = (id: string, type: 'booking' | 'quote') => {
+  const handleEditItem = (id: string) => {
     toast({
-      title: `Edit ${type === 'booking' ? 'Booking' : 'Quote'}`,
-      description: `Opening edit form for the ${type}...`,
+      title: "Edit Event",
+      description: "Opening edit form for the event...",
     });
   };
 
-  const handleDeleteItem = async (id: string, type: 'booking' | 'quote') => {
-    if (!confirm(`Are you sure you want to delete this ${type}?`)) return;
+  const handleDeleteItem = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this event?')) return;
 
     try {
       const { error } = await supabase
-        .from(type === 'booking' ? 'bookings' : 'quotes')
+        .from('bookings')
         .delete()
         .eq('id', id);
 
       if (error) throw error;
 
       toast({
-        title: `${type === 'booking' ? 'Booking' : 'Quote'} Deleted`,
-        description: `The ${type} has been deleted successfully.`,
+        title: "Event Deleted",
+        description: "The event has been deleted successfully.",
       });
     } catch (error: any) {
       toast({
@@ -97,70 +101,74 @@ const Bookings = () => {
     }
   };
 
-  const totalBookings = bookings.length;
-  const totalQuotes = quotes.length;
-  const confirmedBookings = bookings.filter((booking: any) => booking.status === 'confirmed').length;
-  const pendingItems = [...bookings, ...quotes].filter((item: any) => item.status === 'pending').length;
+  // Calculate total revenue from completed events
+  const totalRevenue = previousEvents
+    .filter((event: any) => event.status === 'completed')
+    .reduce((sum: number, event: any) => {
+      // Assuming we'll add a cost/revenue field later, for now use a placeholder
+      return sum + (event.revenue || 0);
+    }, 0);
+
+  const totalEvents = bookings.length;
+  const confirmedEvents = bookings.filter((booking: any) => booking.status === 'confirmed').length;
+  const completedEvents = previousEvents.filter((event: any) => event.status === 'completed').length;
 
   return (
     <div className="space-y-6 p-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-vip-black">Bookings & Quotes</h1>
-          <p className="text-vip-gold/80 mt-2">Manage all VVIP bookings and quotes from the database</p>
+          <h1 className="text-3xl font-serif font-bold text-vip-black">Events Management</h1>
+          <p className="text-vip-gold/80 mt-2">Manage upcoming and previous VVIP events</p>
         </div>
-        <div className="flex gap-3">
-          <Button onClick={() => navigate('/create-booking')} className="bg-vip-gold text-white hover:bg-vip-gold-dark">
-            <Plus className="h-4 w-4 mr-2" />
-            New Booking
-          </Button>
-          <Button onClick={() => navigate('/generate-quote')} variant="outline" className="border-vip-gold text-vip-gold hover:bg-vip-gold/10">
-            <FileText className="h-4 w-4 mr-2" />
-            New Quote
-          </Button>
-        </div>
+        <Button onClick={() => navigate('/create-booking')} className="bg-vip-gold text-white hover:bg-vip-gold-dark">
+          <Plus className="h-4 w-4 mr-2" />
+          Add New Event
+        </Button>
       </div>
 
       {/* Summary Stats */}
       <div className="grid gap-6 md:grid-cols-4">
         <Card className="vip-glass border-vip-gold/20">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">Total Bookings</CardTitle>
+            <CardTitle className="text-sm font-medium text-vip-gold/80">Total Events</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-black">{totalBookings}</div>
-            <p className="text-xs text-vip-gold/60">All appointments</p>
+            <div className="text-2xl font-bold text-vip-black">{totalEvents}</div>
+            <p className="text-xs text-vip-gold/60">All events</p>
           </CardContent>
         </Card>
         
         <Card className="vip-glass border-vip-gold/20">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">Total Quotes</CardTitle>
+            <CardTitle className="text-sm font-medium text-vip-gold/80">Upcoming Events</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-black">{totalQuotes}</div>
-            <p className="text-xs text-vip-gold/60">All quotations</p>
+            <div className="text-2xl font-bold text-vip-black">{upcomingEvents.length}</div>
+            <p className="text-xs text-green-600">Scheduled ahead</p>
           </CardContent>
         </Card>
 
         <Card className="vip-glass border-vip-gold/20">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">Confirmed</CardTitle>
+            <CardTitle className="text-sm font-medium text-vip-gold/80">Completed Events</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-black">{confirmedBookings}</div>
-            <p className="text-xs text-green-600">Ready to proceed</p>
+            <div className="text-2xl font-bold text-vip-black">{completedEvents}</div>
+            <p className="text-xs text-blue-600">Successfully finished</p>
           </CardContent>
         </Card>
 
         <Card className="vip-glass border-vip-gold/20">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">Pending</CardTitle>
+            <CardTitle className="text-sm font-medium text-vip-gold/80 flex items-center">
+              <DollarSign className="h-4 w-4 mr-1" />
+              Total Revenue
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-black">{pendingItems}</div>
-            <p className="text-xs text-yellow-600">Awaiting action</p>
+            <div className="text-2xl font-bold text-vip-black">KSH {totalRevenue.toLocaleString()}</div>
+            <p className="text-xs text-green-600">From completed events</p>
           </CardContent>
         </Card>
       </div>
@@ -168,7 +176,7 @@ const Bookings = () => {
       {/* Search & Filters */}
       <Card className="vip-glass border-vip-gold/20">
         <CardHeader>
-          <CardTitle className="text-vip-black">Search & Filter</CardTitle>
+          <CardTitle className="text-vip-black">Search & Filter Events</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
@@ -202,35 +210,35 @@ const Bookings = () => {
         </CardContent>
       </Card>
 
-      {/* Tabs for Bookings and Quotes */}
-      <Tabs defaultValue="bookings" className="space-y-6">
+      {/* Tabs for Upcoming and Previous Events */}
+      <Tabs defaultValue="upcoming" className="space-y-6">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="bookings" className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            Bookings ({filteredBookings.length})
+          <TabsTrigger value="upcoming" className="flex items-center gap-2">
+            <TrendingUp className="h-4 w-4" />
+            Upcoming Events ({upcomingEvents.length})
           </TabsTrigger>
-          <TabsTrigger value="quotes" className="flex items-center gap-2">
-            <FileText className="h-4 w-4" />
-            Quotes ({filteredQuotes.length})
+          <TabsTrigger value="previous" className="flex items-center gap-2">
+            <History className="h-4 w-4" />
+            Previous Events ({previousEvents.length})
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="bookings">
+        <TabsContent value="upcoming">
           <Card className="vip-glass border-vip-gold/20">
             <CardHeader>
               <CardTitle className="flex items-center text-vip-black">
                 <Calendar className="h-5 w-5 mr-2 text-vip-gold" />
-                VVIP Bookings from Database
+                Upcoming VVIP Events
               </CardTitle>
             </CardHeader>
             <CardContent>
               {bookingsLoading ? (
                 <div className="text-center py-8">
-                  <p className="text-vip-gold/60">Loading bookings from database...</p>
+                  <p className="text-vip-gold/60">Loading upcoming events...</p>
                 </div>
               ) : bookingsError ? (
                 <div className="text-center py-8">
-                  <p className="text-red-500">Error loading bookings: {bookingsError.message}</p>
+                  <p className="text-red-500">Error loading events: {bookingsError.message}</p>
                 </div>
               ) : (
                 <Table>
@@ -245,37 +253,39 @@ const Bookings = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredBookings.map((booking: any) => {
-                      const { date, time } = formatDateTime(booking.scheduled_at || new Date().toISOString());
+                    {upcomingEvents.map((event: any) => {
+                      const { date, time } = formatDateTime(event.scheduled_at);
                       return (
-                        <TableRow key={booking.id}>
-                          <TableCell className="font-medium">{booking.client_name}</TableCell>
-                          <TableCell>{booking.service_type}</TableCell>
+                        <TableRow key={event.id}>
+                          <TableCell className="font-medium">{event.client_name || 'No client name'}</TableCell>
+                          <TableCell>{event.service_type || 'Not specified'}</TableCell>
                           <TableCell>{date}</TableCell>
                           <TableCell>{time}</TableCell>
                           <TableCell>
-                            <Badge className={getStatusColor(booking.status)}>
-                              {booking.status?.charAt(0).toUpperCase() + booking.status?.slice(1)}
+                            <Badge className={getStatusColor(event.status)}>
+                              {event.status?.charAt(0).toUpperCase() + event.status?.slice(1) || 'Unknown'}
                             </Badge>
                           </TableCell>
                           <TableCell>
                             <div className="flex space-x-2">
                               <Button 
-                                onClick={() => handleViewItem(booking.id, 'booking')}
+                                onClick={() => handleViewItem(event.id)}
                                 variant="outline" 
                                 size="sm"
+                                className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
                               >
                                 <Eye className="h-3 w-3" />
                               </Button>
                               <Button 
-                                onClick={() => handleEditItem(booking.id, 'booking')}
+                                onClick={() => handleEditItem(event.id)}
                                 variant="outline" 
                                 size="sm"
+                                className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
                               >
                                 <Edit className="h-3 w-3" />
                               </Button>
                               <Button 
-                                onClick={() => handleDeleteItem(booking.id, 'booking')}
+                                onClick={() => handleDeleteItem(event.id)}
                                 variant="outline" 
                                 size="sm"
                                 className="border-red-300 text-red-600 hover:bg-red-50"
@@ -290,31 +300,31 @@ const Bookings = () => {
                   </TableBody>
                 </Table>
               )}
-              {!bookingsLoading && !bookingsError && filteredBookings.length === 0 && (
+              {!bookingsLoading && !bookingsError && upcomingEvents.length === 0 && (
                 <div className="text-center py-8">
-                  <p className="text-vip-gold/60">No bookings found matching your search.</p>
+                  <p className="text-vip-gold/60">No upcoming events found. Add a new event to get started.</p>
                 </div>
               )}
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="quotes">
+        <TabsContent value="previous">
           <Card className="vip-glass border-vip-gold/20">
             <CardHeader>
               <CardTitle className="flex items-center text-vip-black">
-                <FileText className="h-5 w-5 mr-2 text-vip-gold" />
-                Generated Quotes from Database
+                <History className="h-5 w-5 mr-2 text-vip-gold" />
+                Previous VVIP Events & Revenue
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {quotesLoading ? (
+              {bookingsLoading ? (
                 <div className="text-center py-8">
-                  <p className="text-vip-gold/60">Loading quotes from database...</p>
+                  <p className="text-vip-gold/60">Loading previous events...</p>
                 </div>
-              ) : quotesError ? (
+              ) : bookingsError ? (
                 <div className="text-center py-8">
-                  <p className="text-red-500">Error loading quotes: {quotesError.message}</p>
+                  <p className="text-red-500">Error loading events: {bookingsError.message}</p>
                 </div>
               ) : (
                 <Table>
@@ -322,49 +332,45 @@ const Bookings = () => {
                     <TableRow>
                       <TableHead>Client</TableHead>
                       <TableHead>Service</TableHead>
-                      <TableHead>Amount</TableHead>
                       <TableHead>Date</TableHead>
+                      <TableHead>Revenue</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredQuotes.map((quote: any) => {
-                      const { date } = formatDateTime(quote.created_at || new Date().toISOString());
+                    {previousEvents.map((event: any) => {
+                      const { date } = formatDateTime(event.scheduled_at);
                       return (
-                        <TableRow key={quote.id}>
-                          <TableCell className="font-medium">{quote.requester_name}</TableCell>
-                          <TableCell>{quote.requested_service}</TableCell>
-                          <TableCell>KSH {quote.amount?.toLocaleString()}</TableCell>
+                        <TableRow key={event.id}>
+                          <TableCell className="font-medium">{event.client_name || 'No client name'}</TableCell>
+                          <TableCell>{event.service_type || 'Not specified'}</TableCell>
                           <TableCell>{date}</TableCell>
+                          <TableCell className="font-medium text-green-600">
+                            KSH {(event.revenue || 0).toLocaleString()}
+                          </TableCell>
                           <TableCell>
-                            <Badge className={getStatusColor(quote.status)}>
-                              {quote.status?.charAt(0).toUpperCase() + quote.status?.slice(1)}
+                            <Badge className={getStatusColor(event.status)}>
+                              {event.status?.charAt(0).toUpperCase() + event.status?.slice(1) || 'Unknown'}
                             </Badge>
                           </TableCell>
                           <TableCell>
                             <div className="flex space-x-2">
                               <Button 
-                                onClick={() => handleViewItem(quote.id, 'quote')}
+                                onClick={() => handleViewItem(event.id)}
                                 variant="outline" 
                                 size="sm"
+                                className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
                               >
                                 <Eye className="h-3 w-3" />
                               </Button>
                               <Button 
-                                onClick={() => handleEditItem(quote.id, 'quote')}
+                                onClick={() => handleViewItem(event.id)}
                                 variant="outline" 
                                 size="sm"
+                                className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
                               >
-                                <Edit className="h-3 w-3" />
-                              </Button>
-                              <Button 
-                                onClick={() => handleDeleteItem(quote.id, 'quote')}
-                                variant="outline" 
-                                size="sm"
-                                className="border-red-300 text-red-600 hover:bg-red-50"
-                              >
-                                <Trash2 className="h-3 w-3" />
+                                <FileText className="h-3 w-3" />
                               </Button>
                             </div>
                           </TableCell>
@@ -374,9 +380,9 @@ const Bookings = () => {
                   </TableBody>
                 </Table>
               )}
-              {!quotesLoading && !quotesError && filteredQuotes.length === 0 && (
+              {!bookingsLoading && !bookingsError && previousEvents.length === 0 && (
                 <div className="text-center py-8">
-                  <p className="text-vip-gold/60">No quotes found matching your search.</p>
+                  <p className="text-vip-gold/60">No previous events found.</p>
                 </div>
               )}
             </CardContent>
