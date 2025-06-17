@@ -20,6 +20,9 @@ interface GalleryPhoto {
   updated_at: string;
   is_featured: boolean | null;
   display_order: number | null;
+  content_type: string;
+  file_size: number | null;
+  image_data: string | null;
 }
 
 const Gallery = () => {
@@ -32,15 +35,25 @@ const Gallery = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [photoToDelete, setPhotoToDelete] = useState<GalleryPhoto | null>(null);
 
-  // Properly handle the data type with type guard
+  // Type guard to check if an item is a valid GalleryPhoto
+  const isGalleryPhoto = (item: unknown): item is GalleryPhoto => {
+    return (
+      typeof item === 'object' && 
+      item !== null && 
+      'id' in item && 
+      'src' in item && 
+      'category' in item &&
+      'created_at' in item &&
+      'updated_at' in item &&
+      typeof (item as any).id === 'string' &&
+      typeof (item as any).src === 'string' &&
+      typeof (item as any).category === 'string'
+    );
+  };
+
+  // Safely handle the data type with proper type checking
   const galleryPhotos: GalleryPhoto[] = Array.isArray(photos) 
-    ? photos.filter((item): item is GalleryPhoto => 
-        typeof item === 'object' && 
-        item !== null && 
-        'id' in item && 
-        'src' in item && 
-        'category' in item
-      )
+    ? photos.filter(isGalleryPhoto)
     : [];
 
   const handleDeletePhoto = async () => {
