@@ -27,6 +27,13 @@ const ListBookings = () => {
   // Fetch live meeting requests data with real-time updates
   const { data: meetingRequests, isLoading, error, refetch } = useRealtimeQuery("meeting_requests", { orderBy: "created_at" });
 
+  // Add console logs for debugging
+  React.useEffect(() => {
+    console.log('Meeting Requests Data:', meetingRequests);
+    console.log('Is Loading:', isLoading);
+    console.log('Error:', error);
+  }, [meetingRequests, isLoading, error]);
+
   const formatDateTime = (dateTimeString: string) => {
     if (!dateTimeString) return { date: 'Not set', time: 'Not set' };
     const date = new Date(dateTimeString);
@@ -85,6 +92,7 @@ const ListBookings = () => {
         description: "The meeting request has been deleted successfully.",
       });
     } catch (error: any) {
+      console.error('Delete error:', error);
       toast({
         title: "Delete Failed",
         description: error.message || "An error occurred while deleting.",
@@ -107,6 +115,7 @@ const ListBookings = () => {
         description: `Meeting request status updated to ${newStatus}.`,
       });
     } catch (error: any) {
+      console.error('Update status error:', error);
       toast({
         title: "Update Failed",
         description: error.message || "An error occurred while updating status.",
@@ -143,7 +152,7 @@ const ListBookings = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-serif font-bold text-vip-black">Meeting Requests</h1>
-          <p className="text-vip-gold/80 mt-2">View and manage meeting requests submitted from the frontend</p>
+          <p className="text-vip-gold/80 mt-2">View and manage meeting requests from the meeting_requests table</p>
         </div>
         <div className="flex gap-2">
           <Button 
@@ -163,6 +172,20 @@ const ListBookings = () => {
           </Button>
         </div>
       </div>
+
+      {/* Debug Info */}
+      {process.env.NODE_ENV === 'development' && (
+        <Card className="bg-yellow-50 border-yellow-200">
+          <CardContent className="p-4">
+            <p className="text-sm">
+              <strong>Debug Info:</strong> 
+              Loading: {isLoading ? 'Yes' : 'No'} | 
+              Data Count: {meetingRequests?.length || 0} | 
+              Error: {error ? error.message : 'None'}
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Summary Stats */}
       <div className="grid gap-6 md:grid-cols-4">
@@ -275,7 +298,7 @@ const ListBookings = () => {
           {isLoading ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-vip-gold mx-auto mb-4"></div>
-              <p className="text-vip-gold/60">Loading meeting requests...</p>
+              <p className="text-vip-gold/60">Loading meeting requests from database...</p>
             </div>
           ) : error ? (
             <div className="text-center py-8">
