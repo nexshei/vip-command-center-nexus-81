@@ -53,7 +53,7 @@ const Staff = () => {
   };
 
   // Safely handle the data type with proper type checking
-  const staffMembers: StaffMember[] = Array.isArray(staffData) 
+  const staffMembers: StaffMember[] = Array.isArray(staffData) && !error
     ? staffData.filter(isStaffMember)
     : [];
 

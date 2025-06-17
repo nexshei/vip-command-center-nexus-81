@@ -49,7 +49,7 @@ const Gallery = () => {
   };
 
   // Safely handle the data type with proper type checking
-  const galleryPhotos: GalleryPhoto[] = Array.isArray(photosData) 
+  const galleryPhotos: GalleryPhoto[] = Array.isArray(photosData) && !error
     ? photosData.filter(isGalleryPhoto)
     : [];
 
