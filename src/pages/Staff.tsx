@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -57,6 +56,9 @@ const Staff = () => {
   const staffMembers: StaffMember[] = Array.isArray(staffData) 
     ? staffData.filter(isStaffMember)
     : [];
+
+  console.log('Staff data from database:', staffData);
+  console.log('Filtered staff members:', staffMembers);
 
   const totalStaff = staffMembers.length;
   const activeStaff = staffMembers.filter((staff: StaffMember) => staff.status === 'active').length;

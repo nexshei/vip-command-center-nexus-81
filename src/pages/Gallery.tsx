@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useRealtimeQuery } from '@/hooks/useRealtimeQuery';
 import { Card, CardContent } from '@/components/ui/card';
@@ -53,6 +52,9 @@ const Gallery = () => {
   const galleryPhotos: GalleryPhoto[] = Array.isArray(photosData) 
     ? photosData.filter(isGalleryPhoto)
     : [];
+
+  console.log('Gallery photos data:', photosData);
+  console.log('Filtered gallery photos:', galleryPhotos);
 
   const handleDeletePhoto = async () => {
     if (!photoToDelete) return;
