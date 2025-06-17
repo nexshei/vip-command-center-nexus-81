@@ -26,7 +26,7 @@ interface GalleryPhoto {
 }
 
 const Gallery = () => {
-  const { data: photos, isLoading, error, refetch } = useRealtimeQuery('gallery_photos', {
+  const { data: photosData, isLoading, error, refetch } = useRealtimeQuery('gallery_photos', {
     orderBy: 'display_order'
   });
   const { toast } = useToast();
@@ -50,8 +50,8 @@ const Gallery = () => {
   };
 
   // Safely handle the data type with proper type checking
-  const galleryPhotos: GalleryPhoto[] = Array.isArray(photos) 
-    ? photos.filter(isGalleryPhoto)
+  const galleryPhotos: GalleryPhoto[] = Array.isArray(photosData) 
+    ? photosData.filter(isGalleryPhoto)
     : [];
 
   const handleDeletePhoto = async () => {

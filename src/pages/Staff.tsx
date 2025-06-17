@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +12,7 @@ import { useRealtimeQuery } from "@/hooks/useRealtimeQuery";
 import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
 import { ViewDetailsModal } from '@/components/modals/ViewDetailsModal';
 import { EditItemModal } from '@/components/modals/EditItemModal';
+import { supabase } from '@/integrations/supabase/client';
 
 interface StaffMember {
   id: string;
@@ -31,87 +33,30 @@ const Staff = () => {
   const [deleteModal, setDeleteModal] = useState({ open: false, item: null });
   const [viewModal, setViewModal] = useState({ open: false, item: null });
   const [editModal, setEditModal] = useState({ open: false, item: null });
-  const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
   const { toast } = useToast();
 
   // Fetch live data from Supabase "staff" table
-  const { data: staffData, isLoading, error } = useRealtimeQuery("staff", { orderBy: "created_at" });
+  const { data: staffData, isLoading, error, refetch } = useRealtimeQuery("staff", { orderBy: "created_at" });
 
-  // Mock data for fallback
-  const mockStaffMembers = [
-    {
-      id: '1',
-      full_name: 'Margaret Wanjiku',
-      role: 'Protocol Officer',
-      email: 'margaret@sirolele.com',
-      phone: '+254 701 234 567',
-      status: 'active' as const,
-      notes: 'Protocol department',
-      created_at: '2023-01-15'
-    },
-    {
-      id: '2',
-      full_name: 'David Kimani',
-      role: 'Security Lead',
-      email: 'david@sirolele.com',
-      phone: '+254 702 345 678',
-      status: 'active' as const,
-      notes: 'Security department',
-      created_at: '2022-11-20'
-    },
-    {
-      id: '3',
-      full_name: 'Grace Muthoni',
-      role: 'Event Coordinator',
-      email: 'grace@sirolele.com',
-      phone: '+254 703 456 789',
-      status: 'on-leave' as const,
-      notes: 'Events department',
-      created_at: '2023-03-10'
-    },
-    {
-      id: '4',
-      full_name: 'John Ochieng',
-      role: 'Transport Manager',
-      email: 'john@sirolele.com',
-      phone: '+254 704 567 890',
-      status: 'active' as const,
-      notes: 'Logistics department',
-      created_at: '2022-08-05'
-    },
-    {
-      id: '5',
-      full_name: 'Susan Akinyi',
-      role: 'Communications Lead',
-      email: 'susan@sirolele.com',
-      phone: '+254 705 678 901',
-      status: 'active' as const,
-      notes: 'Marketing department',
-      created_at: '2023-05-22'
-    },
-    {
-      id: '6',
-      full_name: 'Peter Mutua',
-      role: 'Protocol Assistant',
-      email: 'peter@sirolele.com',
-      phone: '+254 706 789 012',
-      status: 'inactive' as const,
-      notes: 'Protocol department',
-      created_at: '2022-12-01'
-    },
-  ];
+  // Type guard to check if an item is a valid StaffMember
+  const isStaffMember = (item: any): item is StaffMember => {
+    return (
+      item &&
+      typeof item === 'object' && 
+      typeof item.id === 'string' &&
+      typeof item.full_name === 'string' &&
+      typeof item.role === 'string' &&
+      typeof item.email === 'string' &&
+      typeof item.phone === 'string' &&
+      typeof item.created_at === 'string' &&
+      ['active', 'on-leave', 'inactive'].includes(item.status)
+    );
+  };
 
-  // Use real data if available, otherwise use mock data and state
-  useEffect(() => {
-    if (staffData && staffData.length > 0) {
-      setStaffMembers(staffData.map((staff: any) => ({
-        ...staff,
-        status: ['active', 'on-leave', 'inactive'].includes(staff.status) ? staff.status : 'active'
-      })));
-    } else {
-      setStaffMembers(mockStaffMembers);
-    }
-  }, [staffData]);
+  // Safely handle the data type with proper type checking
+  const staffMembers: StaffMember[] = Array.isArray(staffData) 
+    ? staffData.filter(isStaffMember)
+    : [];
 
   const totalStaff = staffMembers.length;
   const activeStaff = staffMembers.filter((staff: StaffMember) => staff.status === 'active').length;
@@ -155,7 +100,7 @@ const Staff = () => {
   };
 
   const handleStaffAdded = (newStaff: StaffMember) => {
-    setStaffMembers([...staffMembers, newStaff]);
+    refetch();
     toast({
       title: "Staff Added",
       description: "New staff member has been added successfully.",
@@ -171,22 +116,41 @@ const Staff = () => {
   };
 
   const handleStaffUpdated = (updatedStaff: StaffMember) => {
-    setStaffMembers(staffMembers.map(staff => 
-      staff.id === updatedStaff.id ? updatedStaff : staff
-    ));
+    refetch();
+    toast({
+      title: "Staff Updated",
+      description: "Staff member has been updated successfully.",
+    });
   };
 
   const handleDeleteStaff = (staff: StaffMember) => {
     setDeleteModal({ open: true, item: staff });
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (deleteModal.item) {
-      setStaffMembers(staffMembers.filter(staff => staff.id !== deleteModal.item.id));
-      toast({
-        title: "Staff Member Deleted",
-        description: `${deleteModal.item.full_name} has been removed from the staff directory.`,
-      });
+      try {
+        const { error } = await supabase
+          .from('staff')
+          .delete()
+          .eq('id', deleteModal.item.id);
+
+        if (error) throw error;
+
+        refetch();
+        toast({
+          title: "Staff Member Deleted",
+          description: `${deleteModal.item.full_name} has been removed from the staff directory.`,
+        });
+        setDeleteModal({ open: false, item: null });
+      } catch (error) {
+        console.error('Error deleting staff member:', error);
+        toast({
+          title: "Error",
+          description: "Failed to delete staff member. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -196,6 +160,12 @@ const Staff = () => {
       title: "Calling",
       description: `Dialing ${phone}...`,
     });
+  };
+
+  const clearFilters = () => {
+    setSearchTerm('');
+    setRoleFilter('all');
+    setStatusFilter('all');
   };
 
   return (
@@ -214,7 +184,6 @@ const Staff = () => {
 
       {/* Summary Stats */}
       <div className="grid gap-6 md:grid-cols-3">
-        {/* ... keep existing code (stats cards) */}
         <Card className="vip-glass border-vip-gold/20">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-vip-gold/80">Total Staff Members</CardTitle>
@@ -289,7 +258,11 @@ const Staff = () => {
               </SelectContent>
             </Select>
 
-            <Button variant="outline" className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10">
+            <Button 
+              onClick={clearFilters}
+              variant="outline" 
+              className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+            >
               Clear Filters
             </Button>
           </div>
@@ -312,7 +285,12 @@ const Staff = () => {
           )}
           {error && (
             <div className="text-center py-8">
-              <p className="text-vip-red">{error.message}</p>
+              <p className="text-vip-red">Error loading staff: {error.message}</p>
+            </div>
+          )}
+          {!isLoading && filteredStaff.length === 0 && (
+            <div className="text-center py-8">
+              <p className="text-vip-gold/60">No staff members found. Add some staff members to get started.</p>
             </div>
           )}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -385,11 +363,6 @@ const Staff = () => {
                 </div>
               </div>
             ))}
-            {!isLoading && filteredStaff.length === 0 && (
-              <div className="col-span-full text-center py-8">
-                <p className="text-vip-gold/60">No staff members found matching your search.</p>
-              </div>
-            )}
           </div>
         </CardContent>
       </Card>
