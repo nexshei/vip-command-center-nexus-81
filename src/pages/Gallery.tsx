@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -37,7 +38,7 @@ const Gallery = () => {
     return item && typeof item === 'object' && typeof item.id === 'string' && typeof item.src === 'string';
   };
 
-  // Safely handle data
+  // Safely handle data with proper error checking
   const photos: GalleryPhoto[] = !photosError && Array.isArray(photosData) ? photosData.filter(isGalleryPhoto) : [];
 
   const filteredPhotos = photos.filter(photo => {
@@ -246,7 +247,6 @@ const Gallery = () => {
       <AddPhotoModal
         open={photoModal.open}
         onOpenChange={(open) => setPhotoModal({ ...photoModal, open })}
-        photo={photoModal.photo}
         onPhotoUpdated={handlePhotoUpdated}
       />
 

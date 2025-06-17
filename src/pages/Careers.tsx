@@ -3,8 +3,9 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Briefcase, Users, Eye, Edit, Trash2, Calendar, MapPin } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Plus, Search, Eye, Edit, Trash2, Briefcase, Mail, Phone, Calendar, MapPin } from 'lucide-react';
 import { useRealtimeQuery } from '@/hooks/useRealtimeQuery';
 import { useToast } from '@/hooks/use-toast';
 import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
@@ -19,10 +20,10 @@ interface Job {
   location: string | null;
   description: string | null;
   requirements: string[] | null;
-  employment_type: string;
+  employment_type: string | null;
   salary_range: string | null;
   application_deadline: string | null;
-  status: 'active' | 'closed' | 'draft';
+  status: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -40,14 +41,18 @@ interface Application {
 }
 
 const Careers = () => {
-  const [activeTab, setActiveTab] = useState('jobs');
-  const [jobModal, setJobModal] = useState({ open: false, jobData: null });
-  const [deleteModal, setDeleteModal] = useState({ open: false, item: null, type: '' });
-  const [viewModal, setViewModal] = useState({ open: false, item: null, type: '' });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedDepartment, setSelectedDepartment] = useState('all');
+  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [jobModal, setJobModal] = useState({ open: false, job: null });
+  const [deleteModal, setDeleteModal] = useState({ open: false, job: null });
+  const [viewModal, setViewModal] = useState({ open: false, application: null });
   const { toast } = useToast();
 
-  // Fetch jobs and applications
+  // Fetch job postings
   const { data: jobsData, isLoading: jobsLoading, error: jobsError, refetch: refetchJobs } = useRealtimeQuery('careers', { orderBy: 'created_at' });
+
+  // Fetch job applications
   const { data: applicationsData, isLoading: applicationsLoading, error: applicationsError, refetch: refetchApplications } = useRealtimeQuery('career_applications', { orderBy: 'created_at' });
 
   // Type guards
@@ -59,11 +64,23 @@ const Careers = () => {
     return item && typeof item === 'object' && typeof item.id === 'string' && typeof item.full_name === 'string';
   };
 
-  // Safely handle data
+  // Safely handle data with proper error checking
   const jobs: Job[] = !jobsError && Array.isArray(jobsData) ? jobsData.filter(isJob) : [];
   const applications: Application[] = !applicationsError && Array.isArray(applicationsData) ? applicationsData.filter(isApplication) : [];
 
-  const getStatusColor = (status: string) => {
+  const filteredJobs = jobs.filter(job => {
+    const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         job.department?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesDepartment = selectedDepartment === 'all' || job.department === selectedDepartment;
+    const matchesStatus = selectedStatus === 'all' || job.status === selectedStatus;
+    return matchesSearch && matchesDepartment && matchesStatus;
+  });
+
+  const departments = Array.from(new Set(jobs.map(job => job.department).filter(Boolean)));
+  const statuses = Array.from(new Set(jobs.map(job => job.status).filter(Boolean)));
+  const activeJobs = jobs.filter(job => job.status === 'active').length;
+
+  const getStatusColor = (status: string | null) => {
     switch (status) {
       case 'active': return 'bg-green-100 text-green-800';
       case 'closed': return 'bg-red-100 text-red-800';
@@ -73,58 +90,44 @@ const Careers = () => {
   };
 
   const handleAddJob = () => {
-    setJobModal({ open: true, jobData: null });
+    setJobModal({ open: true, job: null });
   };
 
   const handleEditJob = (job: Job) => {
-    setJobModal({ open: true, jobData: job });
+    setJobModal({ open: true, job });
   };
 
   const handleDeleteJob = (job: Job) => {
-    setDeleteModal({ open: true, item: job, type: 'job' });
-  };
-
-  const handleViewJob = (job: Job) => {
-    setViewModal({ open: true, item: job, type: 'job' });
+    setDeleteModal({ open: true, job });
   };
 
   const handleViewApplication = (application: Application) => {
-    setViewModal({ open: true, item: application, type: 'application' });
-  };
-
-  const handleDeleteApplication = (application: Application) => {
-    setDeleteModal({ open: true, item: application, type: 'application' });
+    setViewModal({ open: true, application });
   };
 
   const confirmDelete = async () => {
-    if (!deleteModal.item) return;
+    if (!deleteModal.job) return;
 
     try {
-      const table = deleteModal.type === 'job' ? 'careers' : 'career_applications';
       const { error } = await supabase
-        .from(table)
+        .from('careers')
         .delete()
-        .eq('id', deleteModal.item.id);
+        .eq('id', deleteModal.job.id);
 
       if (error) throw error;
 
-      if (deleteModal.type === 'job') {
-        refetchJobs();
-      } else {
-        refetchApplications();
-      }
-
+      refetchJobs();
       toast({
-        title: `${deleteModal.type === 'job' ? 'Job' : 'Application'} Deleted`,
-        description: `The ${deleteModal.type} has been successfully deleted.`,
+        title: "Job Deleted",
+        description: "The job posting has been successfully deleted.",
       });
 
-      setDeleteModal({ open: false, item: null, type: '' });
+      setDeleteModal({ open: false, job: null });
     } catch (error) {
-      console.error('Error deleting:', error);
+      console.error('Error deleting job:', error);
       toast({
         title: "Error",
-        description: `Failed to delete ${deleteModal.type}. Please try again.`,
+        description: "Failed to delete job posting. Please try again.",
         variant: "destructive",
       });
     }
@@ -138,9 +141,6 @@ const Careers = () => {
     });
   };
 
-  const activeJobs = jobs.filter(job => job.status === 'active').length;
-  const totalApplications = applications.length;
-
   return (
     <div className="space-y-6 p-6 max-w-7xl mx-auto">
       {/* Header */}
@@ -151,7 +151,7 @@ const Careers = () => {
         </div>
         <Button onClick={handleAddJob} className="bg-vip-gold text-black hover:bg-vip-gold/90">
           <Plus className="h-4 w-4 mr-2" />
-          Post New Job
+          Add Job Posting
         </Button>
       </div>
 
@@ -173,7 +173,7 @@ const Careers = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-vip-black">{activeJobs}</div>
-            <p className="text-xs text-green-600">Currently accepting applications</p>
+            <p className="text-xs text-green-600">Currently hiring</p>
           </CardContent>
         </Card>
 
@@ -182,264 +182,280 @@ const Careers = () => {
             <CardTitle className="text-sm font-medium text-vip-gold/80">Applications</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-black">{totalApplications}</div>
-            <p className="text-xs text-blue-600">Total received</p>
+            <div className="text-2xl font-bold text-vip-black">{applications.length}</div>
+            <p className="text-xs text-blue-600">Total applications</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="jobs" className="flex items-center gap-2">
-            <Briefcase className="h-4 w-4" />
-            Job Postings
-          </TabsTrigger>
-          <TabsTrigger value="applications" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Applications
-          </TabsTrigger>
-        </TabsList>
+      {/* Filters */}
+      <Card className="vip-glass border-vip-gold/20">
+        <CardContent className="p-4">
+          <div className="flex gap-4 items-center">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-vip-gold/50" />
+              <Input
+                placeholder="Search jobs..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 border-vip-gold/30"
+              />
+            </div>
+            <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
+              <SelectTrigger className="w-48 border-vip-gold/30">
+                <SelectValue placeholder="Filter by department" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Departments</SelectItem>
+                {departments.map(department => (
+                  <SelectItem key={department} value={department}>
+                    {department}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+              <SelectTrigger className="w-48 border-vip-gold/30">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                {statuses.map(status => (
+                  <SelectItem key={status} value={status}>
+                    {status}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
 
-        <TabsContent value="jobs" className="space-y-4">
-          <Card className="vip-glass border-vip-gold/20">
-            <CardHeader>
-              <CardTitle className="flex items-center text-vip-black">
-                <Briefcase className="h-5 w-5 mr-2 text-vip-gold" />
-                Job Postings ({jobs.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {jobsLoading ? (
-                <div className="text-center py-8">
-                  <p className="text-vip-gold/60">Loading jobs...</p>
-                </div>
-              ) : jobs.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-vip-gold/60">No job postings yet. Create your first job posting to get started.</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {jobs.map((job) => (
-                    <div key={job.id} className="p-4 border border-vip-gold/20 rounded-lg vip-glass-light hover:bg-vip-gold/5 transition-colors">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h3 className="font-semibold text-vip-black">{job.title}</h3>
-                            <Badge className={getStatusColor(job.status)}>
-                              {job.status}
-                            </Badge>
+      {/* Job Postings */}
+      <Card className="vip-glass border-vip-gold/20">
+        <CardHeader>
+          <CardTitle className="flex items-center text-vip-black">
+            <Briefcase className="h-5 w-5 mr-2 text-vip-gold" />
+            Job Postings ({filteredJobs.length})
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {jobsLoading ? (
+            <div className="text-center py-8">
+              <p className="text-vip-gold/60">Loading jobs...</p>
+            </div>
+          ) : filteredJobs.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-vip-gold/60">No job postings found. Create your first job posting to get started.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {filteredJobs.map((job) => (
+                <div key={job.id} className="p-4 border border-vip-gold/20 rounded-lg vip-glass-light hover:bg-vip-gold/5 transition-colors">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="font-semibold text-vip-black">{job.title}</h3>
+                        {job.status && (
+                          <Badge className={getStatusColor(job.status)}>
+                            {job.status}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="space-y-1 text-sm text-vip-gold/80">
+                        {job.department && (
+                          <div className="flex items-center gap-1">
+                            <Briefcase className="h-3 w-3" />
+                            {job.department}
                           </div>
-                          <div className="space-y-1 text-sm text-vip-gold/80">
-                            {job.department && (
-                              <p>Department: {job.department}</p>
-                            )}
-                            {job.location && (
-                              <div className="flex items-center gap-1">
-                                <MapPin className="h-3 w-3" />
-                                {job.location}
-                              </div>
-                            )}
-                            {job.employment_type && (
-                              <p>Type: {job.employment_type}</p>
-                            )}
-                            {job.salary_range && (
-                              <p>Salary: {job.salary_range}</p>
-                            )}
-                            {job.application_deadline && (
-                              <div className="flex items-center gap-1">
-                                <Calendar className="h-3 w-3" />
-                                Deadline: {new Date(job.application_deadline).toLocaleDateString()}
-                              </div>
-                            )}
+                        )}
+                        {job.location && (
+                          <div className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            {job.location}
                           </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            onClick={() => handleViewJob(job)}
-                            variant="outline"
-                            size="sm"
-                            className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            onClick={() => handleEditJob(job)}
-                            variant="outline"
-                            size="sm"
-                            className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            onClick={() => handleDeleteJob(job)}
-                            variant="outline"
-                            size="sm"
-                            className="border-red-300 text-red-600 hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        )}
+                        {job.employment_type && (
+                          <p>Type: {job.employment_type}</p>
+                        )}
+                        {job.salary_range && (
+                          <p>Salary: {job.salary_range}</p>
+                        )}
+                        {job.application_deadline && (
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            Deadline: {new Date(job.application_deadline).toLocaleDateString()}
+                          </div>
+                        )}
                       </div>
                     </div>
-                  ))}
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => handleEditJob(job)}
+                        variant="outline"
+                        size="sm"
+                        className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        onClick={() => handleDeleteJob(job)}
+                        variant="outline"
+                        size="sm"
+                        className="border-red-300 text-red-600 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-        <TabsContent value="applications" className="space-y-4">
-          <Card className="vip-glass border-vip-gold/20">
-            <CardHeader>
-              <CardTitle className="flex items-center text-vip-black">
-                <Users className="h-5 w-5 mr-2 text-vip-gold" />
-                Applications ({applications.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {applicationsLoading ? (
-                <div className="text-center py-8">
-                  <p className="text-vip-gold/60">Loading applications...</p>
-                </div>
-              ) : applications.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-vip-gold/60">No applications received yet.</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {applications.map((application) => (
-                    <div key={application.id} className="p-4 border border-vip-gold/20 rounded-lg vip-glass-light hover:bg-vip-gold/5 transition-colors">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-vip-black mb-1">{application.full_name}</h3>
-                          <div className="space-y-1 text-sm text-vip-gold/80">
-                            <p>Email: {application.email}</p>
-                            {application.phone && <p>Phone: {application.phone}</p>}
-                            {application.position && <p>Position: {application.position}</p>}
-                            <p>Applied: {new Date(application.created_at).toLocaleDateString()}</p>
+      {/* Job Applications */}
+      <Card className="vip-glass border-vip-gold/20">
+        <CardHeader>
+          <CardTitle className="flex items-center text-vip-black">
+            <Mail className="h-5 w-5 mr-2 text-vip-gold" />
+            Job Applications ({applications.length})
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {applicationsLoading ? (
+            <div className="text-center py-8">
+              <p className="text-vip-gold/60">Loading applications...</p>
+            </div>
+          ) : applications.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-vip-gold/60">No applications received yet.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {applications.map((application) => (
+                <div key={application.id} className="p-4 border border-vip-gold/20 rounded-lg vip-glass-light hover:bg-vip-gold/5 transition-colors">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="font-semibold text-vip-black">{application.full_name}</h3>
+                        {application.position && (
+                          <Badge className="bg-blue-100 text-blue-800">
+                            {application.position}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="space-y-1 text-sm text-vip-gold/80">
+                        <div className="flex items-center gap-1">
+                          <Mail className="h-3 w-3" />
+                          {application.email}
+                        </div>
+                        {application.phone && (
+                          <div className="flex items-center gap-1">
+                            <Phone className="h-3 w-3" />
+                            {application.phone}
                           </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            onClick={() => handleViewApplication(application)}
-                            variant="outline"
-                            size="sm"
-                            className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            onClick={() => handleDeleteApplication(application)}
-                            variant="outline"
-                            size="sm"
-                            className="border-red-300 text-red-600 hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        )}
+                        <p>Applied: {new Date(application.created_at).toLocaleDateString()}</p>
                       </div>
                     </div>
-                  ))}
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => handleViewApplication(application)}
+                        variant="outline"
+                        size="sm"
+                        className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      {application.cv_url && (
+                        <Button
+                          onClick={() => window.open(application.cv_url, '_blank')}
+                          variant="outline"
+                          size="sm"
+                          className="border-green-300 text-green-600 hover:bg-green-50"
+                        >
+                          View CV
+                        </Button>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Modals */}
       <JobOpeningModal
         open={jobModal.open}
         onOpenChange={(open) => setJobModal({ ...jobModal, open })}
-        job={jobModal.jobData}
         onJobUpdated={handleJobUpdated}
       />
 
       <DeleteConfirmationModal
         open={deleteModal.open}
         onOpenChange={(open) => setDeleteModal({ ...deleteModal, open })}
-        title={`Delete ${deleteModal.type === 'job' ? 'Job' : 'Application'}`}
-        description={`Are you sure you want to delete this ${deleteModal.type}?`}
-        itemName={deleteModal.item?.title || deleteModal.item?.full_name || ''}
+        title="Delete Job Posting"
+        description="Are you sure you want to delete this job posting?"
+        itemName={deleteModal.job?.title || 'Job Posting'}
         onConfirm={confirmDelete}
       />
 
       <ViewDetailsModal
         open={viewModal.open}
         onOpenChange={(open) => setViewModal({ ...viewModal, open })}
-        title={viewModal.type === 'job' ? 'Job Details' : 'Application Details'}
+        title="Application Details"
       >
-        {viewModal.item && viewModal.type === 'job' && (
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-semibold text-vip-black">Title</h3>
-              <p className="text-vip-gold/80">{viewModal.item.title}</p>
-            </div>
-            {viewModal.item.department && (
-              <div>
-                <h3 className="font-semibold text-vip-black">Department</h3>
-                <p className="text-vip-gold/80">{viewModal.item.department}</p>
-              </div>
-            )}
-            {viewModal.item.location && (
-              <div>
-                <h3 className="font-semibold text-vip-black">Location</h3>
-                <p className="text-vip-gold/80">{viewModal.item.location}</p>
-              </div>
-            )}
-            {viewModal.item.description && (
-              <div>
-                <h3 className="font-semibold text-vip-black">Description</h3>
-                <p className="text-vip-gold/80">{viewModal.item.description}</p>
-              </div>
-            )}
-            {viewModal.item.requirements && (
-              <div>
-                <h3 className="font-semibold text-vip-black">Requirements</h3>
-                <ul className="text-vip-gold/80 list-disc list-inside">
-                  {viewModal.item.requirements.map((req, index) => (
-                    <li key={index}>{req}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        )}
-        {viewModal.item && viewModal.type === 'application' && (
+        {viewModal.application && (
           <div className="space-y-4">
             <div>
               <h3 className="font-semibold text-vip-black">Full Name</h3>
-              <p className="text-vip-gold/80">{viewModal.item.full_name}</p>
+              <p className="text-vip-gold/80">{viewModal.application.full_name}</p>
             </div>
             <div>
               <h3 className="font-semibold text-vip-black">Email</h3>
-              <p className="text-vip-gold/80">{viewModal.item.email}</p>
+              <p className="text-vip-gold/80">{viewModal.application.email}</p>
             </div>
-            {viewModal.item.phone && (
+            {viewModal.application.phone && (
               <div>
                 <h3 className="font-semibold text-vip-black">Phone</h3>
-                <p className="text-vip-gold/80">{viewModal.item.phone}</p>
+                <p className="text-vip-gold/80">{viewModal.application.phone}</p>
               </div>
             )}
-            {viewModal.item.position && (
+            {viewModal.application.position && (
               <div>
                 <h3 className="font-semibold text-vip-black">Position Applied For</h3>
-                <p className="text-vip-gold/80">{viewModal.item.position}</p>
+                <p className="text-vip-gold/80">{viewModal.application.position}</p>
               </div>
             )}
-            {viewModal.item.cover_letter && (
+            {viewModal.application.cover_letter && (
               <div>
                 <h3 className="font-semibold text-vip-black">Cover Letter</h3>
-                <p className="text-vip-gold/80 whitespace-pre-wrap">{viewModal.item.cover_letter}</p>
+                <p className="text-vip-gold/80 whitespace-pre-wrap">{viewModal.application.cover_letter}</p>
               </div>
             )}
-            {viewModal.item.cv_url && (
+            {viewModal.application.cv_url && (
               <div>
                 <h3 className="font-semibold text-vip-black">CV</h3>
-                <a href={viewModal.item.cv_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                <Button
+                  onClick={() => window.open(viewModal.application.cv_url, '_blank')}
+                  className="bg-vip-gold text-black hover:bg-vip-gold/90"
+                >
                   View CV
-                </a>
+                </Button>
+              </div>
+            )}
+            {viewModal.application.professional_photo_url && (
+              <div>
+                <h3 className="font-semibold text-vip-black">Professional Photo</h3>
+                <img
+                  src={viewModal.application.professional_photo_url}
+                  alt="Professional photo"
+                  className="w-32 h-32 object-cover rounded-lg"
+                />
               </div>
             )}
           </div>
