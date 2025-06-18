@@ -51,56 +51,65 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <DashboardLayout>{children}</DashboardLayout>;
 };
 
-const ComingSoonPage = ({ title, description }: { title: string; description: string }) => (
-  <div className="p-6">
-    <h1 className="text-2xl font-serif text-vip-black">{title}</h1>
-    <p className="text-vip-gold/80 mt-2">{description}</p>
-    <div className="mt-16 text-center">
-      <div className="inline-block p-8 vip-glass border border-vip-gold/20 rounded-lg">
-        <h2 className="text-xl font-semibold text-vip-gold mb-2">Feature under development</h2>
-        <p className="text-vip-gold/70">Coming soon...</p>
+const ProfilePage = () => {
+  const { user, profile } = useAuth();
+  
+  if (!user || !profile) {
+    return (
+      <div className="p-6">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-vip-gold mx-auto mb-4"></div>
+          <p className="text-vip-gold">Loading profile...</p>
+        </div>
       </div>
-    </div>
-  </div>
-);
+    );
+  }
 
-const ProfilePage = () => (
-  <div className="p-6 max-w-4xl mx-auto">
-    <h1 className="text-3xl font-serif font-bold text-vip-black mb-6">Admin Profile</h1>
-    <div className="vip-glass border border-vip-gold/20 rounded-lg p-6">
-      <div className="space-y-6">
-        <div className="flex items-center space-x-4">
-          <div className="w-20 h-20 bg-vip-gold/20 rounded-full flex items-center justify-center">
-            <span className="text-2xl font-bold text-vip-gold">DO</span>
+  return (
+    <div className="p-6 max-w-4xl mx-auto">
+      <h1 className="text-3xl font-serif font-bold text-vip-black mb-6">Admin Profile</h1>
+      <div className="vip-glass border border-vip-gold/20 rounded-lg p-6">
+        <div className="space-y-6">
+          <div className="flex items-center space-x-4">
+            <div className="w-20 h-20 bg-vip-gold/20 rounded-full flex items-center justify-center">
+              <span className="text-2xl font-bold text-vip-gold">
+                {profile.full_name
+                  ?.split(' ')
+                  .map(n => n[0])
+                  .join('')
+                  .toUpperCase()
+                  .substring(0, 2) || 'U'}
+              </span>
+            </div>
+            <div>
+              <h2 className="text-2xl font-semibold text-vip-black">{profile.full_name}</h2>
+              <p className="text-vip-gold/80 capitalize">{profile.role?.replace('_', ' ')}</p>
+              <p className="text-sm text-vip-gold/60">{profile.email}</p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-2xl font-semibold text-vip-black">Sir Dennis Olele</h2>
-            <p className="text-vip-gold/80">Super Administrator</p>
-            <p className="text-sm text-vip-gold/60">admin@sirolele.com</p>
-          </div>
-        </div>
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-vip-gold/80">Full Name</label>
-            <p className="text-vip-black">Sir Dennis Olele</p>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-vip-gold/80">Role</label>
-            <p className="text-vip-black">Super Administrator</p>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-vip-gold/80">Email</label>
-            <p className="text-vip-black">admin@sirolele.com</p>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-vip-gold/80">Phone</label>
-            <p className="text-vip-black">+254 700 000 000</p>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-vip-gold/80">Full Name</label>
+              <p className="text-vip-black">{profile.full_name}</p>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-vip-gold/80">Role</label>
+              <p className="text-vip-black capitalize">{profile.role?.replace('_', ' ')}</p>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-vip-gold/80">Email</label>
+              <p className="text-vip-black">{profile.email}</p>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-vip-gold/80">Phone</label>
+              <p className="text-vip-black">{profile.phone || 'Not provided'}</p>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const AppRoutes = () => {
   const { user } = useAuth();

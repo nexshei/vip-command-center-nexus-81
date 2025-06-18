@@ -84,21 +84,6 @@ const LoginForm = () => {
     }
   };
 
-  const handleDemoLogin = (role: 'super' | 'protocol') => {
-    const credentials = {
-      super: {
-        email: 'superadmin@sirolevvipprotocolltd.co.ke',
-        password: 'vip123'
-      },
-      protocol: {
-        email: 'subadmin@sirolevvipprotocolltd.co.ke', 
-        password: 'vip123'
-      }
-    };
-    setFormData(prev => ({ ...prev, ...credentials[role] }));
-    setMode('login');
-  };
-
   const resetForm = () => {
     setFormData({
       email: '',
@@ -196,7 +181,7 @@ const LoginForm = () => {
                 <Input 
                   id="email" 
                   type="email" 
-                  placeholder="admin@sirolevvipprotocolltd.co.ke" 
+                  placeholder="Enter your email address" 
                   value={formData.email} 
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })} 
                   className="pl-10 border-vip-gold/30 focus:border-vip-gold text-vip-black bg-white" 
@@ -256,61 +241,31 @@ const LoginForm = () => {
           </form>
 
           {mode === 'login' && (
-            <>
-              <div className="space-y-3">
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-vip-gold/30" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-white px-2 text-vip-black/60">Demo Accounts</span>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-3">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => handleDemoLogin('super')} 
-                    className="text-vip-black border-vip-gold/30 hover:bg-vip-gold hover:text-white text-sm bg-white"
-                  >
-                    Super Admin
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => handleDemoLogin('protocol')} 
-                    className="text-vip-black border-vip-gold/30 hover:bg-vip-gold hover:text-white text-sm bg-white"
-                  >
-                    Protocol Admin
-                  </Button>
-                </div>
-              </div>
-
-              <div className="text-center space-y-2">
-                <button
-                  type="button"
-                  onClick={() => switchMode('signup')}
-                  className="text-sm text-vip-gold hover:text-vip-gold-light underline"
-                >
-                  Create new account
-                </button>
-                <br />
-                <button
-                  type="button"
-                  onClick={() => switchMode('create-password')}
-                  className="text-sm text-vip-gold hover:text-vip-gold-light underline"
-                >
-                  Create account via email verification
-                </button>
-                <br />
-                <button
-                  type="button"
-                  onClick={() => switchMode('forgot-password')}
-                  className="text-sm text-vip-gold hover:text-vip-gold-light underline"
-                >
-                  Forgot password?
-                </button>
-              </div>
-            </>
+            <div className="text-center space-y-2">
+              <button
+                type="button"
+                onClick={() => switchMode('signup')}
+                className="text-sm text-vip-gold hover:text-vip-gold-light underline"
+              >
+                Create new account
+              </button>
+              <br />
+              <button
+                type="button"
+                onClick={() => switchMode('create-password')}
+                className="text-sm text-vip-gold hover:text-vip-gold-light underline"
+              >
+                Create account via email verification
+              </button>
+              <br />
+              <button
+                type="button"
+                onClick={() => switchMode('forgot-password')}
+                className="text-sm text-vip-gold hover:text-vip-gold-light underline"
+              >
+                Forgot password?
+              </button>
+            </div>
           )}
         </CardContent>
       </Card>

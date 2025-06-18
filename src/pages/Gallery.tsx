@@ -1,262 +1,314 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Eye, Edit, Trash2, Image as ImageIcon, Star } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { useRealtimeQuery } from '@/hooks/useRealtimeQuery';
-import { useToast } from '@/hooks/use-toast';
+import AddPhotoModal from '@/components/modals/AddPhotoModal';
 import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
-import { AddPhotoModal } from '@/components/modals/AddPhotoModal';
-import { supabase } from '@/integrations/supabase/client';
+import { 
+  Image as ImageIcon, 
+  Plus, 
+  Search, 
+  Filter,
+  Star,
+  Calendar,
+  Edit,
+  Trash2,
+  Download,
+  Eye
+} from 'lucide-react';
 
 interface GalleryPhoto {
   id: string;
   src: string;
-  alt_text: string | null;
+  alt_text: string;
   category: string;
+  is_featured: boolean;
+  display_order: number;
+  file_size: number;
+  content_type: string;
   created_at: string;
   updated_at: string;
-  is_featured: boolean | null;
-  display_order: number | null;
 }
 
 const Gallery = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [photoModal, setPhotoModal] = useState({ open: false, photo: null });
-  const [deleteModal, setDeleteModal] = useState({ open: false, photo: null });
-  const { toast } = useToast();
+  const [selectedPhoto, setSelectedPhoto] = useState<GalleryPhoto | null>(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [photoToDelete, setPhotoToDelete] = useState<GalleryPhoto | null>(null);
 
-  // Fetch gallery photos
-  const { data: photosData, isLoading: photosLoading, error: photosError, refetch } = useRealtimeQuery('gallery_photos', { orderBy: 'display_order' });
+  // Use proper error handling for the query
+  const { 
+    data: photosData, 
+    isLoading, 
+    error 
+  } = useRealtimeQuery('gallery_photos', {
+    queryKey: ['gallery_photos'],
+    table: 'gallery_photos'
+  });
 
-  // Type guard
-  const isGalleryPhoto = (item: any): item is GalleryPhoto => {
-    return item && typeof item === 'object' && typeof item.id === 'string' && typeof item.src === 'string';
-  };
+  // Handle data with proper error checking
+  const photos: GalleryPhoto[] = (!error && Array.isArray(photosData)) ? photosData : [];
 
-  // Safely handle data with proper error checking
-  const photos: GalleryPhoto[] = (!photosError && Array.isArray(photosData)) ? photosData.filter(isGalleryPhoto) : [];
+  const categories = ['all', ...new Set(photos.map(photo => photo.category))];
 
   const filteredPhotos = photos.filter(photo => {
-    const matchesSearch = photo.alt_text?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         photo.category.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = photo.alt_text?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         photo.category?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || photo.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
-  const categories = Array.from(new Set(photos.map(photo => photo.category)));
-  const featuredPhotos = photos.filter(photo => photo.is_featured).length;
-
-  const handleAddPhoto = () => {
-    setPhotoModal({ open: true, photo: null });
-  };
-
   const handleEditPhoto = (photo: GalleryPhoto) => {
-    setPhotoModal({ open: true, photo });
+    setSelectedPhoto(photo);
+    setIsEditModalOpen(true);
   };
 
   const handleDeletePhoto = (photo: GalleryPhoto) => {
-    setDeleteModal({ open: true, photo });
+    setPhotoToDelete(photo);
+    setIsDeleteModalOpen(true);
   };
 
-  const confirmDelete = async () => {
-    if (!deleteModal.photo) return;
-
-    try {
-      const { error } = await supabase
-        .from('gallery_photos')
-        .delete()
-        .eq('id', deleteModal.photo.id);
-
-      if (error) throw error;
-
-      refetch();
-      toast({
-        title: "Photo Deleted",
-        description: "The photo has been successfully deleted from the gallery.",
-      });
-
-      setDeleteModal({ open: false, photo: null });
-    } catch (error) {
-      console.error('Error deleting photo:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete photo. Please try again.",
-        variant: "destructive",
-      });
-    }
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const handlePhotoUpdated = () => {
-    refetch();
-    toast({
-      title: "Gallery Updated",
-      description: "The photo has been updated successfully.",
-    });
-  };
+  if (isLoading) {
+    return (
+      <div className="p-6">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-vip-gold mx-auto mb-4"></div>
+          <p className="text-vip-gold">Loading gallery...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 p-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-vip-black">Gallery Management</h1>
-          <p className="text-vip-gold/80 mt-2">Manage your photo gallery and showcase your best work</p>
+          <h1 className="text-3xl font-serif font-bold text-vip-black">Photo Gallery</h1>
+          <p className="text-vip-gold/80 mt-2">Manage and organize event photos</p>
         </div>
-        <Button onClick={handleAddPhoto} className="bg-vip-gold text-black hover:bg-vip-gold/90">
-          <Plus className="h-4 w-4 mr-2" />
+        <Button 
+          onClick={() => setIsAddModalOpen(true)}
+          className="bg-vip-gold text-white hover:bg-vip-gold-dark flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
           Add Photo
         </Button>
       </div>
 
-      {/* Summary Stats */}
-      <div className="grid gap-6 md:grid-cols-3">
-        <Card className="vip-glass border-vip-gold/20">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">Total Photos</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-vip-black">{photos.length}</div>
-            <p className="text-xs text-vip-gold/60">In gallery</p>
-          </CardContent>
-        </Card>
+      {/* Filters and Search */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex-1">
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-vip-gold/60" />
+            <Input
+              placeholder="Search photos..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 border-vip-gold/30 bg-white text-vip-black focus:border-vip-gold"
+            />
+          </div>
+        </div>
         
-        <Card className="vip-glass border-vip-gold/20">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">Categories</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-vip-black">{categories.length}</div>
-            <p className="text-xs text-blue-600">Different categories</p>
+        <div className="flex items-center gap-2">
+          <Filter className="h-4 w-4 text-vip-gold/60" />
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="px-3 py-2 border border-vip-gold/30 rounded-md bg-white text-vip-black focus:border-vip-gold"
+          >
+            {categories.map(category => (
+              <option key={category} value={category}>
+                {category === 'all' ? 'All Categories' : category}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card className="bg-white border border-vip-gold/20">
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <ImageIcon className="h-8 w-8 text-vip-gold" />
+              <div className="ml-3">
+                <p className="text-sm font-medium text-vip-gold/80">Total Photos</p>
+                <p className="text-2xl font-bold text-vip-black">{photos.length}</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="vip-glass border-vip-gold/20">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">Featured</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-vip-black">{featuredPhotos}</div>
-            <p className="text-xs text-yellow-600">Featured photos</p>
+        <Card className="bg-white border border-vip-gold/20">
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <Star className="h-8 w-8 text-vip-gold" />
+              <div className="ml-3">
+                <p className="text-sm font-medium text-vip-gold/80">Featured</p>
+                <p className="text-2xl font-bold text-vip-black">{photos.filter(p => p.is_featured).length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white border border-vip-gold/20">
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <Filter className="h-8 w-8 text-vip-gold" />
+              <div className="ml-3">
+                <p className="text-sm font-medium text-vip-gold/80">Categories</p>
+                <p className="text-2xl font-bold text-vip-black">{categories.length - 1}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white border border-vip-gold/20">
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <Calendar className="h-8 w-8 text-vip-gold" />
+              <div className="ml-3">
+                <p className="text-sm font-medium text-vip-gold/80">This Month</p>
+                <p className="text-2xl font-bold text-vip-black">
+                  {photos.filter(p => new Date(p.created_at).getMonth() === new Date().getMonth()).length}
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Filters */}
-      <Card className="vip-glass border-vip-gold/20">
-        <CardContent className="p-4">
-          <div className="flex gap-4 items-center">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-vip-gold/50" />
-              <Input
-                placeholder="Search photos..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 border-vip-gold/30"
+      {/* Photo Grid */}
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {filteredPhotos.map((photo) => (
+          <Card key={photo.id} className="bg-white border border-vip-gold/20 hover:shadow-md transition-shadow overflow-hidden">
+            <div className="relative aspect-square">
+              <img 
+                src={photo.src} 
+                alt={photo.alt_text}
+                className="w-full h-full object-cover"
               />
-            </div>
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-48 border-vip-gold/30">
-                <SelectValue placeholder="Filter by category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {categories.map(category => (
-                  <SelectItem key={category} value={category}>
-                    {category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Gallery Grid */}
-      <Card className="vip-glass border-vip-gold/20">
-        <CardHeader>
-          <CardTitle className="flex items-center text-vip-black">
-            <ImageIcon className="h-5 w-5 mr-2 text-vip-gold" />
-            Photo Gallery ({filteredPhotos.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {photosLoading ? (
-            <div className="text-center py-8">
-              <p className="text-vip-gold/60">Loading photos...</p>
-            </div>
-          ) : filteredPhotos.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-vip-gold/60">No photos found. Add your first photo to get started.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredPhotos.map((photo) => (
-                <div key={photo.id} className="relative group rounded-lg overflow-hidden border border-vip-gold/20 vip-glass-light hover:shadow-lg transition-all">
-                  <div className="aspect-square relative">
-                    <img
-                      src={photo.src}
-                      alt={photo.alt_text || 'Gallery photo'}
-                      className="w-full h-full object-cover"
-                    />
-                    {photo.is_featured && (
-                      <div className="absolute top-2 right-2">
-                        <Badge className="bg-yellow-100 text-yellow-800">
-                          <Star className="h-3 w-3 mr-1" />
-                          Featured
-                        </Badge>
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                      <Button
-                        onClick={() => handleEditPhoto(photo)}
-                        variant="outline"
-                        size="sm"
-                        className="bg-white/90 border-vip-gold/30 text-vip-black hover:bg-white"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        onClick={() => handleDeletePhoto(photo)}
-                        variant="outline"
-                        size="sm"
-                        className="bg-white/90 border-red-300 text-red-600 hover:bg-red-50"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="p-3">
-                    <Badge className="mb-2">{photo.category}</Badge>
-                    {photo.alt_text && (
-                      <p className="text-sm text-vip-gold/80 truncate">{photo.alt_text}</p>
-                    )}
-                  </div>
+              {photo.is_featured && (
+                <div className="absolute top-2 left-2">
+                  <Badge className="bg-vip-gold text-white">
+                    <Star className="h-3 w-3 mr-1" />
+                    Featured
+                  </Badge>
                 </div>
-              ))}
+              )}
+              <div className="absolute top-2 right-2 flex gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 bg-black/50 hover:bg-black/70 text-white"
+                  onClick={() => handleEditPhoto(photo)}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 bg-black/50 hover:bg-black/70 text-white"
+                  onClick={() => handleDeletePhoto(photo)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
+            <CardContent className="p-4">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Badge variant="outline" className="border-vip-gold/30 text-vip-gold/70">
+                    {photo.category}
+                  </Badge>
+                  <span className="text-xs text-vip-gold/60">
+                    {formatFileSize(photo.file_size)}
+                  </span>
+                </div>
+                <p className="text-sm text-vip-black font-medium line-clamp-2">
+                  {photo.alt_text}
+                </p>
+                <p className="text-xs text-vip-gold/60">
+                  {new Date(photo.created_at).toLocaleDateString()}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {filteredPhotos.length === 0 && (
+        <div className="text-center py-12">
+          <ImageIcon className="h-12 w-12 text-vip-gold/50 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-vip-black mb-2">No photos found</h3>
+          <p className="text-vip-gold/70 mb-4">
+            {searchTerm ? 'Try adjusting your search terms' : 'Add your first photo to get started'}
+          </p>
+          {!searchTerm && (
+            <Button 
+              onClick={() => setIsAddModalOpen(true)}
+              className="bg-vip-gold text-white hover:bg-vip-gold-dark"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Photo
+            </Button>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      )}
 
       {/* Modals */}
       <AddPhotoModal
-        open={photoModal.open}
-        onOpenChange={(open) => setPhotoModal({ ...photoModal, open })}
-        onPhotoUpdated={handlePhotoUpdated}
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onPhotoAdded={() => {
+          setIsAddModalOpen(false);
+        }}
       />
 
-      <DeleteConfirmationModal
-        open={deleteModal.open}
-        onOpenChange={(open) => setDeleteModal({ ...deleteModal, open })}
-        title="Delete Photo"
-        description="Are you sure you want to delete this photo from the gallery?"
-        itemName={deleteModal.photo?.alt_text || 'Photo'}
-        onConfirm={confirmDelete}
-      />
+      {selectedPhoto && (
+        <AddPhotoModal
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setSelectedPhoto(null);
+          }}
+          photo={selectedPhoto}
+          onPhotoUpdated={() => {
+            setIsEditModalOpen(false);
+            setSelectedPhoto(null);
+          }}
+        />
+      )}
+
+      {photoToDelete && (
+        <DeleteConfirmationModal
+          isOpen={isDeleteModalOpen}
+          onClose={() => {
+            setIsDeleteModalOpen(false);
+            setPhotoToDelete(null);
+          }}
+          onConfirm={() => {
+            setIsDeleteModalOpen(false);
+            setPhotoToDelete(null);
+          }}
+          title="Delete Photo"
+          description={`Are you sure you want to delete this photo? This action cannot be undone.`}
+        />
+      )}
     </div>
   );
 };
