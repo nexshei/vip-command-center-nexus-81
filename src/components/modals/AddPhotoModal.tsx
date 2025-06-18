@@ -5,125 +5,127 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { Upload } from 'lucide-react';
 
 interface AddPhotoModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onPhotoUpdated?: () => void;
+  onPhotoUpdated: () => void;
 }
 
-export const AddPhotoModal = ({ open, onOpenChange, onPhotoUpdated }: AddPhotoModalProps) => {
+const AddPhotoModal: React.FC<AddPhotoModalProps> = ({ 
+  open, 
+  onOpenChange, 
+  onPhotoUpdated 
+}) => {
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     src: '',
-    altText: '',
-    category: '',
-    isFeatured: false,
-    displayOrder: 0
+    alt_text: '',
+    category: 'events'
   });
-  const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.src || !formData.category) {
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase
+        .from('gallery_photos')
+        .insert([formData]);
+
+      if (error) throw error;
+
       toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields.",
+        title: "Photo Added",
+        description: "The photo has been successfully added to the gallery."
+      });
+
+      onPhotoUpdated();
+      setFormData({
+        src: '',
+        alt_text: '',
+        category: 'events'
+      });
+    } catch (error: any) {
+      toast({
+        title: "Upload Failed",
+        description: error.message || "Failed to add photo.",
         variant: "destructive"
       });
-      return;
+    } finally {
+      setIsLoading(false);
     }
-
-    if (onPhotoUpdated) {
-      onPhotoUpdated();
-    }
-
-    toast({
-      title: "Photo Added",
-      description: "The photo has been added to the gallery.",
-    });
-    
-    setFormData({
-      src: '',
-      altText: '',
-      category: '',
-      isFeatured: false,
-      displayOrder: 0
-    });
-    onOpenChange(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] bg-white border border-vip-gold/20">
+      <DialogContent className="max-w-md bg-white">
         <DialogHeader>
-          <DialogTitle className="text-xl font-serif text-vip-black">Add New Photo</DialogTitle>
+          <DialogTitle className="text-xl font-serif text-vip-black">Add Photo</DialogTitle>
         </DialogHeader>
+
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid gap-3">
-            <Label htmlFor="src" className="text-vip-black">Image URL *</Label>
+          <div className="space-y-2">
+            <Label htmlFor="src" className="text-sm font-medium text-vip-black">Image URL</Label>
             <Input
               id="src"
               value={formData.src}
-              onChange={(e) => setFormData({ ...formData, src: e.target.value })}
+              onChange={(e) => setFormData(prev => ({ ...prev, src: e.target.value }))}
               className="border-vip-gold/30 focus:border-vip-gold"
               placeholder="https://example.com/image.jpg"
-            />
-          </div>
-          
-          <div className="grid gap-3">
-            <Label htmlFor="altText" className="text-vip-black">Alt Text</Label>
-            <Input
-              id="altText"
-              value={formData.altText}
-              onChange={(e) => setFormData({ ...formData, altText: e.target.value })}
-              className="border-vip-gold/30 focus:border-vip-gold"
-              placeholder="Describe the image"
+              required
             />
           </div>
 
-          <div className="grid gap-3">
-            <Label htmlFor="category" className="text-vip-black">Category *</Label>
-            <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+          <div className="space-y-2">
+            <Label htmlFor="alt_text" className="text-sm font-medium text-vip-black">Alt Text</Label>
+            <Input
+              id="alt_text"
+              value={formData.alt_text}
+              onChange={(e) => setFormData(prev => ({ ...prev, alt_text: e.target.value }))}
+              className="border-vip-gold/30 focus:border-vip-gold"
+              placeholder="Describe the image..."
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="category" className="text-sm font-medium text-vip-black">Category</Label>
+            <Select
+              value={formData.category}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+            >
               <SelectTrigger className="border-vip-gold/30 focus:border-vip-gold">
-                <SelectValue placeholder="Select category" />
+                <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-white border-vip-gold/20">
-                <SelectItem value="Events">Events</SelectItem>
-                <SelectItem value="Protocol">Protocol</SelectItem>
-                <SelectItem value="Team">Team</SelectItem>
-                <SelectItem value="Facilities">Facilities</SelectItem>
-                <SelectItem value="Other">Other</SelectItem>
+              <SelectContent>
+                <SelectItem value="events">Events</SelectItem>
+                <SelectItem value="services">Services</SelectItem>
+                <SelectItem value="team">Team</SelectItem>
+                <SelectItem value="facilities">Facilities</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="featured"
-              checked={formData.isFeatured}
-              onCheckedChange={(checked) => setFormData({ ...formData, isFeatured: checked as boolean })}
-            />
-            <Label htmlFor="featured" className="text-vip-black">Featured Photo</Label>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-4">
-            <Button 
-              type="button" 
-              variant="outline" 
+          <div className="flex justify-end space-x-4 pt-4">
+            <Button
+              type="button"
+              variant="outline"
               onClick={() => onOpenChange(false)}
-              className="border-vip-gold/30 text-vip-black hover:bg-vip-gold/10"
+              className="text-vip-black border-vip-gold/30"
             >
               Cancel
             </Button>
-            <Button 
-              type="submit" 
-              className="bg-vip-gold text-black hover:bg-vip-gold-dark"
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="bg-vip-gold text-white hover:bg-vip-gold-dark"
             >
-              Add Photo
+              <Upload className="h-4 w-4 mr-2" />
+              {isLoading ? 'Adding...' : 'Add Photo'}
             </Button>
           </div>
         </form>
@@ -131,3 +133,5 @@ export const AddPhotoModal = ({ open, onOpenChange, onPhotoUpdated }: AddPhotoMo
     </Dialog>
   );
 };
+
+export default AddPhotoModal;
