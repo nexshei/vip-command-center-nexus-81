@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export type UserRole = 'super_admin' | 'protocol_admin';
@@ -33,16 +34,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Mock users for demo
   const mockUsers = {
-    'super@sirole.com': {
+    'superadmin@sirolevvipprotocolltd.co.ke': {
       id: '1',
-      email: 'super@sirole.com',
+      email: 'superadmin@sirolevvipprotocolltd.co.ke',
       name: 'Sir Dennis Olele',
       role: 'super_admin' as const,
       avatar: null
     },
-    'protocol@sirole.com': {
+    'subadmin@sirolevvipprotocolltd.co.ke': {
       id: '2', 
-      email: 'protocol@sirole.com',
+      email: 'subadmin@sirolevvipprotocolltd.co.ke',
       name: 'Sir Dennis Olele',
       role: 'protocol_admin' as const,
       avatar: null
@@ -64,7 +65,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     // Mock users for demo
-    const user = mockUsers[email];
+    const user = mockUsers[email as keyof typeof mockUsers];
     if (!user || password !== 'vip123') {
       throw new Error('Invalid credentials');
     }
