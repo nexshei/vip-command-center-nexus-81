@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -12,10 +11,10 @@ import { useToast } from '@/hooks/use-toast';
 interface JobOpeningModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onJobAdded?: (job: any) => void;
+  onJobUpdated?: () => void;
 }
 
-export const JobOpeningModal = ({ open, onOpenChange, onJobAdded }: JobOpeningModalProps) => {
+export const JobOpeningModal = ({ open, onOpenChange, onJobUpdated }: JobOpeningModalProps) => {
   const [jobTitle, setJobTitle] = useState('');
   const [department, setDepartment] = useState('');
   const [location, setLocation] = useState('');
@@ -58,8 +57,8 @@ export const JobOpeningModal = ({ open, onOpenChange, onJobAdded }: JobOpeningMo
       datePosted: new Date().toISOString().split('T')[0],
     };
 
-    if (onJobAdded) {
-      onJobAdded(newJob);
+    if (onJobUpdated) {
+      onJobUpdated();
     }
 
     toast({
@@ -191,7 +190,7 @@ export const JobOpeningModalTrigger = ({ onJobAdded }: { onJobAdded?: (job: any)
           Create New Job Opening
         </Button>
       </DialogTrigger>
-      <JobOpeningModal open={isOpen} onOpenChange={setIsOpen} onJobAdded={onJobAdded} />
+      <JobOpeningModal open={isOpen} onOpenChange={setIsOpen} onJobUpdated={onJobAdded} />
     </Dialog>
   );
 };

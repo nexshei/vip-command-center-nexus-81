@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -10,10 +9,10 @@ import { useToast } from '@/hooks/use-toast';
 interface AddStaffModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onStaffAdded: (newStaff: any) => void;
+  onStaffUpdated?: () => void;
 }
 
-export const AddStaffModal = ({ open, onOpenChange, onStaffAdded }: AddStaffModalProps) => {
+export const AddStaffModal = ({ open, onOpenChange, onStaffUpdated }: AddStaffModalProps) => {
   const [formData, setFormData] = useState({
     name: '',
     role: '',
@@ -42,7 +41,10 @@ export const AddStaffModal = ({ open, onOpenChange, onStaffAdded }: AddStaffModa
       joinDate: new Date().toISOString().split('T')[0]
     };
 
-    onStaffAdded(newStaff);
+    if (onStaffUpdated) {
+      onStaffUpdated();
+    }
+    
     toast({
       title: "Staff Member Added",
       description: `${formData.name} has been added to the team.`,

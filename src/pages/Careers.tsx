@@ -65,8 +65,8 @@ const Careers = () => {
   };
 
   // Safely handle data with proper error checking
-  const jobs: Job[] = !jobsError && Array.isArray(jobsData) ? jobsData.filter(isJob) : [];
-  const applications: Application[] = !applicationsError && Array.isArray(applicationsData) ? applicationsData.filter(isApplication) : [];
+  const jobs: Job[] = (!jobsError && Array.isArray(jobsData)) ? jobsData.filter(isJob) : [];
+  const applications: Application[] = (!applicationsError && Array.isArray(applicationsData)) ? applicationsData.filter(isApplication) : [];
 
   const filteredJobs = jobs.filter(job => {
     const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||

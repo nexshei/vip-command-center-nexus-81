@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -39,7 +38,7 @@ const Gallery = () => {
   };
 
   // Safely handle data with proper error checking
-  const photos: GalleryPhoto[] = !photosError && Array.isArray(photosData) ? photosData.filter(isGalleryPhoto) : [];
+  const photos: GalleryPhoto[] = (!photosError && Array.isArray(photosData)) ? photosData.filter(isGalleryPhoto) : [];
 
   const filteredPhotos = photos.filter(photo => {
     const matchesSearch = photo.alt_text?.toLowerCase().includes(searchTerm.toLowerCase()) || 

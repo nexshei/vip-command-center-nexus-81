@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -42,7 +41,7 @@ const Staff = () => {
   };
 
   // Safely handle data with proper error checking
-  const staffMembers: StaffMember[] = !staffError && Array.isArray(staffData) ? staffData.filter(isStaffMember) : [];
+  const staffMembers: StaffMember[] = (!staffError && Array.isArray(staffData)) ? staffData.filter(isStaffMember) : [];
 
   const filteredStaff = staffMembers.filter(staff => {
     const matchesSearch = staff.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
