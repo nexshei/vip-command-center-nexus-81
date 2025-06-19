@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -42,7 +41,12 @@ const Staff = () => {
   };
 
   // Safely handle data with proper error checking
-  const staffMembers: StaffMember[] = Array.isArray(staffData) && !staffError ? staffData.filter(isStaffMember) : [];
+  const staffMembers: StaffMember[] = React.useMemo(() => {
+    if (staffError || !Array.isArray(staffData)) {
+      return [];
+    }
+    return staffData.filter(isStaffMember);
+  }, [staffData, staffError]);
 
   const filteredStaff = staffMembers.filter(staff => {
     const matchesSearch = staff.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||

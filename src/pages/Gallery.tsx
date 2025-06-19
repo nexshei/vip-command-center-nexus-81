@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -38,7 +38,12 @@ const Gallery = () => {
   };
 
   // Safely handle data
-  const photos: GalleryPhoto[] = !photosError && Array.isArray(photosData) ? photosData.filter(isGalleryPhoto) : [];
+  const photos: GalleryPhoto[] = React.useMemo(() => {
+    if (photosError || !Array.isArray(photosData)) {
+      return [];
+    }
+    return photosData.filter(isGalleryPhoto);
+  }, [photosData, photosError]);
 
   const filteredPhotos = photos.filter(photo => {
     const matchesSearch = photo.alt_text?.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -246,7 +251,6 @@ const Gallery = () => {
       <AddPhotoModal
         open={photoModal.open}
         onOpenChange={(open) => setPhotoModal({ ...photoModal, open })}
-        photo={photoModal.photo}
         onPhotoUpdated={handlePhotoUpdated}
       />
 
