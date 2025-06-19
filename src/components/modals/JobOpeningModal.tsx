@@ -1,317 +1,177 @@
 
-import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { X, Plus } from 'lucide-react';
-
-interface Job {
-  id: string;
-  title: string;
-  department: string;
-  location: string;
-  employment_type: string;
-  salary_range: string;
-  status: string;
-  description: string;
-  requirements: string[];
-  application_deadline: string;
-  created_at: string;
-  updated_at: string;
-}
 
 interface JobOpeningModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  job?: Job | null;
-  onJobUpdated: () => void;
+  onJobAdded?: (job: any) => void;
 }
 
-const JobOpeningModal: React.FC<JobOpeningModalProps> = ({ 
-  open, 
-  onOpenChange, 
-  job, 
-  onJobUpdated 
-}) => {
+export const JobOpeningModal = ({ open, onOpenChange, onJobAdded }: JobOpeningModalProps) => {
+  const [jobTitle, setJobTitle] = useState('');
+  const [department, setDepartment] = useState('');
+  const [location, setLocation] = useState('');
+  const [status, setStatus] = useState('');
+  const [description, setDescription] = useState('');
+  const [requirements, setRequirements] = useState('');
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
-  const [requirements, setRequirements] = useState<string[]>(['']);
 
-  const [formData, setFormData] = useState({
-    title: '',
-    department: '',
-    location: '',
-    employment_type: 'full-time',
-    salary_range: '',
-    status: 'active',
-    description: '',
-    application_deadline: ''
-  });
+  const resetFormAndClose = () => {
+    setJobTitle('');
+    setDepartment('');
+    setLocation('');
+    setStatus('');
+    setDescription('');
+    setRequirements('');
+    onOpenChange(false);
+  };
 
-  useEffect(() => {
-    if (job) {
-      setFormData({
-        title: job.title || '',
-        department: job.department || '',
-        location: job.location || '',
-        employment_type: job.employment_type || 'full-time',
-        salary_range: job.salary_range || '',
-        status: job.status || 'active',
-        description: job.description || '',
-        application_deadline: job.application_deadline || ''
-      });
-      setRequirements(job.requirements && job.requirements.length > 0 ? job.requirements : ['']);
-    } else {
-      setFormData({
-        title: '',
-        department: '',
-        location: '',
-        employment_type: 'full-time',
-        salary_range: '',
-        status: 'active',
-        description: '',
-        application_deadline: ''
-      });
-      setRequirements(['']);
-    }
-  }, [job]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    console.log('Creating job opening:', { 
+      jobTitle, 
+      department, 
+      location, 
+      status, 
+      description, 
+      requirements 
+    });
+    
+    const newJob = {
+      id: Date.now().toString(),
+      title: jobTitle,
+      department,
+      location,
+      status,
+      description,
+      requirements,
+      posted_at: new Date().toISOString(),
+      applicants: 0,
+      datePosted: new Date().toISOString().split('T')[0],
+    };
 
-    try {
-      const jobData = {
-        ...formData,
-        requirements: requirements.filter(req => req.trim() !== '')
-      };
-
-      if (job) {
-        const { error } = await supabase
-          .from('careers')
-          .update(jobData)
-          .eq('id', job.id);
-
-        if (error) throw error;
-
-        toast({
-          title: "Job Updated",
-          description: "The job opening has been successfully updated."
-        });
-      } else {
-        const { error } = await supabase
-          .from('careers')
-          .insert([jobData]);
-
-        if (error) throw error;
-
-        toast({
-          title: "Job Created",
-          description: "The job opening has been successfully created."
-        });
-      }
-
-      onJobUpdated();
-    } catch (error: any) {
-      toast({
-        title: job ? "Update Failed" : "Creation Failed",
-        description: error.message || "An error occurred. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
+    if (onJobAdded) {
+      onJobAdded(newJob);
     }
+
+    toast({
+      title: "Job Opening Created",
+      description: `${jobTitle} position has been posted successfully.`,
+    });
+
+    resetFormAndClose();
   };
 
-  const addRequirement = () => {
-    setRequirements([...requirements, '']);
-  };
-
-  const removeRequirement = (index: number) => {
-    if (requirements.length > 1) {
-      setRequirements(requirements.filter((_, i) => i !== index));
-    }
-  };
-
-  const updateRequirement = (index: number, value: string) => {
-    const updated = [...requirements];
-    updated[index] = value;
-    setRequirements(updated);
+  const handleCancel = () => {
+    resetFormAndClose();
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white">
+      <DialogContent className="sm:max-w-[600px] vip-glass border-vip-gold/20">
         <DialogHeader>
-          <DialogTitle className="text-xl font-serif text-vip-black">
-            {job ? 'Edit Job Opening' : 'Create Job Opening'}
-          </DialogTitle>
+          <DialogTitle className="text-vip-black text-xl font-semibold">Create New Job Opening</DialogTitle>
         </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-6 mt-4">
+          <div className="space-y-2">
+            <Label htmlFor="jobTitle" className="text-sm font-medium text-vip-black">Job Title *</Label>
+            <Input
+              id="jobTitle"
+              value={jobTitle}
+              onChange={(e) => setJobTitle(e.target.value)}
+              placeholder="e.g. Senior Protocol Officer"
+              required
+              className="w-full border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
+            />
+          </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="title" className="text-sm font-medium text-vip-black">Job Title</Label>
-              <Input
-                id="title"
-                value={formData.title}
-                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                className="border-vip-gold/30 focus:border-vip-gold"
-                required
-              />
+              <Label htmlFor="department" className="text-sm font-medium text-vip-black">Department *</Label>
+              <Select value={department} onValueChange={setDepartment} required>
+                <SelectTrigger className="w-full border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black">
+                  <SelectValue placeholder="Select department" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Protocol">Protocol</SelectItem>
+                  <SelectItem value="Security">Security</SelectItem>
+                  <SelectItem value="Events">Events & Coordination</SelectItem>
+                  <SelectItem value="Logistics">Logistics & Transport</SelectItem>
+                  <SelectItem value="Communications">Communications</SelectItem>
+                  <SelectItem value="Administration">Administration</SelectItem>
+                  <SelectItem value="Finance">Finance & Accounting</SelectItem>
+                  <SelectItem value="Human Resources">Human Resources</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="department" className="text-sm font-medium text-vip-black">Department</Label>
-              <Input
-                id="department"
-                value={formData.department}
-                onChange={(e) => setFormData(prev => ({ ...prev, department: e.target.value }))}
-                className="border-vip-gold/30 focus:border-vip-gold"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="location" className="text-sm font-medium text-vip-black">Location</Label>
+              <Label htmlFor="location" className="text-sm font-medium text-vip-black">Location *</Label>
               <Input
                 id="location"
-                value={formData.location}
-                onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                className="border-vip-gold/30 focus:border-vip-gold"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                placeholder="e.g. Nairobi, Kenya"
                 required
+                className="w-full border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
               />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="employment_type" className="text-sm font-medium text-vip-black">Employment Type</Label>
-              <Select
-                value={formData.employment_type}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, employment_type: value }))}
-              >
-                <SelectTrigger className="border-vip-gold/30 focus:border-vip-gold">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="full-time">Full-time</SelectItem>
-                  <SelectItem value="part-time">Part-time</SelectItem>
-                  <SelectItem value="contract">Contract</SelectItem>
-                  <SelectItem value="internship">Internship</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="salary_range" className="text-sm font-medium text-vip-black">Salary Range</Label>
-              <Input
-                id="salary_range"
-                value={formData.salary_range}
-                onChange={(e) => setFormData(prev => ({ ...prev, salary_range: e.target.value }))}
-                className="border-vip-gold/30 focus:border-vip-gold"
-                placeholder="e.g. $50,000 - $70,000"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="status" className="text-sm font-medium text-vip-black">Status</Label>
-              <Select
-                value={formData.status}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}
-              >
-                <SelectTrigger className="border-vip-gold/30 focus:border-vip-gold">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="closed">Closed</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="application_deadline" className="text-sm font-medium text-vip-black">Application Deadline</Label>
-            <Input
-              id="application_deadline"
-              type="date"
-              value={formData.application_deadline}
-              onChange={(e) => setFormData(prev => ({ ...prev, application_deadline: e.target.value }))}
-              className="border-vip-gold/30 focus:border-vip-gold"
-            />
+            <Label htmlFor="status" className="text-sm font-medium text-vip-black">Status *</Label>
+            <Select value={status} onValueChange={setStatus} required>
+              <SelectTrigger className="w-full border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black">
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="open">Open</SelectItem>
+                <SelectItem value="on-hold">On Hold</SelectItem>
+                <SelectItem value="closed">Closed</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description" className="text-sm font-medium text-vip-black">Job Description</Label>
+            <Label htmlFor="description" className="text-sm font-medium text-vip-black">Job Description *</Label>
             <Textarea
               id="description"
-              value={formData.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              className="border-vip-gold/30 focus:border-vip-gold min-h-[100px]"
-              placeholder="Describe the role, responsibilities, and requirements..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Describe the role, responsibilities, and key duties..."
+              rows={4}
               required
+              className="w-full border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
             />
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label className="text-sm font-medium text-vip-black">Requirements</Label>
-              <Button
-                type="button"
-                onClick={addRequirement}
-                size="sm"
-                variant="outline"
-                className="text-vip-gold border-vip-gold/30 hover:bg-vip-gold hover:text-white"
-              >
-                <Plus className="h-3 w-3 mr-1" />
-                Add
-              </Button>
-            </div>
-            <div className="space-y-2">
-              {requirements.map((req, index) => (
-                <div key={index} className="flex items-center space-x-2">
-                  <Input
-                    value={req}
-                    onChange={(e) => updateRequirement(index, e.target.value)}
-                    className="border-vip-gold/30 focus:border-vip-gold"
-                    placeholder="Enter a requirement..."
-                  />
-                  {requirements.length > 1 && (
-                    <Button
-                      type="button"
-                      onClick={() => removeRequirement(index)}
-                      size="sm"
-                      variant="outline"
-                      className="text-red-600 border-red-300 hover:bg-red-50"
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  )}
-                </div>
-              ))}
-            </div>
+            <Label htmlFor="requirements" className="text-sm font-medium text-vip-black">Requirements *</Label>
+            <Textarea
+              id="requirements"
+              value={requirements}
+              onChange={(e) => setRequirements(e.target.value)}
+              placeholder="List qualifications, experience, skills, and education requirements..."
+              rows={4}
+              required
+              className="w-full border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
+            />
           </div>
 
-          <div className="flex justify-end space-x-4 pt-4 border-t border-vip-gold/10">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="text-vip-black border-vip-gold/30"
-            >
+          <div className="flex justify-end gap-3 pt-6 border-t border-vip-gold/20">
+            <Button type="button" variant="outline" onClick={handleCancel} className="px-6 border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10">
               Cancel
             </Button>
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="bg-vip-gold text-white hover:bg-vip-gold-dark"
-            >
-              {isLoading ? 'Saving...' : job ? 'Update Job' : 'Create Job'}
+            <Button type="submit" className="px-6 bg-vip-gold text-white hover:bg-vip-gold-dark">
+              Create
             </Button>
           </div>
         </form>
@@ -320,4 +180,18 @@ const JobOpeningModal: React.FC<JobOpeningModalProps> = ({
   );
 };
 
-export default JobOpeningModal;
+export const JobOpeningModalTrigger = ({ onJobAdded }: { onJobAdded?: (job: any) => void }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button className="bg-vip-gold text-white hover:bg-vip-gold-dark">
+          <Plus className="h-4 w-4 mr-2" />
+          Create New Job Opening
+        </Button>
+      </DialogTrigger>
+      <JobOpeningModal open={isOpen} onOpenChange={setIsOpen} onJobAdded={onJobAdded} />
+    </Dialog>
+  );
+};

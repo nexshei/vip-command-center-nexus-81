@@ -15,31 +15,25 @@ import { User, LogOut, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export const UserMenu = () => {
-  const { user, profile, logout } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   if (!user) return null;
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate('/');
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
+  const handleLogout = () => {
+    logout();
+    navigate('/');
   };
 
   const handleViewProfile = () => {
     navigate('/profile');
   };
 
-  const displayName = profile?.full_name || user.email?.split('@')[0] || 'User';
-  const initials = displayName
+  const initials = user.name
     .split(' ')
     .map(name => name[0])
     .join('')
-    .toUpperCase()
-    .substring(0, 2);
+    .toUpperCase();
 
   return (
     <DropdownMenu>
@@ -51,17 +45,15 @@ export const UserMenu = () => {
             </AvatarFallback>
           </Avatar>
           <div className="hidden md:block text-left">
-            <p className="text-sm font-medium">{displayName}</p>
-            <p className="text-xs text-vip-gold/70 capitalize">
-              {profile?.role?.replace('_', ' ') || 'User'}
-            </p>
+            <p className="text-sm font-medium">{user.name}</p>
+            <p className="text-xs text-vip-gold/70 capitalize">{user.role.replace('_', ' ')}</p>
           </div>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56 bg-black border-vip-gold/30">
         <DropdownMenuLabel className="text-vip-gold">
           <div>
-            <p className="text-sm font-medium">{displayName}</p>
+            <p className="text-sm font-medium">{user.name}</p>
             <p className="text-xs text-vip-gold/70">{user.email}</p>
           </div>
         </DropdownMenuLabel>

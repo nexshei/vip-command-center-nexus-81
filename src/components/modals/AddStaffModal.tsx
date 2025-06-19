@@ -3,174 +3,144 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { UserPlus } from 'lucide-react';
 
 interface AddStaffModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onStaffUpdated: () => void;
+  onStaffAdded: (newStaff: any) => void;
 }
 
-const AddStaffModal: React.FC<AddStaffModalProps> = ({ 
-  open, 
-  onOpenChange, 
-  onStaffUpdated 
-}) => {
-  const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+export const AddStaffModal = ({ open, onOpenChange, onStaffAdded }: AddStaffModalProps) => {
   const [formData, setFormData] = useState({
-    full_name: '',
-    email: '',
+    name: '',
+    role: '',
+    department: '',
     phone: '',
-    role: 'staff',
-    status: 'active',
-    notes: ''
+    email: '',
+    status: 'active'
   });
+  const { toast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const { error } = await supabase
-        .from('staff')
-        .insert([formData]);
-
-      if (error) throw error;
-
+    
+    if (!formData.name || !formData.role || !formData.department || !formData.phone || !formData.email) {
       toast({
-        title: "Staff Member Added",
-        description: "The staff member has been successfully added."
-      });
-
-      onStaffUpdated();
-      setFormData({
-        full_name: '',
-        email: '',
-        phone: '',
-        role: 'staff',
-        status: 'active',
-        notes: ''
-      });
-    } catch (error: any) {
-      toast({
-        title: "Addition Failed",
-        description: error.message || "Failed to add staff member.",
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
         variant: "destructive"
       });
-    } finally {
-      setIsLoading(false);
+      return;
     }
+
+    const newStaff = {
+      id: Date.now().toString(),
+      ...formData,
+      joinDate: new Date().toISOString().split('T')[0]
+    };
+
+    onStaffAdded(newStaff);
+    toast({
+      title: "Staff Member Added",
+      description: `${formData.name} has been added to the team.`,
+    });
+    
+    setFormData({
+      name: '',
+      role: '',
+      department: '',
+      phone: '',
+      email: '',
+      status: 'active'
+    });
+    onOpenChange(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md bg-white">
+      <DialogContent className="sm:max-w-[500px] bg-white border border-vip-gold/20">
         <DialogHeader>
-          <DialogTitle className="text-xl font-serif text-vip-black">Add Staff Member</DialogTitle>
+          <DialogTitle className="text-xl font-serif text-vip-black">Add New Staff Member</DialogTitle>
         </DialogHeader>
-
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="full_name" className="text-sm font-medium text-vip-black">Full Name</Label>
+          <div className="grid gap-3">
+            <Label htmlFor="name" className="text-vip-black">Full Name *</Label>
             <Input
-              id="full_name"
-              value={formData.full_name}
-              onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
+              id="name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className="border-vip-gold/30 focus:border-vip-gold"
-              required
+              placeholder="Enter full name"
+            />
+          </div>
+          
+          <div className="grid gap-3">
+            <Label htmlFor="role" className="text-vip-black">Role *</Label>
+            <Input
+              id="role"
+              value={formData.role}
+              onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+              className="border-vip-gold/30 focus:border-vip-gold"
+              placeholder="e.g., Protocol Officer"
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-sm font-medium text-vip-black">Email</Label>
+          <div className="grid gap-3">
+            <Label htmlFor="department" className="text-vip-black">Department *</Label>
+            <Select value={formData.department} onValueChange={(value) => setFormData({ ...formData, department: value })}>
+              <SelectTrigger className="border-vip-gold/30 focus:border-vip-gold">
+                <SelectValue placeholder="Select department" />
+              </SelectTrigger>
+              <SelectContent className="bg-white border-vip-gold/20">
+                <SelectItem value="Protocol">Protocol</SelectItem>
+                <SelectItem value="Security">Security</SelectItem>
+                <SelectItem value="Events">Events</SelectItem>
+                <SelectItem value="Logistics">Logistics</SelectItem>
+                <SelectItem value="Marketing">Marketing</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid gap-3">
+            <Label htmlFor="phone" className="text-vip-black">Phone Number *</Label>
+            <Input
+              id="phone"
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              className="border-vip-gold/30 focus:border-vip-gold"
+              placeholder="+254 7XX XXX XXX"
+            />
+          </div>
+
+          <div className="grid gap-3">
+            <Label htmlFor="email" className="text-vip-black">Email Address *</Label>
             <Input
               id="email"
               type="email"
               value={formData.email}
-              onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="border-vip-gold/30 focus:border-vip-gold"
-              required
+              placeholder="email@sirolele.com"
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="phone" className="text-sm font-medium text-vip-black">Phone</Label>
-            <Input
-              id="phone"
-              value={formData.phone}
-              onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-              className="border-vip-gold/30 focus:border-vip-gold"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="role" className="text-sm font-medium text-vip-black">Role</Label>
-            <Select
-              value={formData.role}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, role: value }))}
-            >
-              <SelectTrigger className="border-vip-gold/30 focus:border-vip-gold">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="staff">Staff</SelectItem>
-                <SelectItem value="manager">Manager</SelectItem>
-                <SelectItem value="protocol_officer">Protocol Officer</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="status" className="text-sm font-medium text-vip-black">Status</Label>
-            <Select
-              value={formData.status}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}
-            >
-              <SelectTrigger className="border-vip-gold/30 focus:border-vip-gold">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-                <SelectItem value="on_leave">On Leave</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="notes" className="text-sm font-medium text-vip-black">Notes</Label>
-            <Textarea
-              id="notes"
-              value={formData.notes}
-              onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-              className="border-vip-gold/30 focus:border-vip-gold"
-              placeholder="Additional notes..."
-            />
-          </div>
-
-          <div className="flex justify-end space-x-4 pt-4">
-            <Button
-              type="button"
-              variant="outline"
+          <div className="flex justify-end gap-3 pt-4">
+            <Button 
+              type="button" 
+              variant="outline" 
               onClick={() => onOpenChange(false)}
-              className="text-vip-black border-vip-gold/30"
+              className="border-vip-gold/30 text-vip-black hover:bg-vip-gold/10"
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="bg-vip-gold text-white hover:bg-vip-gold-dark"
+            <Button 
+              type="submit" 
+              className="bg-vip-gold text-black hover:bg-vip-gold-dark"
             >
-              <UserPlus className="h-4 w-4 mr-2" />
-              {isLoading ? 'Adding...' : 'Add Staff'}
+              Add Staff Member
             </Button>
           </div>
         </form>
@@ -178,5 +148,3 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({
     </Dialog>
   );
 };
-
-export default AddStaffModal;
