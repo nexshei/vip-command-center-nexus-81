@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -59,9 +58,20 @@ const Careers = () => {
     return item && typeof item === 'object' && typeof item.id === 'string' && typeof item.full_name === 'string';
   };
 
-  // Safely handle data with proper error checking
-  const jobs: Job[] = Array.isArray(jobsData) && !jobsError ? jobsData.filter(isJob) : [];
-  const applications: Application[] = Array.isArray(applicationsData) && !applicationsError ? applicationsData.filter(isApplication) : [];
+  // Safely handle data with proper error checking - returning correctly typed arrays
+  const jobs: Job[] = useMemo(() => {
+    if (jobsError || !Array.isArray(jobsData)) {
+      return [];
+    }
+    return jobsData.filter(isJob);
+  }, [jobsData, jobsError]);
+
+  const applications: Application[] = useMemo(() => {
+    if (applicationsError || !Array.isArray(applicationsData)) {
+      return [];
+    }
+    return applicationsData.filter(isApplication);
+  }, [applicationsData, applicationsError]);
 
   const getStatusColor = (status: string) => {
     switch (status) {

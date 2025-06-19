@@ -40,8 +40,8 @@ const Staff = () => {
     return item && typeof item === 'object' && typeof item.id === 'string';
   };
 
-  // Safely handle data with proper error checking
-  const staffMembers: StaffMember[] = React.useMemo(() => {
+  // Safely handle data with proper error checking - returning correctly typed array
+  const staffMembers: StaffMember[] = useMemo(() => {
     if (staffError || !Array.isArray(staffData)) {
       return [];
     }

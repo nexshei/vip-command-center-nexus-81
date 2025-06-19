@@ -37,8 +37,8 @@ const Gallery = () => {
     return item && typeof item === 'object' && typeof item.id === 'string' && typeof item.src === 'string';
   };
 
-  // Safely handle data
-  const photos: GalleryPhoto[] = React.useMemo(() => {
+  // Safely handle data - returning correctly typed array
+  const photos: GalleryPhoto[] = useMemo(() => {
     if (photosError || !Array.isArray(photosData)) {
       return [];
     }
