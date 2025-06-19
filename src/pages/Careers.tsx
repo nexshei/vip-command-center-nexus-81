@@ -60,8 +60,8 @@ const Careers = () => {
   };
 
   // Safely handle data with proper error checking
-  const jobs: Job[] = !jobsError && Array.isArray(jobsData) ? jobsData.filter(isJob) : [];
-  const applications: Application[] = !applicationsError && Array.isArray(applicationsData) ? applicationsData.filter(isApplication) : [];
+  const jobs: Job[] = Array.isArray(jobsData) && !jobsError ? jobsData.filter(isJob) : [];
+  const applications: Application[] = Array.isArray(applicationsData) && !applicationsError ? applicationsData.filter(isApplication) : [];
 
   const getStatusColor = (status: string) => {
     switch (status) {

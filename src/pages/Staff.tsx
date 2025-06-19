@@ -42,7 +42,7 @@ const Staff = () => {
   };
 
   // Safely handle data with proper error checking
-  const staffMembers: StaffMember[] = !staffError && Array.isArray(staffData) ? staffData.filter(isStaffMember) : [];
+  const staffMembers: StaffMember[] = Array.isArray(staffData) && !staffError ? staffData.filter(isStaffMember) : [];
 
   const filteredStaff = staffMembers.filter(staff => {
     const matchesSearch = staff.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||

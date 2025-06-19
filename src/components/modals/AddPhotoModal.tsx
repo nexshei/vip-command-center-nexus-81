@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -14,10 +13,10 @@ import { Upload, X } from 'lucide-react';
 interface AddPhotoModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onPhotoAdded: () => void;
+  onPhotoUpdated: () => void;
 }
 
-export const AddPhotoModal = ({ open, onOpenChange, onPhotoAdded }: AddPhotoModalProps) => {
+export const AddPhotoModal = ({ open, onOpenChange, onPhotoUpdated }: AddPhotoModalProps) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -128,7 +127,7 @@ export const AddPhotoModal = ({ open, onOpenChange, onPhotoAdded }: AddPhotoModa
 
       if (dbError) throw dbError;
 
-      onPhotoAdded();
+      onPhotoUpdated();
       onOpenChange(false);
       handleCancel();
     } catch (error) {
