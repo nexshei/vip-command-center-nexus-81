@@ -26,15 +26,14 @@ export type SupabaseTable =
 
 /**
  * Generic realtime query for a Supabase table.
- * Usage: const { data, isLoading, error, refetch } = useRealtimeQuery("bookings")
+ * Usage: const { data, isLoading, error, refetch } = useRealtimeQuery("bookings", { table: "bookings" })
  */
 export function useRealtimeQuery(
-  table: SupabaseTable,
-  options: { select?: string; orderBy?: string } = {}
+  queryKey: string,
+  options: { table: SupabaseTable; select?: string; orderBy?: string } = { table: "bookings" }
 ) {
   const queryClient = useQueryClient();
-  const select = options.select || "*";
-  const orderBy = options.orderBy;
+  const { table, select = "*", orderBy } = options;
 
   const fetchData = async () => {
     let query = supabase.from(table).select(select);
@@ -44,10 +43,10 @@ export function useRealtimeQuery(
     return data;
   };
 
-  const queryKey = [table];
+  const queryKeyArray = [queryKey];
 
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey,
+    queryKey: queryKeyArray,
     queryFn: fetchData,
   });
 
@@ -58,7 +57,7 @@ export function useRealtimeQuery(
         "postgres_changes",
         { event: "*", schema: "public", table },
         (payload) => {
-          queryClient.invalidateQueries({ queryKey });
+          queryClient.invalidateQueries({ queryKey: queryKeyArray });
         }
       )
       .subscribe();

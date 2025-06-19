@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,15 +10,30 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { UserPlus } from 'lucide-react';
 
+interface StaffMember {
+  id: string;
+  full_name: string;
+  role: string;
+  email: string;
+  phone: string;
+  status: string;
+  notes: string;
+  created_at: string;
+}
+
 interface AddStaffModalProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onStaffUpdated: () => void;
+  onClose: (open: boolean) => void;
+  staff?: StaffMember | null;
+  onStaffAdded?: () => void;
+  onStaffUpdated?: () => void;
 }
 
 const AddStaffModal: React.FC<AddStaffModalProps> = ({ 
   open, 
-  onOpenChange, 
+  onClose, 
+  staff,
+  onStaffAdded,
   onStaffUpdated 
 }) => {
   const { toast } = useToast();
@@ -32,23 +47,62 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({
     notes: ''
   });
 
+  useEffect(() => {
+    if (staff) {
+      setFormData({
+        full_name: staff.full_name || '',
+        email: staff.email || '',
+        phone: staff.phone || '',
+        role: staff.role || 'staff',
+        status: staff.status || 'active',
+        notes: staff.notes || ''
+      });
+    } else {
+      setFormData({
+        full_name: '',
+        email: '',
+        phone: '',
+        role: 'staff',
+        status: 'active',
+        notes: ''
+      });
+    }
+  }, [staff]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const { error } = await supabase
-        .from('staff')
-        .insert([formData]);
+      if (staff) {
+        const { error } = await supabase
+          .from('staff')
+          .update(formData)
+          .eq('id', staff.id);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast({
-        title: "Staff Member Added",
-        description: "The staff member has been successfully added."
-      });
+        toast({
+          title: "Staff Member Updated",
+          description: "The staff member has been successfully updated."
+        });
 
-      onStaffUpdated();
+        onStaffUpdated?.();
+      } else {
+        const { error } = await supabase
+          .from('staff')
+          .insert([formData]);
+
+        if (error) throw error;
+
+        toast({
+          title: "Staff Member Added",
+          description: "The staff member has been successfully added."
+        });
+
+        onStaffAdded?.();
+      }
+
       setFormData({
         full_name: '',
         email: '',
@@ -59,8 +113,8 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({
       });
     } catch (error: any) {
       toast({
-        title: "Addition Failed",
-        description: error.message || "Failed to add staff member.",
+        title: staff ? "Update Failed" : "Addition Failed",
+        description: error.message || "Failed to save staff member.",
         variant: "destructive"
       });
     } finally {
@@ -69,10 +123,12 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md bg-white">
         <DialogHeader>
-          <DialogTitle className="text-xl font-serif text-vip-black">Add Staff Member</DialogTitle>
+          <DialogTitle className="text-xl font-serif text-vip-black">
+            {staff ? 'Edit Staff Member' : 'Add Staff Member'}
+          </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -159,7 +215,7 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({
             <Button
               type="button"
               variant="outline"
-              onClick={() => onOpenChange(false)}
+              onClick={() => onClose(false)}
               className="text-vip-black border-vip-gold/30"
             >
               Cancel
@@ -170,7 +226,7 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({
               className="bg-vip-gold text-white hover:bg-vip-gold-dark"
             >
               <UserPlus className="h-4 w-4 mr-2" />
-              {isLoading ? 'Adding...' : 'Add Staff'}
+              {isLoading ? 'Saving...' : staff ? 'Update Staff' : 'Add Staff'}
             </Button>
           </div>
         </form>
