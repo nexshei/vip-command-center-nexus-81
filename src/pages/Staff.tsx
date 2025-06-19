@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -40,12 +39,13 @@ const Staff = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [staffToDelete, setStaffToDelete] = useState<StaffMember | null>(null);
 
-  // Use proper query structure for useRealtimeQuery
+  // Use proper error handling for the query
   const { 
     data: staffData, 
     isLoading, 
     error 
   } = useRealtimeQuery('staff', {
+    queryKey: ['staff'],
     table: 'staff'
   });
 
@@ -249,7 +249,7 @@ const Staff = () => {
 
       {/* Modals */}
       <AddStaffModal
-        open={isAddModalOpen}
+        isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onStaffAdded={() => {
           setIsAddModalOpen(false);
@@ -258,7 +258,7 @@ const Staff = () => {
 
       {selectedStaff && (
         <AddStaffModal
-          open={isEditModalOpen}
+          isOpen={isEditModalOpen}
           onClose={() => {
             setIsEditModalOpen(false);
             setSelectedStaff(null);
@@ -273,7 +273,7 @@ const Staff = () => {
 
       {staffToDelete && (
         <DeleteConfirmationModal
-          open={isDeleteModalOpen}
+          isOpen={isDeleteModalOpen}
           onClose={() => {
             setIsDeleteModalOpen(false);
             setStaffToDelete(null);

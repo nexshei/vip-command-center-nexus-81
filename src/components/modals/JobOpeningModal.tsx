@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { X, Plus, Briefcase } from 'lucide-react';
+import { X, Plus } from 'lucide-react';
 
 interface Job {
   id: string;
@@ -27,17 +27,15 @@ interface Job {
 
 interface JobOpeningModalProps {
   open: boolean;
-  onClose: (open: boolean) => void;
+  onOpenChange: (open: boolean) => void;
   job?: Job | null;
-  onJobAdded?: () => void;
-  onJobUpdated?: () => void;
+  onJobUpdated: () => void;
 }
 
 const JobOpeningModal: React.FC<JobOpeningModalProps> = ({ 
   open, 
-  onClose, 
+  onOpenChange, 
   job, 
-  onJobAdded,
   onJobUpdated 
 }) => {
   const { toast } = useToast();
@@ -105,8 +103,6 @@ const JobOpeningModal: React.FC<JobOpeningModalProps> = ({
           title: "Job Updated",
           description: "The job opening has been successfully updated."
         });
-
-        onJobUpdated?.();
       } else {
         const { error } = await supabase
           .from('careers')
@@ -118,9 +114,9 @@ const JobOpeningModal: React.FC<JobOpeningModalProps> = ({
           title: "Job Created",
           description: "The job opening has been successfully created."
         });
-
-        onJobAdded?.();
       }
+
+      onJobUpdated();
     } catch (error: any) {
       toast({
         title: job ? "Update Failed" : "Creation Failed",
@@ -149,7 +145,7 @@ const JobOpeningModal: React.FC<JobOpeningModalProps> = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white">
         <DialogHeader>
           <DialogTitle className="text-xl font-serif text-vip-black">
@@ -305,7 +301,7 @@ const JobOpeningModal: React.FC<JobOpeningModalProps> = ({
             <Button
               type="button"
               variant="outline"
-              onClick={() => onClose(false)}
+              onClick={() => onOpenChange(false)}
               className="text-vip-black border-vip-gold/30"
             >
               Cancel
@@ -321,32 +317,6 @@ const JobOpeningModal: React.FC<JobOpeningModalProps> = ({
         </form>
       </DialogContent>
     </Dialog>
-  );
-};
-
-// Create a trigger component for the CareerPortal
-export const JobOpeningModalTrigger: React.FC<{ onJobAdded: (job: any) => void }> = ({ onJobAdded }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <>
-      <Button 
-        onClick={() => setIsOpen(true)}
-        className="bg-vip-gold text-white hover:bg-vip-gold-dark flex items-center gap-2"
-      >
-        <Briefcase className="h-4 w-4" />
-        Create Job Opening
-      </Button>
-      
-      <JobOpeningModal
-        open={isOpen}
-        onClose={setIsOpen}
-        onJobAdded={() => {
-          setIsOpen(false);
-          onJobAdded({});
-        }}
-      />
-    </>
   );
 };
 
