@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -20,6 +21,7 @@ import CreateBooking from "@/pages/CreateBooking";
 import GenerateQuote from "@/pages/GenerateQuote";
 import Inventory from "@/pages/Inventory";
 import Careers from "@/pages/Careers";
+import Gallery from "@/pages/Gallery";
 import Staff from "@/pages/Staff";
 import CareerPortal from "@/pages/CareerPortal";
 import Email from "@/pages/Email";
@@ -153,6 +155,11 @@ const AppRoutes = () => {
       <Route path="/careers" element={
         <ProtectedRoute>
           <Careers />
+        </ProtectedRoute>
+      } />
+      <Route path="/gallery" element={
+        <ProtectedRoute>
+          <Gallery />
         </ProtectedRoute>
       } />
       <Route path="/staff" element={
