@@ -246,6 +246,36 @@ export type Database = {
         }
         Relationships: []
       }
+      documents: {
+        Row: {
+          created_at: string
+          entity: string | null
+          entity_id: string | null
+          id: number
+          name: string | null
+          type: string | null
+          url: string | null
+        }
+        Insert: {
+          created_at?: string
+          entity?: string | null
+          entity_id?: string | null
+          id?: number
+          name?: string | null
+          type?: string | null
+          url?: string | null
+        }
+        Update: {
+          created_at?: string
+          entity?: string | null
+          entity_id?: string | null
+          id?: number
+          name?: string | null
+          type?: string | null
+          url?: string | null
+        }
+        Relationships: []
+      }
       emails: {
         Row: {
           body: string | null

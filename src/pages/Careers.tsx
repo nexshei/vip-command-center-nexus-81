@@ -59,7 +59,7 @@ const Careers = () => {
     return item && typeof item === 'object' && typeof item.id === 'string' && typeof item.full_name === 'string';
   };
 
-  // Safely handle data
+  // Safely handle data with proper error checking
   const jobs: Job[] = !jobsError && Array.isArray(jobsData) ? jobsData.filter(isJob) : [];
   const applications: Application[] = !applicationsError && Array.isArray(applicationsData) ? applicationsData.filter(isApplication) : [];
 
@@ -130,11 +130,11 @@ const Careers = () => {
     }
   };
 
-  const handleJobUpdated = () => {
+  const handleJobAdded = (newJob: any) => {
     refetchJobs();
     toast({
-      title: "Job Updated",
-      description: "The job posting has been updated successfully.",
+      title: "Job Added",
+      description: "The job posting has been added successfully.",
     });
   };
 
@@ -352,8 +352,7 @@ const Careers = () => {
       <JobOpeningModal
         open={jobModal.open}
         onOpenChange={(open) => setJobModal({ ...jobModal, open })}
-        job={jobModal.jobData}
-        onJobUpdated={handleJobUpdated}
+        onJobAdded={handleJobAdded}
       />
 
       <DeleteConfirmationModal

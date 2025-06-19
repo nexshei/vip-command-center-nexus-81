@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -40,7 +41,7 @@ const Staff = () => {
     return item && typeof item === 'object' && typeof item.id === 'string';
   };
 
-  // Safely handle data
+  // Safely handle data with proper error checking
   const staffMembers: StaffMember[] = !staffError && Array.isArray(staffData) ? staffData.filter(isStaffMember) : [];
 
   const filteredStaff = staffMembers.filter(staff => {
@@ -109,11 +110,11 @@ const Staff = () => {
     }
   };
 
-  const handleStaffUpdated = () => {
+  const handleStaffAdded = (newStaff: any) => {
     refetch();
     toast({
-      title: "Staff Updated",
-      description: "The staff member has been updated successfully.",
+      title: "Staff Added",
+      description: "The staff member has been added successfully.",
     });
   };
 
@@ -295,8 +296,7 @@ const Staff = () => {
       <AddStaffModal
         open={staffModal.open}
         onOpenChange={(open) => setStaffModal({ ...staffModal, open })}
-        staff={staffModal.staff}
-        onStaffUpdated={handleStaffUpdated}
+        onStaffAdded={handleStaffAdded}
       />
 
       <DeleteConfirmationModal
