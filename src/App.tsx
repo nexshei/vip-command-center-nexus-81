@@ -30,8 +30,8 @@ import Settings from "@/pages/Settings";
 
 const queryClient = new QueryClient();
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, isLoading } = useAuth();
+const ProtectedRoute = ({ children, requiredPage }: { children: React.ReactNode; requiredPage?: string }) => {
+  const { user, isLoading, canAccess } = useAuth();
   
   if (isLoading) {
     return (
@@ -46,6 +46,17 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   
   if (!user) {
     return <LoginForm />;
+  }
+
+  if (requiredPage && !canAccess(requiredPage)) {
+    return (
+      <DashboardLayout>
+        <div className="p-6 text-center">
+          <h1 className="text-2xl font-serif text-vip-black mb-4">Access Restricted</h1>
+          <p className="text-vip-gold/80">You don't have permission to access this page.</p>
+        </div>
+      </DashboardLayout>
+    );
   }
   
   return <DashboardLayout>{children}</DashboardLayout>;
@@ -64,43 +75,49 @@ const ComingSoonPage = ({ title, description }: { title: string; description: st
   </div>
 );
 
-const ProfilePage = () => (
-  <div className="p-6 max-w-4xl mx-auto">
-    <h1 className="text-3xl font-serif font-bold text-vip-black mb-6">Admin Profile</h1>
-    <div className="vip-glass border border-vip-gold/20 rounded-lg p-6">
-      <div className="space-y-6">
-        <div className="flex items-center space-x-4">
-          <div className="w-20 h-20 bg-vip-gold/20 rounded-full flex items-center justify-center">
-            <span className="text-2xl font-bold text-vip-gold">DO</span>
+const ProfilePage = () => {
+  const { user } = useAuth();
+  
+  return (
+    <div className="p-6 max-w-4xl mx-auto">
+      <h1 className="text-3xl font-serif font-bold text-vip-black mb-6">Admin Profile</h1>
+      <div className="vip-glass border border-vip-gold/20 rounded-lg p-6">
+        <div className="space-y-6">
+          <div className="flex items-center space-x-4">
+            <div className="w-20 h-20 bg-vip-gold/20 rounded-full flex items-center justify-center">
+              <span className="text-2xl font-bold text-vip-gold">
+                {user?.name?.split(' ').map(n => n[0]).join('') || 'U'}
+              </span>
+            </div>
+            <div>
+              <h2 className="text-2xl font-semibold text-vip-black">{user?.name}</h2>
+              <p className="text-vip-gold/80 capitalize">{user?.role?.replace('_', ' ')}</p>
+              <p className="text-sm text-vip-gold/60">{user?.email}</p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-2xl font-semibold text-vip-black">Sir Dennis Olele</h2>
-            <p className="text-vip-gold/80">Super Administrator</p>
-            <p className="text-sm text-vip-gold/60">admin@sirolele.com</p>
-          </div>
-        </div>
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-vip-gold/80">Full Name</label>
-            <p className="text-vip-black">Sir Dennis Olele</p>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-vip-gold/80">Role</label>
-            <p className="text-vip-black">Super Administrator</p>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-vip-gold/80">Email</label>
-            <p className="text-vip-black">admin@sirolele.com</p>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-vip-gold/80">Phone</label>
-            <p className="text-vip-black">+254 700 000 000</p>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-vip-gold/80">Full Name</label>
+              <p className="text-vip-black">{user?.name}</p>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-vip-gold/80">Role</label>
+              <p className="text-vip-black capitalize">{user?.role?.replace('_', ' ')}</p>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-vip-gold/80">Email</label>
+              <p className="text-vip-black">{user?.email}</p>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-vip-gold/80">Phone</label>
+              <p className="text-vip-black">+254 700 000 000</p>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const AppRoutes = () => {
   const { user } = useAuth();
@@ -109,67 +126,67 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/" element={user ? <Navigate to="/dashboard" /> : <Index />} />
       <Route path="/dashboard" element={
-        <ProtectedRoute>
+        <ProtectedRoute requiredPage="dashboard">
           <Dashboard />
         </ProtectedRoute>
       } />
       <Route path="/create-booking" element={
-        <ProtectedRoute>
+        <ProtectedRoute requiredPage="create-booking">
           <CreateBooking />
         </ProtectedRoute>
       } />
       <Route path="/generate-quote" element={
-        <ProtectedRoute>
+        <ProtectedRoute requiredPage="generate-quote">
           <GenerateQuote />
         </ProtectedRoute>
       } />
       <Route path="/bookings" element={
-        <ProtectedRoute>
+        <ProtectedRoute requiredPage="bookings">
           <Bookings />
         </ProtectedRoute>
       } />
       <Route path="/list-bookings" element={
-        <ProtectedRoute>
+        <ProtectedRoute requiredPage="list-bookings">
           <ListBookings />
         </ProtectedRoute>
       } />
       <Route path="/clients" element={
-        <ProtectedRoute>
+        <ProtectedRoute requiredPage="clients">
           <Clients />
         </ProtectedRoute>
       } />
       <Route path="/inventory" element={
-        <ProtectedRoute>
+        <ProtectedRoute requiredPage="inventory">
           <Inventory />
         </ProtectedRoute>
       } />
       <Route path="/careers" element={
-        <ProtectedRoute>
+        <ProtectedRoute requiredPage="careers">
           <Careers />
         </ProtectedRoute>
       } />
       <Route path="/gallery" element={
-        <ProtectedRoute>
+        <ProtectedRoute requiredPage="gallery">
           <Gallery />
         </ProtectedRoute>
       } />
       <Route path="/staff" element={
-        <ProtectedRoute>
+        <ProtectedRoute requiredPage="staff">
           <Staff />
         </ProtectedRoute>
       } />
       <Route path="/subscriptions" element={
-        <ProtectedRoute>
+        <ProtectedRoute requiredPage="subscriptions">
           <Subscriptions />
         </ProtectedRoute>
       } />
       <Route path="/email" element={
-        <ProtectedRoute>
+        <ProtectedRoute requiredPage="email">
           <Email />
         </ProtectedRoute>
       } />
       <Route path="/analytics" element={
-        <ProtectedRoute>
+        <ProtectedRoute requiredPage="analytics">
           <Analytics />
         </ProtectedRoute>
       } />
@@ -179,17 +196,17 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
       <Route path="/settings" element={
-        <ProtectedRoute>
+        <ProtectedRoute requiredPage="settings">
           <Settings />
         </ProtectedRoute>
       } />
       <Route path="/subscribers" element={
-        <ProtectedRoute>
+        <ProtectedRoute requiredPage="subscribers">
           <Subscribers />
         </ProtectedRoute>
       } />
       <Route path="/contact-submissions" element={
-        <ProtectedRoute>
+        <ProtectedRoute requiredPage="contact-submissions">
           <React.Suspense fallback={<div>Loading...</div>}>
             <ContactSubmissions />
           </React.Suspense>

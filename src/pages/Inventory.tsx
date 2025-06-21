@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Package, Plus, Search, MapPin, Edit, Trash2 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Package, Plus, Search, MapPin, Edit, Trash2, Lock } from 'lucide-react';
 
 interface InventoryItem {
   id: string;
@@ -52,6 +53,9 @@ const Inventory = () => {
   const [inventory, setInventory] = useState<InventoryItem[]>(mockInventory);
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
+  const { user, hasPermission } = useAuth();
+
+  const isProtocolAdmin = user?.role === 'protocol_admin';
 
   const filteredInventory = inventory.filter((item) =>
     item.item_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -60,6 +64,14 @@ const Inventory = () => {
   );
 
   const handleDeleteItem = (item: InventoryItem) => {
+    if (isProtocolAdmin) {
+      toast({
+        title: "Access Restricted",
+        description: "Item deletion is restricted for Protocol Admin users.",
+        variant: "destructive"
+      });
+      return;
+    }
     setInventory(prev => prev.filter(i => i.id !== item.id));
     toast({
       title: "Item Deleted",
@@ -68,6 +80,14 @@ const Inventory = () => {
   };
 
   const handleAddItem = () => {
+    if (isProtocolAdmin) {
+      toast({
+        title: "Access Restricted",
+        description: "Adding new inventory categories is restricted for Protocol Admin users.",
+        variant: "destructive"
+      });
+      return;
+    }
     toast({
       title: "Feature Unavailable",
       description: "Inventory management features require database connection.",
@@ -75,10 +95,17 @@ const Inventory = () => {
   };
 
   const handleEditItem = (item: InventoryItem) => {
-    toast({
-      title: "Feature Unavailable",
-      description: "Inventory editing features require database connection.",
-    });
+    if (isProtocolAdmin) {
+      toast({
+        title: "Limited Access",
+        description: "You can edit basic item details but not critical system settings.",
+      });
+    } else {
+      toast({
+        title: "Feature Unavailable",
+        description: "Inventory editing features require database connection.",
+      });
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -101,16 +128,32 @@ const Inventory = () => {
       <div className="mb-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-serif font-bold text-vip-gold">Inventory Management</h1>
-            <p className="text-vip-gold/70 mt-1">Track and manage VVIP protocol equipment</p>
+            <h1 className="text-3xl font-serif font-bold text-vip-gold">
+              Inventory Management {isProtocolAdmin && '(Limited Access)'}
+            </h1>
+            <p className="text-vip-gold/70 mt-1">
+              {isProtocolAdmin 
+                ? 'Manage existing items (restricted from adding/deleting categories)'
+                : 'Track and manage VVIP protocol equipment'
+              }
+            </p>
           </div>
-          <Button 
-            onClick={handleAddItem}
-            className="bg-vip-gold text-black hover:bg-vip-gold/90"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Item
-          </Button>
+          <div className="flex items-center gap-3">
+            {isProtocolAdmin && (
+              <div className="flex items-center text-vip-gold/60">
+                <Lock className="h-4 w-4 mr-2" />
+                <span className="text-sm">Limited Access</span>
+              </div>
+            )}
+            <Button 
+              onClick={handleAddItem}
+              className="bg-vip-gold text-black hover:bg-vip-gold/90"
+              disabled={isProtocolAdmin}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Item
+            </Button>
+          </div>
         </div>
 
         <div className="flex items-center space-x-4 mb-6">
@@ -162,6 +205,7 @@ const Inventory = () => {
                     size="sm"
                     onClick={() => handleDeleteItem(item)}
                     className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                    disabled={isProtocolAdmin}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -194,13 +238,15 @@ const Inventory = () => {
                 <p className="text-vip-gold/70 mb-4">
                   {searchTerm ? 'No items match your search criteria.' : 'Start tracking your VVIP protocol equipment.'}
                 </p>
-                <Button 
-                  onClick={handleAddItem}
-                  className="bg-vip-gold text-black hover:bg-vip-gold/90"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add First Item
-                </Button>
+                {!isProtocolAdmin && (
+                  <Button 
+                    onClick={handleAddItem}
+                    className="bg-vip-gold text-black hover:bg-vip-gold/90"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add First Item
+                  </Button>
+                )}
               </CardContent>
             </Card>
           </div>

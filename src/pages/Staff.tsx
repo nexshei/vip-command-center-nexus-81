@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Eye, Edit, Trash2, Users, Phone, Mail } from 'lucide-react';
+import { Plus, Search, Eye, Edit, Trash2, Users, Phone, Mail, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface StaffMember {
   id: string;
@@ -59,6 +60,9 @@ const Staff = () => {
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>(mockStaff);
   const { toast } = useToast();
+  const { user, hasPermission } = useAuth();
+
+  const isProtocolAdmin = user?.role === 'protocol_admin';
 
   const filteredStaff = staffMembers.filter(staff => {
     const matchesSearch = staff.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -84,30 +88,32 @@ const Staff = () => {
 
   const handleAddStaff = () => {
     toast({
-      title: "Feature Unavailable",
-      description: "Staff management features require database connection.",
+      title: "Access Restricted",
+      description: "Staff management is restricted for Protocol Admin users.",
+      variant: "destructive"
     });
   };
 
   const handleEditStaff = (staff: StaffMember) => {
     toast({
-      title: "Feature Unavailable",
-      description: "Staff editing features require database connection.",
+      title: "Access Restricted", 
+      description: "Staff editing is restricted for Protocol Admin users.",
+      variant: "destructive"
     });
   };
 
   const handleDeleteStaff = (staff: StaffMember) => {
-    setStaffMembers(prev => prev.filter(s => s.id !== staff.id));
     toast({
-      title: "Staff Member Deleted",
-      description: `${staff.full_name} has been removed from the staff list.`,
+      title: "Access Restricted",
+      description: "Staff deletion is restricted for Protocol Admin users.",
+      variant: "destructive"
     });
   };
 
   const handleViewStaff = (staff: StaffMember) => {
     toast({
-      title: "Feature Unavailable",
-      description: "Staff details view requires database connection.",
+      title: "Staff Details",
+      description: `Viewing details for ${staff.full_name} - ${staff.role}`,
     });
   };
 
@@ -116,13 +122,28 @@ const Staff = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-vip-black">Staff Management</h1>
-          <p className="text-vip-gold/80 mt-2">Manage your team members and their roles</p>
+          <h1 className="text-3xl font-serif font-bold text-vip-black">
+            Staff Management {isProtocolAdmin && '(View Only)'}
+          </h1>
+          <p className="text-vip-gold/80 mt-2">
+            {isProtocolAdmin 
+              ? 'View team member information (management restricted)'
+              : 'Manage your team members and their roles'
+            }
+          </p>
         </div>
-        <Button onClick={handleAddStaff} className="bg-vip-gold text-black hover:bg-vip-gold/90">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Staff Member
-        </Button>
+        {!isProtocolAdmin && (
+          <Button onClick={handleAddStaff} className="bg-vip-gold text-black hover:bg-vip-gold/90">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Staff Member
+          </Button>
+        )}
+        {isProtocolAdmin && (
+          <div className="flex items-center text-vip-gold/60">
+            <Lock className="h-4 w-4 mr-2" />
+            <span className="text-sm">Management Restricted</span>
+          </div>
+        )}
       </div>
 
       {/* Summary Stats */}
@@ -212,7 +233,7 @@ const Staff = () => {
         <CardContent>
           {filteredStaff.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-vip-gold/60">No staff members found. Add your first team member to get started.</p>
+              <p className="text-vip-gold/60">No staff members found.</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -256,22 +277,26 @@ const Staff = () => {
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button
-                        onClick={() => handleEditStaff(staff)}
-                        variant="outline"
-                        size="sm"
-                        className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        onClick={() => handleDeleteStaff(staff)}
-                        variant="outline"
-                        size="sm"
-                        className="border-red-300 text-red-600 hover:bg-red-50"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      {!isProtocolAdmin && (
+                        <>
+                          <Button
+                            onClick={() => handleEditStaff(staff)}
+                            variant="outline"
+                            size="sm"
+                            className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            onClick={() => handleDeleteStaff(staff)}
+                            variant="outline"
+                            size="sm"
+                            className="border-red-300 text-red-600 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>

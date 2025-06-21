@@ -3,7 +3,10 @@ import React, { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { Search, Lock, Mail, UserCheck, UserX } from "lucide-react";
 
 interface Subscriber {
   id: string;
@@ -35,16 +38,69 @@ const mockSubscribers: Subscriber[] = [
 ];
 
 const Subscribers = () => {
-  const [subscribers] = useState<Subscriber[]>(mockSubscribers);
+  const [subscribers, setSubscribers] = useState<Subscriber[]>(mockSubscribers);
   const [searchTerm, setSearchTerm] = useState('');
+  const { toast } = useToast();
+  const { user } = useAuth();
+
+  const isProtocolAdmin = user?.role === 'protocol_admin';
 
   const filteredSubscribers = subscribers.filter(subscriber =>
     subscriber.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleSubscriberAction = (subscriber: Subscriber, action: 'toggle' | 'message') => {
+    if (isProtocolAdmin && action === 'toggle') {
+      toast({
+        title: "Access Restricted",
+        description: "Changing subscriber status is restricted for Protocol Admin users.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (action === 'message') {
+      toast({
+        title: "Send Message",
+        description: `Opening communication with ${subscriber.email}`,
+      });
+    } else {
+      const newStatus = !subscriber.subscribed;
+      setSubscribers(prev => 
+        prev.map(s => 
+          s.id === subscriber.id 
+            ? { ...s, subscribed: newStatus }
+            : s
+        )
+      );
+      toast({
+        title: "Status Updated",
+        description: `${subscriber.email} is now ${newStatus ? 'subscribed' : 'unsubscribed'}`,
+      });
+    }
+  };
+
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-serif font-bold mb-4 text-vip-black">VVIP Subscribers</h1>
+    <div className="max-w-4xl mx-auto p-6">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-3xl font-serif font-bold text-vip-black">
+            VVIP Subscribers {isProtocolAdmin && '(Limited Access)'}
+          </h1>
+          <p className="text-vip-gold/80 mt-2">
+            {isProtocolAdmin 
+              ? 'View and communicate with subscribers (status changes restricted)'
+              : 'Manage your VVIP subscriber database'
+            }
+          </p>
+        </div>
+        {isProtocolAdmin && (
+          <div className="flex items-center text-vip-gold/60">
+            <Lock className="h-4 w-4 mr-2" />
+            <span className="text-sm">Limited Access</span>
+          </div>
+        )}
+      </div>
       
       <Card className="vip-glass border-vip-gold/20">
         <CardHeader>
@@ -60,42 +116,68 @@ const Subscribers = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead>
-                <tr className="bg-vip-gold/10">
-                  <th className="px-4 py-2 text-left">#</th>
-                  <th className="px-4 py-2 text-left">Email</th>
-                  <th className="px-4 py-2 text-left">Status</th>
-                  <th className="px-4 py-2 text-left">Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredSubscribers.map((subscriber, idx) => (
-                  <tr key={subscriber.id} className="border-t border-vip-gold/10">
-                    <td className="px-4 py-2">{idx + 1}</td>
-                    <td className="px-4 py-2">{subscriber.email}</td>
-                    <td className="px-4 py-2">
-                      {subscriber.subscribed ? (
-                        <Badge className="bg-green-100 text-green-800">SUBSCRIBED</Badge>
-                      ) : (
-                        <Badge className="bg-red-100 text-red-800">UNSUBSCRIBED</Badge>
-                      )}
-                    </td>
-                    <td className="px-4 py-2">
-                      {new Date(subscriber.created_at).toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
-                {filteredSubscribers.length === 0 && (
-                  <tr>
-                    <td colSpan={4} className="text-center text-vip-gold/60 py-8">
-                      {searchTerm ? 'No subscribers match your search.' : 'No subscribers yet.'}
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+          <div className="space-y-4">
+            {filteredSubscribers.map((subscriber) => (
+              <div key={subscriber.id} className="flex items-center justify-between p-4 border border-vip-gold/20 rounded-lg">
+                <div className="flex-1">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-vip-gold/20 rounded-full flex items-center justify-center">
+                      <Mail className="h-4 w-4 text-vip-gold" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-vip-black">{subscriber.email}</p>
+                      <p className="text-sm text-vip-gold/60">
+                        Joined: {new Date(subscriber.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Badge className={subscriber.subscribed ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
+                    {subscriber.subscribed ? "SUBSCRIBED" : "UNSUBSCRIBED"}
+                  </Badge>
+                  <div className="flex space-x-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleSubscriberAction(subscriber, 'message')}
+                      className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+                    >
+                      <Mail className="h-3 w-3 mr-1" />
+                      Message
+                    </Button>
+                    {!isProtocolAdmin && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleSubscriberAction(subscriber, 'toggle')}
+                        className={subscriber.subscribed 
+                          ? "border-red-300 text-red-600 hover:bg-red-50"
+                          : "border-green-300 text-green-600 hover:bg-green-50"
+                        }
+                      >
+                        {subscriber.subscribed ? (
+                          <>
+                            <UserX className="h-3 w-3 mr-1" />
+                            Unsubscribe
+                          </>
+                        ) : (
+                          <>
+                            <UserCheck className="h-3 w-3 mr-1" />
+                            Subscribe
+                          </>
+                        )}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+            {filteredSubscribers.length === 0 && (
+              <div className="text-center text-vip-gold/60 py-8">
+                {searchTerm ? 'No subscribers match your search.' : 'No subscribers yet.'}
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
