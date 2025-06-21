@@ -23,11 +23,8 @@ import {
   Send,
   Edit
 } from 'lucide-react';
-import { AddClientModal } from '@/components/modals/AddClientModal';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { useRealtimeQuery } from '@/hooks/useRealtimeQuery';
 
 interface Client {
   id: string;
@@ -54,7 +51,6 @@ const GenerateQuote = () => {
   const [discountAmount, setDiscountAmount] = useState(0);
   const [discountType, setDiscountType] = useState<'percentage' | 'fixed'>('percentage');
   const [expiryDate, setExpiryDate] = useState('');
-  const [showAddClient, setShowAddClient] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newItemName, setNewItemName] = useState('');
   const [newItemQuantity, setNewItemQuantity] = useState(1);
@@ -62,8 +58,30 @@ const GenerateQuote = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Fetch existing clients from database
-  const { data: clientsData, isLoading: clientsLoading } = useRealtimeQuery("clients");
+  // Mock clients data
+  const [clients] = useState<Client[]>([
+    {
+      id: '1',
+      full_name: 'Ambassador Johnson',
+      email: 'ambassador.johnson@embassy.com',
+      phone: '+254-123-456-789',
+      company: 'Embassy of Excellence'
+    },
+    {
+      id: '2',
+      full_name: 'Minister Chen',
+      email: 'minister.chen@gov.example',
+      phone: '+254-987-654-321',
+      company: 'Government Office'
+    },
+    {
+      id: '3',
+      full_name: 'Sarah Williams',
+      email: 'sarah.williams@megacorp.com',
+      phone: '+254-555-123-456',
+      company: 'MegaCorp International'
+    }
+  ]);
 
   const serviceCategories = [
     {
@@ -169,40 +187,8 @@ const GenerateQuote = () => {
     setIsSubmitting(true);
 
     try {
-      const { data, error } = await supabase
-        .from('quotes')
-        .insert([
-          {
-            requester_name: clientName,
-            requested_service: serviceType,
-            amount: calculateTotal(),
-            quote_details: JSON.stringify({
-              lineItems,
-              taxRate,
-              discountAmount,
-              discountType,
-              subtotal: calculateSubtotal(),
-              discount: calculateDiscount(),
-              tax: calculateTax(),
-              total: calculateTotal(),
-              expiryDate,
-              notes: quoteDetails
-            }),
-            status: isDraft ? 'draft' : 'pending'
-          }
-        ])
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error creating quote:', error);
-        toast({
-          title: "Error",
-          description: "Failed to generate quote. Please try again.",
-          variant: "destructive"
-        });
-        return;
-      }
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       toast({
         title: isDraft ? "Quote Saved as Draft" : "Quote Generated",
@@ -218,7 +204,7 @@ const GenerateQuote = () => {
       setDiscountAmount(0);
       setExpiryDate('');
 
-      // Navigate to quotes management page
+      // Navigate to bookings page
       navigate('/bookings');
 
     } catch (error) {
@@ -236,35 +222,6 @@ const GenerateQuote = () => {
   const handleCancel = () => {
     navigate('/bookings');
   };
-
-  const handleClientAdded = (newClient: Client) => {
-    setClientName(newClient.full_name);
-    toast({
-      title: "Client Added",
-      description: `${newClient.full_name} has been added to your client list.`,
-    });
-  };
-
-  // Type guard for safe client data usage
-  const getValidClients = (): Client[] => {
-    if (!Array.isArray(clientsData) || clientsData.length === 0) {
-      return [];
-    }
-    
-    const firstItem = clientsData[0];
-    
-    if (!firstItem || typeof firstItem !== 'object') {
-      return [];
-    }
-    
-    if (firstItem && typeof firstItem === 'object' && 'id' in firstItem && 'full_name' in firstItem) {
-      return clientsData as unknown as Client[];
-    }
-    
-    return [];
-  };
-
-  const validClients = getValidClients();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4">
@@ -309,42 +266,24 @@ const GenerateQuote = () => {
                     <Label htmlFor="clientName" className="text-sm font-medium text-gray-700">
                       Client Name *
                     </Label>
-                    <div className="flex gap-3">
-                      <div className="flex-1">
-                        <Select value={clientName} onValueChange={setClientName}>
-                          <SelectTrigger className="bg-white border-gray-300 focus:border-blue-500">
-                            <SelectValue placeholder="Select client" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-white border-gray-200 z-50">
-                            {clientsLoading ? (
-                              <SelectItem value="loading" disabled>Loading clients...</SelectItem>
-                            ) : validClients.length > 0 ? (
-                              validClients.map((client: Client) => (
-                                <SelectItem key={client.id} value={client.full_name} className="hover:bg-blue-50">
-                                  <div className="flex items-center">
-                                    <User className="h-4 w-4 mr-2 text-blue-600" />
-                                    <div>
-                                      <div className="font-medium">{client.full_name}</div>
-                                      {client.email && <div className="text-xs text-gray-500">{client.email}</div>}
-                                    </div>
-                                  </div>
-                                </SelectItem>
-                              ))
-                            ) : (
-                              <SelectItem value="no-clients" disabled>No clients found</SelectItem>
-                            )}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <Button
-                        type="button"
-                        onClick={() => setShowAddClient(true)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4"
-                      >
-                        <Plus className="h-4 w-4 mr-1" />
-                        Add New
-                      </Button>
-                    </div>
+                    <Select value={clientName} onValueChange={setClientName}>
+                      <SelectTrigger className="bg-white border-gray-300 focus:border-blue-500">
+                        <SelectValue placeholder="Select client" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white border-gray-200 z-50">
+                        {clients.map((client: Client) => (
+                          <SelectItem key={client.id} value={client.full_name} className="hover:bg-blue-50">
+                            <div className="flex items-center">
+                              <User className="h-4 w-4 mr-2 text-blue-600" />
+                              <div>
+                                <div className="font-medium">{client.full_name}</div>
+                                {client.email && <div className="text-xs text-gray-500">{client.email}</div>}
+                              </div>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   {/* Service Type */}
@@ -583,97 +522,57 @@ const GenerateQuote = () => {
                       <span className="font-medium">{formatCurrency(calculateSubtotal())}</span>
                     </div>
                     {discountAmount > 0 && (
-                      <div className="flex justify-between text-sm text-green-600">
-                        <span>Discount ({discountType === 'percentage' ? `${discountAmount}%` : 'Fixed'})</span>
-                        <span>-{formatCurrency(calculateDiscount())}</span>
-                      </div>
-                    )}
-                    {taxRate > 0 && (
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Tax ({taxRate}%)</span>
-                        <span className="font-medium">{formatCurrency(calculateTax())}</span>
+                        <span className="text-gray-600">Discount</span>
+                        <span className="font-medium text-red-600">-{formatCurrency(calculateDiscount())}</span>
                       </div>
                     )}
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Tax ({taxRate}%)</span>
+                      <span className="font-medium">{formatCurrency(calculateTax())}</span>
+                    </div>
                     <Separator />
-                    <div className="flex justify-between font-bold text-lg">
-                      <span>Total</span>
-                      <span className="text-blue-600">{formatCurrency(calculateTotal())}</span>
+                    <div className="flex justify-between">
+                      <span className="font-semibold text-gray-900">Total</span>
+                      <span className="font-bold text-lg text-blue-600">{formatCurrency(calculateTotal())}</span>
                     </div>
                   </div>
 
-                  {/* Expiry Date */}
-                  {expiryDate && (
-                    <div>
-                      <h4 className="font-medium text-gray-900">Expires</h4>
-                      <p className="text-sm text-gray-600">{new Date(expiryDate).toLocaleDateString()}</p>
-                    </div>
-                  )}
-
-                  {/* Status Badge */}
-                  <div className="pt-4">
-                    <Badge variant="outline" className="w-full justify-center">
-                      Draft Quote
-                    </Badge>
+                  {/* Actions */}
+                  <div className="space-y-2 pt-4">
+                    <Button
+                      onClick={(e) => handleSubmit(e, false)}
+                      disabled={isSubmitting || !clientName || !serviceType || lineItems.length === 0}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="h-4 w-4 mr-2" />
+                          Generate Quote
+                        </>
+                      )}
+                    </Button>
+                    
+                    <Button
+                      onClick={(e) => handleSubmit(e, true)}
+                      disabled={isSubmitting}
+                      variant="outline"
+                      className="w-full border-gray-300 text-gray-700 hover:bg-gray-50"
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Save as Draft
+                    </Button>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
         </div>
-
-        {/* Action Buttons */}
-        <Card className="bg-white shadow-sm border-0">
-          <CardContent className="p-6">
-            <div className="flex justify-between">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleCancel}
-                disabled={isSubmitting}
-                className="px-6 border-gray-300 text-gray-700 hover:bg-gray-50"
-              >
-                Cancel
-              </Button>
-              <div className="flex gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={(e) => handleSubmit(e, true)}
-                  disabled={isSubmitting}
-                  className="px-6 border-blue-300 text-blue-700 hover:bg-blue-50"
-                >
-                  <Save className="h-4 w-4 mr-2" />
-                  Save as Draft
-                </Button>
-                <Button
-                  type="button"
-                  onClick={(e) => handleSubmit(e, false)}
-                  disabled={isSubmitting}
-                  className="px-6 bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <Calculator className="h-4 w-4 mr-2" />
-                      Generate Quote
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Add Client Modal */}
-        <AddClientModal
-          open={showAddClient}
-          onOpenChange={setShowAddClient}
-          onClientAdded={handleClientAdded}
-        />
       </div>
     </div>
   );

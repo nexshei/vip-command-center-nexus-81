@@ -1,6 +1,5 @@
 
 import React, { useState } from "react";
-import { useRealtimeQuery } from "@/hooks/useRealtimeQuery";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,46 +7,51 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Search, Mail, MessageSquare, Trash2, Eye, Reply } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 
 const ContactSubmissions = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const { data: submissions, isLoading, error, refetch } = useRealtimeQuery("contact_submissions", {
-    orderBy: "created_at",
-  });
   const { toast } = useToast();
 
-  const filteredSubmissions = (submissions || []).filter((submission: any) =>
+  // Mock contact submissions data
+  const [submissions] = useState([
+    {
+      id: '1',
+      name: 'Ambassador Johnson',
+      email: 'ambassador.johnson@embassy.com',
+      subject: 'VIP Protocol Meeting Request',
+      message: 'We would like to schedule a high-level diplomatic meeting for next month. Please provide available dates and protocol requirements.',
+      created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: '2',
+      name: 'Sarah Williams',
+      email: 'sarah.williams@megacorp.com',
+      subject: 'Corporate Event Planning',
+      message: 'Our company is planning a major corporate event and requires VIP protocol services. Could you send us a detailed quote?',
+      created_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: '3',
+      name: 'Minister Chen',
+      email: 'minister.chen@gov.example',
+      subject: 'State Reception Organization',
+      message: 'We need assistance organizing a state reception for visiting dignitaries. What services do you provide for such events?',
+      created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+    }
+  ]);
+
+  const filteredSubmissions = submissions.filter((submission: any) =>
     submission.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     submission.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     submission.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     submission.message?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleDeleteSubmission = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this contact submission?')) return;
-
-    try {
-      const { error } = await supabase
-        .from('contact_submissions')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Submission Deleted",
-        description: "The contact submission has been deleted successfully.",
-      });
-      
-      refetch();
-    } catch (error: any) {
-      toast({
-        title: "Delete Failed",
-        description: error.message || "An error occurred while deleting.",
-        variant: "destructive"
-      });
-    }
+  const handleDeleteSubmission = (id: string) => {
+    toast({
+      title: "Demo Mode",
+      description: "In a real application, this would delete the contact submission.",
+    });
   };
 
   const handleViewDetails = (submission: any) => {
@@ -58,7 +62,6 @@ const ContactSubmissions = () => {
   };
 
   const handleReply = (submission: any) => {
-    // Create a mailto link for quick reply
     const mailtoLink = `mailto:${submission.email}?subject=Re: ${submission.subject || 'Your Contact Submission'}&body=Dear ${submission.name},%0D%0A%0D%0AThank you for contacting us.%0D%0A%0D%0ABest regards,%0D%0AVVIP Protocol Team`;
     window.open(mailtoLink, '_blank');
     
@@ -122,7 +125,7 @@ const ContactSubmissions = () => {
           </CardHeader>
           <CardContent>
             <Button 
-              onClick={() => refetch()} 
+              onClick={() => toast({ title: "Demo Mode", description: "This is demo data for display purposes." })} 
               variant="outline" 
               size="sm"
               className="border-vip-gold text-vip-gold hover:bg-vip-gold/10"
@@ -156,129 +159,114 @@ const ContactSubmissions = () => {
         <CardHeader>
           <CardTitle className="text-vip-gold flex items-center">
             <Mail className="h-5 w-5 mr-2" />
-            All Contact Messages from Database
+            All Contact Messages (Demo Data)
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading && (
-            <div className="py-8 text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-vip-gold mx-auto mb-4"></div>
-              <p className="text-vip-gold/70">Loading contact submissions from database...</p>
-            </div>
-          )}
-          
-          {error && (
-            <div className="py-6 text-center text-red-500">
-              Error loading submissions: {error.message}
-            </div>
-          )}
-
-          {!isLoading && !error && (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>#</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Subject</TableHead>
-                    <TableHead>Message Preview</TableHead>
-                    <TableHead>Date Received</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredSubmissions.map((submission: any, idx: number) => (
-                    <TableRow key={submission.id} className="hover:bg-vip-gold/5">
-                      <TableCell className="font-medium">{idx + 1}</TableCell>
-                      <TableCell className="font-medium">{submission.name}</TableCell>
-                      <TableCell>
-                        <a 
-                          href={`mailto:${submission.email}`} 
-                          className="text-vip-gold hover:underline"
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>#</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Subject</TableHead>
+                  <TableHead>Message Preview</TableHead>
+                  <TableHead>Date Received</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredSubmissions.map((submission: any, idx: number) => (
+                  <TableRow key={submission.id} className="hover:bg-vip-gold/5">
+                    <TableCell className="font-medium">{idx + 1}</TableCell>
+                    <TableCell className="font-medium">{submission.name}</TableCell>
+                    <TableCell>
+                      <a 
+                        href={`mailto:${submission.email}`} 
+                        className="text-vip-gold hover:underline"
+                      >
+                        {submission.email}
+                      </a>
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {submission.subject || "No Subject"}
+                    </TableCell>
+                    <TableCell className="max-w-xs">
+                      <div className="truncate text-sm text-gray-600">
+                        {submission.message?.substring(0, 80)}
+                        {submission.message?.length > 80 && "..."}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm">
+                        {submission.created_at
+                          ? new Date(submission.created_at).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })
+                          : "-"}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <Button
+                          onClick={() => handleViewDetails(submission)}
+                          variant="outline"
+                          size="sm"
+                          title="View Details"
                         >
-                          {submission.email}
-                        </a>
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {submission.subject || "No Subject"}
-                      </TableCell>
-                      <TableCell className="max-w-xs">
-                        <div className="truncate text-sm text-gray-600">
-                          {submission.message?.substring(0, 80)}
-                          {submission.message?.length > 80 && "..."}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm">
-                          {submission.created_at
-                            ? new Date(submission.created_at).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })
-                            : "-"}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          <Button
-                            onClick={() => handleViewDetails(submission)}
-                            variant="outline"
-                            size="sm"
-                            title="View Details"
-                          >
-                            <Eye className="h-3 w-3" />
-                          </Button>
-                          <Button
-                            onClick={() => handleReply(submission)}
-                            variant="outline"
-                            size="sm"
-                            title="Reply via Email"
-                            className="border-green-300 text-green-600 hover:bg-green-50"
-                          >
-                            <Reply className="h-3 w-3" />
-                          </Button>
-                          <Button
-                            onClick={() => handleDeleteSubmission(submission.id)}
-                            variant="outline"
-                            size="sm"
-                            title="Delete Submission"
-                            className="border-red-300 text-red-600 hover:bg-red-50"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                          <Eye className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          onClick={() => handleReply(submission)}
+                          variant="outline"
+                          size="sm"
+                          title="Reply via Email"
+                          className="border-green-300 text-green-600 hover:bg-green-50"
+                        >
+                          <Reply className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          onClick={() => handleDeleteSubmission(submission.id)}
+                          variant="outline"
+                          size="sm"
+                          title="Delete Submission"
+                          className="border-red-300 text-red-600 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
 
-              {filteredSubmissions.length === 0 && !isLoading && (
-                <div className="text-center py-12">
-                  <MessageSquare className="h-12 w-12 text-vip-gold/30 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-vip-black mb-2">No Contact Submissions</h3>
-                  <p className="text-vip-gold/60">
-                    {searchTerm 
-                      ? "No messages match your search criteria." 
-                      : "No contact form submissions have been received yet."}
-                  </p>
-                  {searchTerm && (
-                    <Button
-                      onClick={() => setSearchTerm('')}
-                      variant="outline"
-                      className="mt-4 border-vip-gold text-vip-gold hover:bg-vip-gold/10"
-                    >
-                      Clear Search
-                    </Button>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
+            {filteredSubmissions.length === 0 && (
+              <div className="text-center py-12">
+                <MessageSquare className="h-12 w-12 text-vip-gold/30 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-vip-black mb-2">No Contact Submissions</h3>
+                <p className="text-vip-gold/60">
+                  {searchTerm 
+                    ? "No messages match your search criteria." 
+                    : "No contact form submissions have been received yet."}
+                </p>
+                {searchTerm && (
+                  <Button
+                    onClick={() => setSearchTerm('')}
+                    variant="outline"
+                    className="mt-4 border-vip-gold text-vip-gold hover:bg-vip-gold/10"
+                  >
+                    Clear Search
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>

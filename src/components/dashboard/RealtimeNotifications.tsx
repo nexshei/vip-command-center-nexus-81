@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useRealtimeQuery } from '@/hooks/useRealtimeQuery';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Bell, 
@@ -19,52 +18,42 @@ const RealtimeNotifications = () => {
   const { toast } = useToast();
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   
-  // Monitor all real-time data
-  const { data: bookings } = useRealtimeQuery("bookings", { orderBy: "created_at" });
-  const { data: contacts } = useRealtimeQuery("contact_submissions", { orderBy: "created_at" });
-  const { data: quotes } = useRealtimeQuery("quotes", { orderBy: "created_at" });
-
-  // Get recent items (last 24 hours)
-  const getRecentItems = (items: any[], hours = 24) => {
-    if (!items) return [];
-    const cutoff = new Date();
-    cutoff.setHours(cutoff.getHours() - hours);
-    
-    return items.filter(item => 
-      new Date(item.created_at) > cutoff
-    ).slice(0, 5); // Show max 5 recent items
-  };
-
-  const recentBookings = getRecentItems(bookings);
-  const recentContacts = getRecentItems(contacts);
-  const recentQuotes = getRecentItems(quotes);
-
-  // Show toast notification for new items
-  useEffect(() => {
-    if (recentBookings.length > 0) {
-      const newest = recentBookings[0];
-      const createdTime = new Date(newest.created_at);
-      if (createdTime > lastUpdate) {
-        toast({
-          title: "New Booking Received!",
-          description: `${newest.client_name} - ${newest.service_type}`,
-        });
-      }
+  // Mock data for recent activity
+  const [recentBookings] = useState([
+    {
+      id: '1',
+      client_name: 'Ambassador Johnson',
+      service_type: 'Diplomatic Meeting',
+      status: 'confirmed',
+      created_at: new Date(Date.now() - 30 * 60 * 1000).toISOString() // 30 minutes ago
+    },
+    {
+      id: '2',
+      client_name: 'Minister Chen',
+      service_type: 'State Reception',
+      status: 'pending',
+      created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() // 2 hours ago
     }
-  }, [recentBookings]);
+  ]);
 
-  useEffect(() => {
-    if (recentContacts.length > 0) {
-      const newest = recentContacts[0];
-      const createdTime = new Date(newest.created_at);
-      if (createdTime > lastUpdate) {
-        toast({
-          title: "New Contact Message",
-          description: `From ${newest.name}: ${newest.subject}`,
-        });
-      }
+  const [recentContacts] = useState([
+    {
+      id: '1',
+      name: 'Sarah Williams',
+      subject: 'VIP Transport Request',
+      created_at: new Date(Date.now() - 45 * 60 * 1000).toISOString() // 45 minutes ago
     }
-  }, [recentContacts]);
+  ]);
+
+  const [recentQuotes] = useState([
+    {
+      id: '1',
+      requester_name: 'Embassy of France',
+      requested_service: 'Corporate Event',
+      amount: 150000,
+      created_at: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString() // 1 hour ago
+    }
+  ]);
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -88,7 +77,7 @@ const RealtimeNotifications = () => {
             Recent Activity
           </div>
           <Badge variant="outline" className="text-xs">
-            Live Updates
+            Demo Mode
           </Badge>
         </CardTitle>
       </CardHeader>
@@ -163,28 +152,18 @@ const RealtimeNotifications = () => {
           </div>
         )}
 
-        {/* No recent activity */}
-        {recentBookings.length === 0 && recentContacts.length === 0 && recentQuotes.length === 0 && (
-          <div className="text-center py-6 text-gray-500">
-            <Clock className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-            <p className="text-sm">No recent activity</p>
-            <p className="text-xs">New bookings and messages will appear here</p>
-          </div>
-        )}
-
         {/* Quick action to view all */}
-        {(recentBookings.length > 0 || recentContacts.length > 0 || recentQuotes.length > 0) && (
-          <div className="pt-2 border-t">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="w-full text-vip-gold border-vip-gold/30 hover:bg-vip-gold/10"
-            >
-              <Eye className="h-3 w-3 mr-1" />
-              View All Activity
-            </Button>
-          </div>
-        )}
+        <div className="pt-2 border-t">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="w-full text-vip-gold border-vip-gold/30 hover:bg-vip-gold/10"
+            onClick={() => toast({ title: "Demo Mode", description: "This is demo data for display purposes." })}
+          >
+            <Eye className="h-3 w-3 mr-1" />
+            View All Activity
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

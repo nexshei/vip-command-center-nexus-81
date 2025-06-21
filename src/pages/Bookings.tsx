@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,8 +10,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Search, Plus, Calendar, Clock, User, MapPin, Eye, Edit, Trash2, FileText, DollarSign, TrendingUp, History, Check, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { useRealtimeQuery } from "@/hooks/useRealtimeQuery";
 import { NewBookingModal } from '@/components/modals/NewBookingModal';
 import { ViewEventDetailsModal } from '@/components/modals/ViewEventDetailsModal';
 import { EditEventModal } from '@/components/modals/EditEventModal';
@@ -24,11 +23,39 @@ const Bookings = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Fetch live data from Supabase
-  const { data: bookingsData, isLoading: bookingsLoading, error: bookingsError, refetch } = useRealtimeQuery("bookings", { orderBy: "created_at" });
-
-  // Use real data or fallback to empty arrays
-  const bookings = bookingsData || [];
+  // Mock bookings data
+  const [bookings] = useState([
+    {
+      id: '1',
+      client_name: 'Ambassador Johnson',
+      service_type: 'Diplomatic Meeting',
+      status: 'confirmed',
+      approval_status: 'approved',
+      scheduled_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
+      revenue: 150000,
+      created_at: new Date().toISOString()
+    },
+    {
+      id: '2',
+      client_name: 'Minister Chen',
+      service_type: 'State Reception',
+      status: 'pending',
+      approval_status: 'pending',
+      scheduled_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(), // 14 days from now
+      revenue: 250000,
+      created_at: new Date().toISOString()
+    },
+    {
+      id: '3',
+      client_name: 'Sarah Williams',
+      service_type: 'Corporate Event',
+      status: 'completed',
+      approval_status: 'approved',
+      scheduled_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days ago
+      revenue: 180000,
+      created_at: new Date().toISOString()
+    }
+  ]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -77,48 +104,18 @@ const Bookings = () => {
     return new Date(booking.scheduled_at) < now;
   });
 
-  const handleApproveEvent = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('bookings')
-        .update({ approval_status: 'approved' })
-        .eq('id', id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Event Approved",
-        description: "The event has been approved successfully.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Approval Failed",
-        description: error.message || "An error occurred while approving.",
-        variant: "destructive"
-      });
-    }
+  const handleApproveEvent = (id: string) => {
+    toast({
+      title: "Demo Mode",
+      description: "In a real application, this would approve the event.",
+    });
   };
 
-  const handleRejectEvent = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('bookings')
-        .update({ approval_status: 'rejected' })
-        .eq('id', id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Event Rejected",
-        description: "The event has been rejected.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Rejection Failed",
-        description: error.message || "An error occurred while rejecting.",
-        variant: "destructive"
-      });
-    }
+  const handleRejectEvent = (id: string) => {
+    toast({
+      title: "Demo Mode",
+      description: "In a real application, this would reject the event.",
+    });
   };
 
   const handleViewItem = (event: any) => {
@@ -131,32 +128,18 @@ const Bookings = () => {
     setEditModalOpen(true);
   };
 
-  const handleDeleteItem = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this event?')) return;
-
-    try {
-      const { error } = await supabase
-        .from('bookings')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Event Deleted",
-        description: "The event has been deleted successfully.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Delete Failed",
-        description: error.message || "An error occurred while deleting.",
-        variant: "destructive"
-      });
-    }
+  const handleDeleteItem = (id: string) => {
+    toast({
+      title: "Demo Mode",
+      description: "In a real application, this would delete the event.",
+    });
   };
 
   const handleEventUpdated = () => {
-    refetch();
+    toast({
+      title: "Demo Mode",
+      description: "Event updated successfully in demo mode.",
+    });
   };
 
   // Calculate total revenue from completed events
@@ -287,103 +270,93 @@ const Bookings = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {bookingsLoading ? (
-                <div className="text-center py-8">
-                  <p className="text-vip-gold/60">Loading upcoming events...</p>
-                </div>
-              ) : bookingsError ? (
-                <div className="text-center py-8">
-                  <p className="text-red-500">Error loading events: {bookingsError.message}</p>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Client</TableHead>
-                      <TableHead>Service</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Time</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Approval</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {upcomingEvents.map((event: any) => {
-                      const { date, time } = formatDateTime(event.scheduled_at);
-                      return (
-                        <TableRow key={event.id}>
-                          <TableCell className="font-medium">{event.client_name || 'No client name'}</TableCell>
-                          <TableCell>{event.service_type || 'Not specified'}</TableCell>
-                          <TableCell>{date}</TableCell>
-                          <TableCell>{time}</TableCell>
-                          <TableCell>
-                            <Badge className={getStatusColor(event.status)}>
-                              {event.status?.charAt(0).toUpperCase() + event.status?.slice(1) || 'Unknown'}
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Client</TableHead>
+                    <TableHead>Service</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Time</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Approval</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {upcomingEvents.map((event: any) => {
+                    const { date, time } = formatDateTime(event.scheduled_at);
+                    return (
+                      <TableRow key={event.id}>
+                        <TableCell className="font-medium">{event.client_name || 'No client name'}</TableCell>
+                        <TableCell>{event.service_type || 'Not specified'}</TableCell>
+                        <TableCell>{date}</TableCell>
+                        <TableCell>{time}</TableCell>
+                        <TableCell>
+                          <Badge className={getStatusColor(event.status)}>
+                            {event.status?.charAt(0).toUpperCase() + event.status?.slice(1) || 'Unknown'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Badge className={getApprovalStatusColor(event.approval_status)}>
+                              {event.approval_status?.charAt(0).toUpperCase() + event.approval_status?.slice(1) || 'Unknown'}
                             </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Badge className={getApprovalStatusColor(event.approval_status)}>
-                                {event.approval_status?.charAt(0).toUpperCase() + event.approval_status?.slice(1) || 'Unknown'}
-                              </Badge>
-                              {event.approval_status === 'pending' && (
-                                <div className="flex gap-1">
-                                  <Button 
-                                    onClick={() => handleApproveEvent(event.id)}
-                                    variant="outline" 
-                                    size="sm"
-                                    className="border-green-300 text-green-600 hover:bg-green-50"
-                                  >
-                                    <Check className="h-3 w-3" />
-                                  </Button>
-                                  <Button 
-                                    onClick={() => handleRejectEvent(event.id)}
-                                    variant="outline" 
-                                    size="sm"
-                                    className="border-red-300 text-red-600 hover:bg-red-50"
-                                  >
-                                    <X className="h-3 w-3" />
-                                  </Button>
-                                </div>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex space-x-2">
-                              <Button 
-                                onClick={() => handleViewItem(event)}
-                                variant="outline" 
-                                size="sm"
-                                className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
-                              >
-                                <Eye className="h-3 w-3" />
-                              </Button>
-                              <Button 
-                                onClick={() => handleEditItem(event)}
-                                variant="outline" 
-                                size="sm"
-                                className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
-                              >
-                                <Edit className="h-3 w-3" />
-                              </Button>
-                              <Button 
-                                onClick={() => handleDeleteItem(event.id)}
-                                variant="outline" 
-                                size="sm"
-                                className="border-red-300 text-red-600 hover:bg-red-50"
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              )}
-              {!bookingsLoading && !bookingsError && upcomingEvents.length === 0 && (
+                            {event.approval_status === 'pending' && (
+                              <div className="flex gap-1">
+                                <Button 
+                                  onClick={() => handleApproveEvent(event.id)}
+                                  variant="outline" 
+                                  size="sm"
+                                  className="border-green-300 text-green-600 hover:bg-green-50"
+                                >
+                                  <Check className="h-3 w-3" />
+                                </Button>
+                                <Button 
+                                  onClick={() => handleRejectEvent(event.id)}
+                                  variant="outline" 
+                                  size="sm"
+                                  className="border-red-300 text-red-600 hover:bg-red-50"
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex space-x-2">
+                            <Button 
+                              onClick={() => handleViewItem(event)}
+                              variant="outline" 
+                              size="sm"
+                              className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+                            >
+                              <Eye className="h-3 w-3" />
+                            </Button>
+                            <Button 
+                              onClick={() => handleEditItem(event)}
+                              variant="outline" 
+                              size="sm"
+                              className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            <Button 
+                              onClick={() => handleDeleteItem(event.id)}
+                              variant="outline" 
+                              size="sm"
+                              className="border-red-300 text-red-600 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+              {upcomingEvents.length === 0 && (
                 <div className="text-center py-8">
                   <p className="text-vip-gold/60">No upcoming events found. Add a new event to get started.</p>
                 </div>
@@ -401,69 +374,59 @@ const Bookings = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {bookingsLoading ? (
-                <div className="text-center py-8">
-                  <p className="text-vip-gold/60">Loading previous events...</p>
-                </div>
-              ) : bookingsError ? (
-                <div className="text-center py-8">
-                  <p className="text-red-500">Error loading events: {bookingsError.message}</p>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Client</TableHead>
-                      <TableHead>Service</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Revenue</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {previousEvents.map((event: any) => {
-                      const { date } = formatDateTime(event.scheduled_at);
-                      return (
-                        <TableRow key={event.id}>
-                          <TableCell className="font-medium">{event.client_name || 'No client name'}</TableCell>
-                          <TableCell>{event.service_type || 'Not specified'}</TableCell>
-                          <TableCell>{date}</TableCell>
-                          <TableCell className="font-medium text-green-600">
-                            KSH {(event.revenue || 0).toLocaleString()}
-                          </TableCell>
-                          <TableCell>
-                            <Badge className={getStatusColor(event.status)}>
-                              {event.status?.charAt(0).toUpperCase() + event.status?.slice(1) || 'Unknown'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex space-x-2">
-                              <Button 
-                                onClick={() => handleViewItem(event)}
-                                variant="outline" 
-                                size="sm"
-                                className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
-                              >
-                                <Eye className="h-3 w-3" />
-                              </Button>
-                              <Button 
-                                onClick={() => handleViewItem(event)}
-                                variant="outline" 
-                                size="sm"
-                                className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
-                              >
-                                <FileText className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              )}
-              {!bookingsLoading && !bookingsError && previousEvents.length === 0 && (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Client</TableHead>
+                    <TableHead>Service</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Revenue</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {previousEvents.map((event: any) => {
+                    const { date } = formatDateTime(event.scheduled_at);
+                    return (
+                      <TableRow key={event.id}>
+                        <TableCell className="font-medium">{event.client_name || 'No client name'}</TableCell>
+                        <TableCell>{event.service_type || 'Not specified'}</TableCell>
+                        <TableCell>{date}</TableCell>
+                        <TableCell className="font-medium text-green-600">
+                          KSH {(event.revenue || 0).toLocaleString()}
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={getStatusColor(event.status)}>
+                            {event.status?.charAt(0).toUpperCase() + event.status?.slice(1) || 'Unknown'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex space-x-2">
+                            <Button 
+                              onClick={() => handleViewItem(event)}
+                              variant="outline" 
+                              size="sm"
+                              className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+                            >
+                              <Eye className="h-3 w-3" />
+                            </Button>
+                            <Button 
+                              onClick={() => handleViewItem(event)}
+                              variant="outline" 
+                              size="sm"
+                              className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+                            >
+                              <FileText className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+              {previousEvents.length === 0 && (
                 <div className="text-center py-8">
                   <p className="text-vip-gold/60">No previous events found.</p>
                 </div>

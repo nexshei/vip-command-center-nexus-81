@@ -15,7 +15,6 @@ import {
   Filter,
   RefreshCw
 } from 'lucide-react';
-import { useRealtimeQuery } from "@/hooks/useRealtimeQuery";
 import { useToast } from '@/hooks/use-toast';
 import {
   LineChart,
@@ -38,76 +37,37 @@ const Analytics = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { toast } = useToast();
 
-  // Fetch real data from multiple tables
-  const { data: bookingsData, isLoading: bookingsLoading } = useRealtimeQuery("bookings");
-  const { data: clientsData, isLoading: clientsLoading } = useRealtimeQuery("clients");
-  const { data: quotesData, isLoading: quotesLoading } = useRealtimeQuery("quotes");
-  const { data: analyticsData, isLoading: analyticsLoading } = useRealtimeQuery("analytics");
-
-  const isLoading = bookingsLoading || clientsLoading || quotesLoading || analyticsLoading;
-
-  // Process data for analytics
-  const processedData = React.useMemo(() => {
-    if (!bookingsData || !clientsData || !quotesData) {
-      return {
-        totalBookings: 0,
-        totalClients: 0,
-        totalRevenue: 0,
-        monthlyGrowth: 0,
-        bookingTrends: [],
-        serviceDist: [],
-        statusDist: []
-      };
-    }
-
-    const totalBookings = bookingsData.length;
-    const totalClients = clientsData.length;
-    const totalRevenue = quotesData.reduce((sum: number, quote: any) => sum + (parseFloat(quote.amount) || 0), 0);
-
-    // Calculate monthly growth (mock calculation)
-    const monthlyGrowth = 12.5;
-
-    // Booking trends (last 7 days)
-    const bookingTrends = Array.from({ length: 7 }, (_, i) => {
-      const date = new Date();
-      date.setDate(date.getDate() - (6 - i));
-      const dayBookings = Math.floor(Math.random() * 5) + 1;
-      return {
-        date: date.toLocaleDateString('en-US', { weekday: 'short' }),
-        bookings: dayBookings,
-        revenue: dayBookings * 50000
-      };
-    });
-
-    // Service distribution
-    const serviceTypes = ['Diplomatic Meeting', 'Corporate Event', 'State Reception', 'Private Security', 'VIP Transport'];
-    const serviceDist = serviceTypes.map(service => ({
-      name: service,
-      value: Math.floor(Math.random() * 20) + 5,
-      color: `hsl(${Math.random() * 360}, 70%, 50%)`
-    }));
-
-    // Status distribution
-    const statusDist = [
-      { name: 'Confirmed', value: Math.floor(totalBookings * 0.6), color: '#10b981' },
-      { name: 'Pending', value: Math.floor(totalBookings * 0.25), color: '#f59e0b' },
-      { name: 'Completed', value: Math.floor(totalBookings * 0.15), color: '#3b82f6' }
-    ];
-
-    return {
-      totalBookings,
-      totalClients,
-      totalRevenue,
-      monthlyGrowth,
-      bookingTrends,
-      serviceDist,
-      statusDist
-    };
-  }, [bookingsData, clientsData, quotesData]);
+  // Mock data for analytics
+  const mockData = {
+    totalBookings: 45,
+    totalClients: 28,
+    totalRevenue: 2750000,
+    monthlyGrowth: 12.5,
+    bookingTrends: [
+      { date: 'Mon', bookings: 3, revenue: 150000 },
+      { date: 'Tue', bookings: 5, revenue: 250000 },
+      { date: 'Wed', bookings: 2, revenue: 100000 },
+      { date: 'Thu', bookings: 4, revenue: 200000 },
+      { date: 'Fri', bookings: 6, revenue: 300000 },
+      { date: 'Sat', bookings: 1, revenue: 50000 },
+      { date: 'Sun', bookings: 2, revenue: 100000 }
+    ],
+    serviceDist: [
+      { name: 'Diplomatic Meeting', value: 15, color: '#3b82f6' },
+      { name: 'Corporate Event', value: 12, color: '#10b981' },
+      { name: 'State Reception', value: 8, color: '#f59e0b' },
+      { name: 'Private Security', value: 6, color: '#ef4444' },
+      { name: 'VIP Transport', value: 4, color: '#8b5cf6' }
+    ],
+    statusDist: [
+      { name: 'Confirmed', value: 27, color: '#10b981' },
+      { name: 'Pending', value: 11, color: '#f59e0b' },
+      { name: 'Completed', value: 7, color: '#3b82f6' }
+    ]
+  };
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    // Simulate refresh delay
     await new Promise(resolve => setTimeout(resolve, 1000));
     setIsRefreshing(false);
     toast({
@@ -118,7 +78,7 @@ const Analytics = () => {
 
   const handleExport = () => {
     const csvContent = `Date,Bookings,Revenue,Clients
-${processedData.bookingTrends.map(item => `${item.date},${item.bookings},${item.revenue}`).join('\n')}`;
+${mockData.bookingTrends.map(item => `${item.date},${item.bookings},${item.revenue}`).join('\n')}`;
     
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
@@ -193,11 +153,11 @@ ${processedData.bookingTrends.map(item => `${item.date},${item.bookings},${item.
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-gray-900">
-                {isLoading ? '...' : processedData.totalBookings}
+                {mockData.totalBookings}
               </div>
               <div className="flex items-center mt-2">
                 <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
-                <span className="text-sm text-green-600 font-medium">+{processedData.monthlyGrowth}%</span>
+                <span className="text-sm text-green-600 font-medium">+{mockData.monthlyGrowth}%</span>
                 <span className="text-sm text-gray-500 ml-2">vs last month</span>
               </div>
             </CardContent>
@@ -212,7 +172,7 @@ ${processedData.bookingTrends.map(item => `${item.date},${item.bookings},${item.
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-gray-900">
-                {isLoading ? '...' : formatCurrency(processedData.totalRevenue)}
+                {formatCurrency(mockData.totalRevenue)}
               </div>
               <div className="flex items-center mt-2">
                 <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
@@ -231,7 +191,7 @@ ${processedData.bookingTrends.map(item => `${item.date},${item.bookings},${item.
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-gray-900">
-                {isLoading ? '...' : processedData.totalClients}
+                {mockData.totalClients}
               </div>
               <div className="flex items-center mt-2">
                 <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
@@ -250,7 +210,7 @@ ${processedData.bookingTrends.map(item => `${item.date},${item.bookings},${item.
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-gray-900">
-                {isLoading ? '...' : formatCurrency(processedData.totalBookings > 0 ? processedData.totalRevenue / processedData.totalBookings : 0)}
+                {formatCurrency(mockData.totalBookings > 0 ? mockData.totalRevenue / mockData.totalBookings : 0)}
               </div>
               <div className="flex items-center mt-2">
                 <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
@@ -270,7 +230,7 @@ ${processedData.bookingTrends.map(item => `${item.date},${item.bookings},${item.
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={processedData.bookingTrends}>
+                <LineChart data={mockData.bookingTrends}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" />
                   <YAxis />
@@ -297,7 +257,7 @@ ${processedData.bookingTrends.map(item => `${item.date},${item.bookings},${item.
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
-                    data={processedData.serviceDist}
+                    data={mockData.serviceDist}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
@@ -306,7 +266,7 @@ ${processedData.bookingTrends.map(item => `${item.date},${item.bookings},${item.
                     fill="#8884d8"
                     dataKey="value"
                   >
-                    {processedData.serviceDist.map((entry, index) => (
+                    {mockData.serviceDist.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
@@ -324,7 +284,7 @@ ${processedData.bookingTrends.map(item => `${item.date},${item.bookings},${item.
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={processedData.statusDist}>
+              <BarChart data={mockData.statusDist}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />

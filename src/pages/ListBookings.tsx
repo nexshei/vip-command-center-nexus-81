@@ -9,8 +9,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Search, Calendar, Eye, Edit, Trash2, Plus, Filter, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { useRealtimeQuery } from "@/hooks/useRealtimeQuery";
 import { ViewMeetingRequestModal } from '@/components/modals/ViewMeetingRequestModal';
 import { EditMeetingRequestModal } from '@/components/modals/EditMeetingRequestModal';
 
@@ -24,15 +22,42 @@ const ListBookings = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Fetch live meeting requests data with real-time updates
-  const { data: meetingRequests, isLoading, error, refetch } = useRealtimeQuery("meeting_requests", { orderBy: "created_at" });
-
-  // Add console logs for debugging
-  React.useEffect(() => {
-    console.log('Meeting Requests Data:', meetingRequests);
-    console.log('Is Loading:', isLoading);
-    console.log('Error:', error);
-  }, [meetingRequests, isLoading, error]);
+  // Mock meeting requests data
+  const [meetingRequests] = useState([
+    {
+      id: '1',
+      full_name: 'Ambassador Johnson',
+      email: 'ambassador.johnson@embassy.com',
+      phone: '+254-123-456-789',
+      event_type: 'Diplomatic Meeting',
+      event_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      location: 'Embassy Conference Room',
+      status: 'pending',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: '2',
+      full_name: 'Minister Chen',
+      email: 'minister.chen@gov.example',
+      phone: '+254-987-654-321',
+      event_type: 'State Reception',
+      event_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+      location: 'State House',
+      status: 'confirmed',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: '3',
+      full_name: 'Sarah Williams',
+      email: 'sarah.williams@megacorp.com',
+      phone: '+254-555-123-456',
+      event_type: 'Corporate Event',
+      event_date: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString(),
+      location: 'Nairobi Hotel',
+      status: 'pending',
+      created_at: new Date().toISOString()
+    }
+  ]);
 
   const formatDateTime = (dateTimeString: string) => {
     if (!dateTimeString) return { date: 'Not set', time: 'Not set' };
@@ -54,7 +79,7 @@ const ListBookings = () => {
   };
 
   // Enhanced filtering
-  const filteredMeetingRequests = (meetingRequests || []).filter((request: any) => {
+  const filteredMeetingRequests = meetingRequests.filter((request: any) => {
     const matchesSearch = request.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          request.event_type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          request.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -76,60 +101,29 @@ const ListBookings = () => {
     setEditModalOpen(true);
   };
 
-  const handleDeleteRequest = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this meeting request?')) return;
-
-    try {
-      const { error } = await supabase
-        .from('meeting_requests')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Meeting Request Deleted",
-        description: "The meeting request has been deleted successfully.",
-      });
-    } catch (error: any) {
-      console.error('Delete error:', error);
-      toast({
-        title: "Delete Failed",
-        description: error.message || "An error occurred while deleting.",
-        variant: "destructive"
-      });
-    }
+  const handleDeleteRequest = (id: string) => {
+    toast({
+      title: "Demo Mode",
+      description: "In a real application, this would delete the meeting request.",
+    });
   };
 
-  const handleUpdateStatus = async (id: string, newStatus: string) => {
-    try {
-      const { error } = await supabase
-        .from('meeting_requests')
-        .update({ status: newStatus })
-        .eq('id', id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Status Updated",
-        description: `Meeting request status updated to ${newStatus}.`,
-      });
-    } catch (error: any) {
-      console.error('Update status error:', error);
-      toast({
-        title: "Update Failed",
-        description: error.message || "An error occurred while updating status.",
-        variant: "destructive"
-      });
-    }
+  const handleUpdateStatus = (id: string, newStatus: string) => {
+    toast({
+      title: "Demo Mode",
+      description: `In a real application, status would be updated to ${newStatus}.`,
+    });
   };
 
   const handleRequestUpdated = () => {
-    refetch();
+    toast({
+      title: "Demo Mode",
+      description: "Request updated successfully in demo mode.",
+    });
   };
 
   // Get unique event types for filter
-  const eventTypes = [...new Set((meetingRequests || []).map((request: any) => request.event_type).filter(Boolean))];
+  const eventTypes = [...new Set(meetingRequests.map((request: any) => request.event_type).filter(Boolean))];
 
   // Calculate stats
   const totalRequests = filteredMeetingRequests.length;
@@ -152,11 +146,11 @@ const ListBookings = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-serif font-bold text-vip-black">Meeting Requests</h1>
-          <p className="text-vip-gold/80 mt-2">View and manage meeting requests from the meeting_requests table</p>
+          <p className="text-vip-gold/80 mt-2">View and manage meeting requests (Demo Data)</p>
         </div>
         <div className="flex gap-2">
           <Button 
-            onClick={() => refetch()} 
+            onClick={() => toast({ title: "Demo Mode", description: "This is demo data for display purposes." })} 
             variant="outline"
             className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
           >
@@ -172,20 +166,6 @@ const ListBookings = () => {
           </Button>
         </div>
       </div>
-
-      {/* Debug Info */}
-      {process.env.NODE_ENV === 'development' && (
-        <Card className="bg-yellow-50 border-yellow-200">
-          <CardContent className="p-4">
-            <p className="text-sm">
-              <strong>Debug Info:</strong> 
-              Loading: {isLoading ? 'Yes' : 'No'} | 
-              Data Count: {meetingRequests?.length || 0} | 
-              Error: {error ? error.message : 'None'}
-            </p>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Summary Stats */}
       <div className="grid gap-6 md:grid-cols-4">
@@ -295,106 +275,88 @@ const ListBookings = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-vip-gold mx-auto mb-4"></div>
-              <p className="text-vip-gold/60">Loading meeting requests from database...</p>
-            </div>
-          ) : error ? (
-            <div className="text-center py-8">
-              <p className="text-red-500">Error loading meeting requests: {error.message}</p>
-              <Button 
-                onClick={() => refetch()} 
-                variant="outline"
-                className="mt-4 border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
-              >
-                Try Again
-              </Button>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Client Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Event Type</TableHead>
-                    <TableHead>Event Date</TableHead>
-                    <TableHead>Location</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Submitted</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredMeetingRequests.map((request: any) => {
-                    const eventDate = formatDateTime(request.event_date);
-                    const submittedDate = formatDateTime(request.created_at);
-                    const status = request.status || 'pending';
-                    
-                    return (
-                      <TableRow key={request.id}>
-                        <TableCell className="font-medium">{request.full_name || 'No name'}</TableCell>
-                        <TableCell className="text-sm">{request.email || 'No email'}</TableCell>
-                        <TableCell className="text-sm">{request.phone || 'No phone'}</TableCell>
-                        <TableCell>
-                          {request.event_type ? (
-                            <Badge variant="outline" className="border-vip-gold/30 text-vip-gold">
-                              {request.event_type}
-                            </Badge>
-                          ) : (
-                            <span className="text-gray-400">Not specified</span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-sm">{eventDate.date}</TableCell>
-                        <TableCell className="text-sm">{request.location || 'Not specified'}</TableCell>
-                        <TableCell>
-                          <Badge className={getStatusColor(status)}>
-                            {status.charAt(0).toUpperCase() + status.slice(1)}
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Client Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead>Event Type</TableHead>
+                  <TableHead>Event Date</TableHead>
+                  <TableHead>Location</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Submitted</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredMeetingRequests.map((request: any) => {
+                  const eventDate = formatDateTime(request.event_date);
+                  const submittedDate = formatDateTime(request.created_at);
+                  const status = request.status || 'pending';
+                  
+                  return (
+                    <TableRow key={request.id}>
+                      <TableCell className="font-medium">{request.full_name || 'No name'}</TableCell>
+                      <TableCell className="text-sm">{request.email || 'No email'}</TableCell>
+                      <TableCell className="text-sm">{request.phone || 'No phone'}</TableCell>
+                      <TableCell>
+                        {request.event_type ? (
+                          <Badge variant="outline" className="border-vip-gold/30 text-vip-gold">
+                            {request.event_type}
                           </Badge>
-                        </TableCell>
-                        <TableCell className="text-sm text-gray-600">{submittedDate.date}</TableCell>
-                        <TableCell>
-                          <div className="flex space-x-1">
-                            <Button 
-                              onClick={() => handleViewRequest(request)}
-                              variant="outline" 
-                              size="sm"
-                              className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
-                            >
-                              <Eye className="h-3 w-3" />
-                            </Button>
-                            <Button 
-                              onClick={() => handleEditRequest(request)}
-                              variant="outline" 
-                              size="sm"
-                              className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
-                            >
-                              <Edit className="h-3 w-3" />
-                            </Button>
-                            <Button 
-                              onClick={() => handleDeleteRequest(request.id)}
-                              variant="outline" 
-                              size="sm"
-                              className="border-red-300 text-red-600 hover:bg-red-50"
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-          {!isLoading && !error && filteredMeetingRequests.length === 0 && (
+                        ) : (
+                          <span className="text-gray-400">Not specified</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-sm">{eventDate.date}</TableCell>
+                      <TableCell className="text-sm">{request.location || 'Not specified'}</TableCell>
+                      <TableCell>
+                        <Badge className={getStatusColor(status)}>
+                          {status.charAt(0).toUpperCase() + status.slice(1)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm text-gray-600">{submittedDate.date}</TableCell>
+                      <TableCell>
+                        <div className="flex space-x-1">
+                          <Button 
+                            onClick={() => handleViewRequest(request)}
+                            variant="outline" 
+                            size="sm"
+                            className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+                          >
+                            <Eye className="h-3 w-3" />
+                          </Button>
+                          <Button 
+                            onClick={() => handleEditRequest(request)}
+                            variant="outline" 
+                            size="sm"
+                            className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+                          >
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                          <Button 
+                            onClick={() => handleDeleteRequest(request.id)}
+                            variant="outline" 
+                            size="sm"
+                            className="border-red-300 text-red-600 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+          {filteredMeetingRequests.length === 0 && (
             <div className="text-center py-8">
               <p className="text-vip-gold/60">No meeting requests found matching your search criteria.</p>
               <p className="text-sm text-vip-gold/40 mt-2">
-                {meetingRequests?.length === 0 ? 'No requests have been submitted yet.' : 'Try adjusting your filters.'}
+                This is demo data for display purposes.
               </p>
             </div>
           )}
