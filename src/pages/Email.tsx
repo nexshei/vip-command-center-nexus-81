@@ -1,18 +1,49 @@
 
 import React, { useState } from 'react';
-import { useRealtimeQuery } from '@/hooks/useRealtimeQuery';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Mail, Send, Inbox, Search, Calendar } from 'lucide-react';
+
+interface EmailRecord {
+  id: string;
+  from_email: string;
+  to_email: string;
+  subject: string;
+  body: string;
+  status: string;
+  sent_at: string;
+}
+
+// Mock data for emails
+const mockEmails: EmailRecord[] = [
+  {
+    id: '1',
+    from_email: 'admin@sirole-vvip.com',
+    to_email: 'ambassador.johnson@embassy.com',
+    subject: 'VIP Event Confirmation',
+    body: 'Dear Ambassador Johnson, we are pleased to confirm your VIP event scheduled for next week...',
+    status: 'sent',
+    sent_at: '2024-01-15T10:00:00Z'
+  },
+  {
+    id: '2',
+    from_email: 'admin@sirole-vvip.com',
+    to_email: 'sarah.williams@megacorp.com',
+    subject: 'Corporate Summit Details',
+    body: 'Dear Ms. Williams, please find attached the detailed agenda for the upcoming corporate summit...',
+    status: 'sent',
+    sent_at: '2024-01-16T14:30:00Z'
+  }
+];
 
 const Email = () => {
   const [isComposing, setIsComposing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [emails, setEmails] = useState<EmailRecord[]>(mockEmails);
   const [emailForm, setEmailForm] = useState({
     to_email: '',
     subject: '',
@@ -20,15 +51,11 @@ const Email = () => {
   });
   const { toast } = useToast();
 
-  const { data: emails, isLoading, error, refetch } = useRealtimeQuery('emails', {
-    orderBy: 'sent_at',
-  });
-
-  const filteredEmails = emails?.filter((email: any) =>
+  const filteredEmails = emails.filter((email) =>
     email.to_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     email.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     email.from_email?.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  );
 
   const handleSendEmail = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,35 +69,26 @@ const Email = () => {
       return;
     }
 
-    try {
-      const { error } = await supabase
-        .from('emails')
-        .insert([{
-          from_email: 'admin@sirole-vvip.com',
-          to_email: emailForm.to_email,
-          subject: emailForm.subject,
-          body: emailForm.body,
-          status: 'sent',
-          sent_at: new Date().toISOString()
-        }]);
+    // Simulate sending email
+    const newEmail: EmailRecord = {
+      id: Date.now().toString(),
+      from_email: 'admin@sirole-vvip.com',
+      to_email: emailForm.to_email,
+      subject: emailForm.subject,
+      body: emailForm.body,
+      status: 'sent',
+      sent_at: new Date().toISOString()
+    };
 
-      if (error) throw error;
+    setEmails(prev => [newEmail, ...prev]);
 
-      toast({
-        title: "Email Sent",
-        description: `Email sent successfully to ${emailForm.to_email}`,
-      });
+    toast({
+      title: "Email Sent",
+      description: `Email sent successfully to ${emailForm.to_email}`,
+    });
 
-      setEmailForm({ to_email: '', subject: '', body: '' });
-      setIsComposing(false);
-      refetch();
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
+    setEmailForm({ to_email: '', subject: '', body: '' });
+    setIsComposing(false);
   };
 
   const getStatusColor = (status: string) => {
@@ -180,73 +198,55 @@ const Email = () => {
         </div>
       </div>
 
-      {isLoading && (
-        <Card className="bg-black border-vip-gold/30">
-          <CardContent className="p-8 text-center">
-            <div className="text-vip-gold/70">Loading emails...</div>
-          </CardContent>
-        </Card>
-      )}
-
-      {error && (
-        <Card className="bg-black border-red-500/30">
-          <CardContent className="p-8 text-center">
-            <div className="text-red-400">Error loading emails: {error.message}</div>
-          </CardContent>
-        </Card>
-      )}
-
-      {!isLoading && !error && (
-        <div className="space-y-4">
-          {filteredEmails.map((email: any) => (
-            <Card key={email.id} className="bg-black border-vip-gold/30 hover:border-vip-gold/50 transition-colors">
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <Mail className="h-4 w-4 text-vip-gold/60" />
-                      <span className="text-sm font-medium text-vip-gold">
-                        From: {email.from_email}
-                      </span>
-                      <span className="text-sm text-vip-gold/70">
-                        To: {email.to_email}
-                      </span>
-                      <Badge className={getStatusColor(email.status)}>
-                        {email.status}
-                      </Badge>
-                    </div>
-                    <h3 className="text-lg font-medium text-vip-gold mb-2">{email.subject}</h3>
-                    <p className="text-sm text-vip-gold/80 line-clamp-2">{email.body}</p>
+      <div className="space-y-4">
+        {filteredEmails.map((email) => (
+          <Card key={email.id} className="bg-black border-vip-gold/30 hover:border-vip-gold/50 transition-colors">
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex-1">
+                  <div className="flex items-center space-x-3 mb-2">
+                    <Mail className="h-4 w-4 text-vip-gold/60" />
+                    <span className="text-sm font-medium text-vip-gold">
+                      From: {email.from_email}
+                    </span>
+                    <span className="text-sm text-vip-gold/70">
+                      To: {email.to_email}
+                    </span>
+                    <Badge className={getStatusColor(email.status)}>
+                      {email.status}
+                    </Badge>
                   </div>
-                  <div className="flex items-center text-xs text-vip-gold/50 ml-4">
-                    <Calendar className="h-3 w-3 mr-1" />
-                    {new Date(email.sent_at).toLocaleString()}
-                  </div>
+                  <h3 className="text-lg font-medium text-vip-gold mb-2">{email.subject}</h3>
+                  <p className="text-sm text-vip-gold/80 line-clamp-2">{email.body}</p>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+                <div className="flex items-center text-xs text-vip-gold/50 ml-4">
+                  <Calendar className="h-3 w-3 mr-1" />
+                  {new Date(email.sent_at).toLocaleString()}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
 
-          {filteredEmails.length === 0 && !isLoading && (
-            <Card className="bg-black border-vip-gold/30">
-              <CardContent className="p-8 text-center">
-                <Inbox className="h-12 w-12 text-vip-gold/40 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-vip-gold mb-2">No Emails Found</h3>
-                <p className="text-vip-gold/70 mb-4">
-                  {searchTerm ? 'No emails match your search criteria.' : 'Start sending VVIP communications.'}
-                </p>
-                <Button 
-                  onClick={() => setIsComposing(true)}
-                  className="bg-vip-gold text-black hover:bg-vip-gold/90"
-                >
-                  <Mail className="h-4 w-4 mr-2" />
-                  Send First Email
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      )}
+        {filteredEmails.length === 0 && (
+          <Card className="bg-black border-vip-gold/30">
+            <CardContent className="p-8 text-center">
+              <Inbox className="h-12 w-12 text-vip-gold/40 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-vip-gold mb-2">No Emails Found</h3>
+              <p className="text-vip-gold/70 mb-4">
+                {searchTerm ? 'No emails match your search criteria.' : 'Start sending VVIP communications.'}
+              </p>
+              <Button 
+                onClick={() => setIsComposing(true)}
+                className="bg-vip-gold text-black hover:bg-vip-gold/90"
+              >
+                <Mail className="h-4 w-4 mr-2" />
+                Send First Email
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 };

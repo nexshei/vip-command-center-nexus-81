@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -5,12 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Search, Eye, Edit, Trash2, Users, Phone, Mail } from 'lucide-react';
-import { useRealtimeQuery } from '@/hooks/useRealtimeQuery';
 import { useToast } from '@/hooks/use-toast';
-import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
-import { ViewDetailsModal } from '@/components/modals/ViewDetailsModal';
-import { AddStaffModal } from '@/components/modals/AddStaffModal';
-import { supabase } from '@/integrations/supabase/client';
 
 interface StaffMember {
   id: string;
@@ -23,30 +19,46 @@ interface StaffMember {
   created_at: string | null;
 }
 
+// Mock data for staff members
+const mockStaff: StaffMember[] = [
+  {
+    id: '1',
+    full_name: 'John Smith',
+    role: 'Protocol Officer',
+    email: 'john.smith@vip.com',
+    phone: '+1 (555) 123-4567',
+    status: 'active',
+    notes: 'Senior protocol officer with diplomatic experience',
+    created_at: '2024-01-15T10:00:00Z'
+  },
+  {
+    id: '2',
+    full_name: 'Sarah Johnson',
+    role: 'Event Coordinator',
+    email: 'sarah.johnson@vip.com',
+    phone: '+1 (555) 234-5678',
+    status: 'active',
+    notes: 'Specializes in large-scale VIP events',
+    created_at: '2024-01-16T10:00:00Z'
+  },
+  {
+    id: '3',
+    full_name: 'Michael Brown',
+    role: 'Security Head',
+    email: 'michael.brown@vip.com',
+    phone: '+1 (555) 345-6789',
+    status: 'on_leave',
+    notes: 'Currently on medical leave',
+    created_at: '2024-01-17T10:00:00Z'
+  }
+];
+
 const Staff = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRole, setSelectedRole] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
-  const [staffModal, setStaffModal] = useState({ open: false, staff: null });
-  const [deleteModal, setDeleteModal] = useState({ open: false, staff: null });
-  const [viewModal, setViewModal] = useState({ open: false, staff: null });
+  const [staffMembers, setStaffMembers] = useState<StaffMember[]>(mockStaff);
   const { toast } = useToast();
-
-  // Fetch staff members
-  const { data: staffData, isLoading: staffLoading, error: staffError, refetch } = useRealtimeQuery('staff', { orderBy: 'created_at' });
-
-  // Type guard
-  const isStaffMember = (item: any): item is StaffMember => {
-    return item && typeof item === 'object' && typeof item.id === 'string';
-  };
-
-  // Safely handle data with proper error checking - returning correctly typed array
-  const staffMembers: StaffMember[] = useMemo(() => {
-    if (staffError || !Array.isArray(staffData)) {
-      return [];
-    }
-    return staffData.filter(isStaffMember);
-  }, [staffData, staffError]);
 
   const filteredStaff = staffMembers.filter(staff => {
     const matchesSearch = staff.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -71,54 +83,31 @@ const Staff = () => {
   };
 
   const handleAddStaff = () => {
-    setStaffModal({ open: true, staff: null });
+    toast({
+      title: "Feature Unavailable",
+      description: "Staff management features require database connection.",
+    });
   };
 
   const handleEditStaff = (staff: StaffMember) => {
-    setStaffModal({ open: true, staff });
+    toast({
+      title: "Feature Unavailable",
+      description: "Staff editing features require database connection.",
+    });
   };
 
   const handleDeleteStaff = (staff: StaffMember) => {
-    setDeleteModal({ open: true, staff });
+    setStaffMembers(prev => prev.filter(s => s.id !== staff.id));
+    toast({
+      title: "Staff Member Deleted",
+      description: `${staff.full_name} has been removed from the staff list.`,
+    });
   };
 
   const handleViewStaff = (staff: StaffMember) => {
-    setViewModal({ open: true, staff });
-  };
-
-  const confirmDelete = async () => {
-    if (!deleteModal.staff) return;
-
-    try {
-      const { error } = await supabase
-        .from('staff')
-        .delete()
-        .eq('id', deleteModal.staff.id);
-
-      if (error) throw error;
-
-      refetch();
-      toast({
-        title: "Staff Member Deleted",
-        description: "The staff member has been successfully deleted.",
-      });
-
-      setDeleteModal({ open: false, staff: null });
-    } catch (error) {
-      console.error('Error deleting staff member:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete staff member. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleStaffAdded = (newStaff: any) => {
-    refetch();
     toast({
-      title: "Staff Added",
-      description: "The staff member has been added successfully.",
+      title: "Feature Unavailable",
+      description: "Staff details view requires database connection.",
     });
   };
 
@@ -221,11 +210,7 @@ const Staff = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {staffLoading ? (
-            <div className="text-center py-8">
-              <p className="text-vip-gold/60">Loading staff...</p>
-            </div>
-          ) : filteredStaff.length === 0 ? (
+          {filteredStaff.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-vip-gold/60">No staff members found. Add your first team member to get started.</p>
             </div>
@@ -295,59 +280,6 @@ const Staff = () => {
           )}
         </CardContent>
       </Card>
-
-      {/* Modals */}
-      <AddStaffModal
-        open={staffModal.open}
-        onOpenChange={(open) => setStaffModal({ ...staffModal, open })}
-        onStaffAdded={handleStaffAdded}
-      />
-
-      <DeleteConfirmationModal
-        open={deleteModal.open}
-        onOpenChange={(open) => setDeleteModal({ ...deleteModal, open })}
-        title="Delete Staff Member"
-        description="Are you sure you want to delete this staff member?"
-        itemName={deleteModal.staff?.full_name || 'Staff Member'}
-        onConfirm={confirmDelete}
-      />
-
-      <ViewDetailsModal
-        open={viewModal.open}
-        onOpenChange={(open) => setViewModal({ ...viewModal, open })}
-        title="Staff Member Details"
-      >
-        {viewModal.staff && (
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-semibold text-vip-black">Full Name</h3>
-              <p className="text-vip-gold/80">{viewModal.staff.full_name || 'Not provided'}</p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-vip-black">Role</h3>
-              <p className="text-vip-gold/80">{viewModal.staff.role || 'Not assigned'}</p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-vip-black">Email</h3>
-              <p className="text-vip-gold/80">{viewModal.staff.email || 'Not provided'}</p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-vip-black">Phone</h3>
-              <p className="text-vip-gold/80">{viewModal.staff.phone || 'Not provided'}</p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-vip-black">Status</h3>
-              <p className="text-vip-gold/80">{viewModal.staff.status || 'Not set'}</p>
-            </div>
-            {viewModal.staff.notes && (
-              <div>
-                <h3 className="font-semibold text-vip-black">Notes</h3>
-                <p className="text-vip-gold/80 whitespace-pre-wrap">{viewModal.staff.notes}</p>
-              </div>
-            )}
-          </div>
-        )}
-      </ViewDetailsModal>
     </div>
   );
 };

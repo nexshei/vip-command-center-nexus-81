@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -5,11 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Search, Eye, Edit, Trash2, Image as ImageIcon, Star } from 'lucide-react';
-import { useRealtimeQuery } from '@/hooks/useRealtimeQuery';
 import { useToast } from '@/hooks/use-toast';
-import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
-import { AddPhotoModal } from '@/components/modals/AddPhotoModal';
-import { supabase } from '@/integrations/supabase/client';
 
 interface GalleryPhoto {
   id: string;
@@ -22,28 +19,45 @@ interface GalleryPhoto {
   display_order: number | null;
 }
 
+// Mock data for gallery photos
+const mockPhotos: GalleryPhoto[] = [
+  {
+    id: '1',
+    src: 'https://images.unsplash.com/photo-1515378791036-0648a814c963?w=500',
+    alt_text: 'VIP event photography',
+    category: 'Events',
+    created_at: '2024-01-15T10:00:00Z',
+    updated_at: '2024-01-15T10:00:00Z',
+    is_featured: true,
+    display_order: 1
+  },
+  {
+    id: '2', 
+    src: 'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=500',
+    alt_text: 'Corporate meeting setup',
+    category: 'Corporate',
+    created_at: '2024-01-16T10:00:00Z',
+    updated_at: '2024-01-16T10:00:00Z',
+    is_featured: false,
+    display_order: 2
+  },
+  {
+    id: '3',
+    src: 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=500',
+    alt_text: 'Elegant venue decoration',
+    category: 'Venues',
+    created_at: '2024-01-17T10:00:00Z',
+    updated_at: '2024-01-17T10:00:00Z',
+    is_featured: true,
+    display_order: 3
+  }
+];
+
 const Gallery = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [photoModal, setPhotoModal] = useState({ open: false, photo: null });
-  const [deleteModal, setDeleteModal] = useState({ open: false, photo: null });
+  const [photos, setPhotos] = useState<GalleryPhoto[]>(mockPhotos);
   const { toast } = useToast();
-
-  // Fetch gallery photos
-  const { data: photosData, isLoading: photosLoading, error: photosError, refetch } = useRealtimeQuery('gallery_photos', { orderBy: 'display_order' });
-
-  // Type guard
-  const isGalleryPhoto = (item: any): item is GalleryPhoto => {
-    return item && typeof item === 'object' && typeof item.id === 'string' && typeof item.src === 'string';
-  };
-
-  // Safely handle data - returning correctly typed array
-  const photos: GalleryPhoto[] = useMemo(() => {
-    if (photosError || !Array.isArray(photosData)) {
-      return [];
-    }
-    return photosData.filter(isGalleryPhoto);
-  }, [photosData, photosError]);
 
   const filteredPhotos = photos.filter(photo => {
     const matchesSearch = photo.alt_text?.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -56,50 +70,24 @@ const Gallery = () => {
   const featuredPhotos = photos.filter(photo => photo.is_featured).length;
 
   const handleAddPhoto = () => {
-    setPhotoModal({ open: true, photo: null });
+    toast({
+      title: "Feature Unavailable",
+      description: "Photo upload feature requires database connection.",
+    });
   };
 
   const handleEditPhoto = (photo: GalleryPhoto) => {
-    setPhotoModal({ open: true, photo });
+    toast({
+      title: "Feature Unavailable", 
+      description: "Photo editing feature requires database connection.",
+    });
   };
 
   const handleDeletePhoto = (photo: GalleryPhoto) => {
-    setDeleteModal({ open: true, photo });
-  };
-
-  const confirmDelete = async () => {
-    if (!deleteModal.photo) return;
-
-    try {
-      const { error } = await supabase
-        .from('gallery_photos')
-        .delete()
-        .eq('id', deleteModal.photo.id);
-
-      if (error) throw error;
-
-      refetch();
-      toast({
-        title: "Photo Deleted",
-        description: "The photo has been successfully deleted from the gallery.",
-      });
-
-      setDeleteModal({ open: false, photo: null });
-    } catch (error) {
-      console.error('Error deleting photo:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete photo. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handlePhotoUpdated = () => {
-    refetch();
+    setPhotos(prev => prev.filter(p => p.id !== photo.id));
     toast({
-      title: "Gallery Updated",
-      description: "The photo has been updated successfully.",
+      title: "Photo Deleted",
+      description: "The photo has been removed from the gallery.",
     });
   };
 
@@ -189,11 +177,7 @@ const Gallery = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {photosLoading ? (
-            <div className="text-center py-8">
-              <p className="text-vip-gold/60">Loading photos...</p>
-            </div>
-          ) : filteredPhotos.length === 0 ? (
+          {filteredPhotos.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-vip-gold/60">No photos found. Add your first photo to get started.</p>
             </div>
@@ -246,22 +230,6 @@ const Gallery = () => {
           )}
         </CardContent>
       </Card>
-
-      {/* Modals */}
-      <AddPhotoModal
-        open={photoModal.open}
-        onOpenChange={(open) => setPhotoModal({ ...photoModal, open })}
-        onPhotoUpdated={handlePhotoUpdated}
-      />
-
-      <DeleteConfirmationModal
-        open={deleteModal.open}
-        onOpenChange={(open) => setDeleteModal({ ...deleteModal, open })}
-        title="Delete Photo"
-        description="Are you sure you want to delete this photo from the gallery?"
-        itemName={deleteModal.photo?.alt_text || 'Photo'}
-        onConfirm={confirmDelete}
-      />
     </div>
   );
 };
