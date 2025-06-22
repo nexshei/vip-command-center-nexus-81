@@ -5,8 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
-import { Search, Lock, Mail, UserCheck, UserX } from "lucide-react";
+import { Search, Mail, UserCheck, UserX } from "lucide-react";
 
 interface Subscriber {
   id: string;
@@ -41,24 +40,12 @@ const Subscribers = () => {
   const [subscribers, setSubscribers] = useState<Subscriber[]>(mockSubscribers);
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
-  const { user } = useAuth();
-
-  const isProtocolAdmin = user?.role === 'protocol_admin';
 
   const filteredSubscribers = subscribers.filter(subscriber =>
     subscriber.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleSubscriberAction = (subscriber: Subscriber, action: 'toggle' | 'message') => {
-    if (isProtocolAdmin && action === 'toggle') {
-      toast({
-        title: "Access Restricted",
-        description: "Changing subscriber status is restricted for Protocol Admin users.",
-        variant: "destructive"
-      });
-      return;
-    }
-
     if (action === 'message') {
       toast({
         title: "Send Message",
@@ -85,21 +72,12 @@ const Subscribers = () => {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-serif font-bold text-vip-black">
-            VVIP Subscribers {isProtocolAdmin && '(Limited Access)'}
+            VVIP Subscribers
           </h1>
           <p className="text-vip-gold/80 mt-2">
-            {isProtocolAdmin 
-              ? 'View and communicate with subscribers (status changes restricted)'
-              : 'Manage your VVIP subscriber database'
-            }
+            Manage your VVIP subscriber database
           </p>
         </div>
-        {isProtocolAdmin && (
-          <div className="flex items-center text-vip-gold/60">
-            <Lock className="h-4 w-4 mr-2" />
-            <span className="text-sm">Limited Access</span>
-          </div>
-        )}
       </div>
       
       <Card className="vip-glass border-vip-gold/20">
@@ -146,29 +124,27 @@ const Subscribers = () => {
                       <Mail className="h-3 w-3 mr-1" />
                       Message
                     </Button>
-                    {!isProtocolAdmin && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleSubscriberAction(subscriber, 'toggle')}
-                        className={subscriber.subscribed 
-                          ? "border-red-300 text-red-600 hover:bg-red-50"
-                          : "border-green-300 text-green-600 hover:bg-green-50"
-                        }
-                      >
-                        {subscriber.subscribed ? (
-                          <>
-                            <UserX className="h-3 w-3 mr-1" />
-                            Unsubscribe
-                          </>
-                        ) : (
-                          <>
-                            <UserCheck className="h-3 w-3 mr-1" />
-                            Subscribe
-                          </>
-                        )}
-                      </Button>
-                    )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleSubscriberAction(subscriber, 'toggle')}
+                      className={subscriber.subscribed 
+                        ? "border-red-300 text-red-600 hover:bg-red-50"
+                        : "border-green-300 text-green-600 hover:bg-green-50"
+                      }
+                    >
+                      {subscriber.subscribed ? (
+                        <>
+                          <UserX className="h-3 w-3 mr-1" />
+                          Unsubscribe
+                        </>
+                      ) : (
+                        <>
+                          <UserCheck className="h-3 w-3 mr-1" />
+                          Subscribe
+                        </>
+                      )}
+                    </Button>
                   </div>
                 </div>
               </div>

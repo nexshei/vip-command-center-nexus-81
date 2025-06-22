@@ -30,8 +30,8 @@ import Settings from "@/pages/Settings";
 
 const queryClient = new QueryClient();
 
-const ProtectedRoute = ({ children, requiredPage }: { children: React.ReactNode; requiredPage?: string }) => {
-  const { user, isLoading, canAccess } = useAuth();
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, isLoading } = useAuth();
   
   if (isLoading) {
     return (
@@ -47,40 +47,16 @@ const ProtectedRoute = ({ children, requiredPage }: { children: React.ReactNode;
   if (!user) {
     return <LoginForm />;
   }
-
-  if (requiredPage && !canAccess(requiredPage)) {
-    return (
-      <DashboardLayout>
-        <div className="p-6 text-center">
-          <h1 className="text-2xl font-serif text-vip-black mb-4">Access Restricted</h1>
-          <p className="text-vip-gold/80">You don't have permission to access this page.</p>
-        </div>
-      </DashboardLayout>
-    );
-  }
   
   return <DashboardLayout>{children}</DashboardLayout>;
 };
-
-const ComingSoonPage = ({ title, description }: { title: string; description: string }) => (
-  <div className="p-6">
-    <h1 className="text-2xl font-serif text-vip-black">{title}</h1>
-    <p className="text-vip-gold/80 mt-2">{description}</p>
-    <div className="mt-16 text-center">
-      <div className="inline-block p-8 vip-glass border border-vip-gold/20 rounded-lg">
-        <h2 className="text-xl font-semibold text-vip-gold mb-2">Feature under development</h2>
-        <p className="text-vip-gold/70">Coming soon...</p>
-      </div>
-    </div>
-  </div>
-);
 
 const ProfilePage = () => {
   const { user } = useAuth();
   
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-serif font-bold text-vip-black mb-6">Admin Profile</h1>
+      <h1 className="text-3xl font-serif font-bold text-vip-black mb-6">User Profile</h1>
       <div className="vip-glass border border-vip-gold/20 rounded-lg p-6">
         <div className="space-y-6">
           <div className="flex items-center space-x-4">
@@ -91,7 +67,6 @@ const ProfilePage = () => {
             </div>
             <div>
               <h2 className="text-2xl font-semibold text-vip-black">{user?.name}</h2>
-              <p className="text-vip-gold/80 capitalize">{user?.role?.replace('_', ' ')}</p>
               <p className="text-sm text-vip-gold/60">{user?.email}</p>
             </div>
           </div>
@@ -99,10 +74,6 @@ const ProfilePage = () => {
             <div className="space-y-2">
               <label className="text-sm font-medium text-vip-gold/80">Full Name</label>
               <p className="text-vip-black">{user?.name}</p>
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-vip-gold/80">Role</label>
-              <p className="text-vip-black capitalize">{user?.role?.replace('_', ' ')}</p>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-vip-gold/80">Email</label>
@@ -126,67 +97,67 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/" element={user ? <Navigate to="/dashboard" /> : <Index />} />
       <Route path="/dashboard" element={
-        <ProtectedRoute requiredPage="dashboard">
+        <ProtectedRoute>
           <Dashboard />
         </ProtectedRoute>
       } />
       <Route path="/create-booking" element={
-        <ProtectedRoute requiredPage="create-booking">
+        <ProtectedRoute>
           <CreateBooking />
         </ProtectedRoute>
       } />
       <Route path="/generate-quote" element={
-        <ProtectedRoute requiredPage="generate-quote">
+        <ProtectedRoute>
           <GenerateQuote />
         </ProtectedRoute>
       } />
       <Route path="/bookings" element={
-        <ProtectedRoute requiredPage="bookings">
+        <ProtectedRoute>
           <Bookings />
         </ProtectedRoute>
       } />
       <Route path="/list-bookings" element={
-        <ProtectedRoute requiredPage="list-bookings">
+        <ProtectedRoute>
           <ListBookings />
         </ProtectedRoute>
       } />
       <Route path="/clients" element={
-        <ProtectedRoute requiredPage="clients">
+        <ProtectedRoute>
           <Clients />
         </ProtectedRoute>
       } />
       <Route path="/inventory" element={
-        <ProtectedRoute requiredPage="inventory">
+        <ProtectedRoute>
           <Inventory />
         </ProtectedRoute>
       } />
       <Route path="/careers" element={
-        <ProtectedRoute requiredPage="careers">
+        <ProtectedRoute>
           <Careers />
         </ProtectedRoute>
       } />
       <Route path="/gallery" element={
-        <ProtectedRoute requiredPage="gallery">
+        <ProtectedRoute>
           <Gallery />
         </ProtectedRoute>
       } />
       <Route path="/staff" element={
-        <ProtectedRoute requiredPage="staff">
+        <ProtectedRoute>
           <Staff />
         </ProtectedRoute>
       } />
       <Route path="/subscriptions" element={
-        <ProtectedRoute requiredPage="subscriptions">
+        <ProtectedRoute>
           <Subscriptions />
         </ProtectedRoute>
       } />
       <Route path="/email" element={
-        <ProtectedRoute requiredPage="email">
+        <ProtectedRoute>
           <Email />
         </ProtectedRoute>
       } />
       <Route path="/analytics" element={
-        <ProtectedRoute requiredPage="analytics">
+        <ProtectedRoute>
           <Analytics />
         </ProtectedRoute>
       } />
@@ -196,17 +167,17 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
       <Route path="/settings" element={
-        <ProtectedRoute requiredPage="settings">
+        <ProtectedRoute>
           <Settings />
         </ProtectedRoute>
       } />
       <Route path="/subscribers" element={
-        <ProtectedRoute requiredPage="subscribers">
+        <ProtectedRoute>
           <Subscribers />
         </ProtectedRoute>
       } />
       <Route path="/contact-submissions" element={
-        <ProtectedRoute requiredPage="contact-submissions">
+        <ProtectedRoute>
           <React.Suspense fallback={<div>Loading...</div>}>
             <ContactSubmissions />
           </React.Suspense>

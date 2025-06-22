@@ -2,7 +2,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -12,16 +11,14 @@ import {
   Mail, 
   FileText, 
   Download, 
-  Settings,
   Zap
 } from 'lucide-react';
 
 const QuickActions = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  const superAdminActions = [
+  const actions = [
     {
       title: "New Booking",
       description: "Create VVIP appointment",
@@ -47,7 +44,7 @@ const QuickActions = () => {
       title: "Send Message",
       description: "Communication",
       icon: Mail,
-      action: () => navigate('/communications'),
+      action: () => navigate('/email'),
       primary: false
     },
     {
@@ -78,39 +75,6 @@ const QuickActions = () => {
       primary: false
     }
   ];
-
-  const protocolAdminActions = [
-    {
-      title: "New Booking",
-      description: "Create appointment",
-      icon: Plus,
-      action: () => navigate('/create-booking'),
-      primary: true
-    },
-    {
-      title: "View Schedule",
-      description: "Today's events",
-      icon: Calendar,
-      action: () => navigate('/bookings'),
-      primary: false
-    },
-    {
-      title: "Client Directory",
-      description: "Manage clients",
-      icon: Users,
-      action: () => navigate('/clients'),
-      primary: false
-    },
-    {
-      title: "Send Message",
-      description: "Communications",
-      icon: Mail,
-      action: () => navigate('/communications'),
-      primary: false
-    }
-  ];
-
-  const actions = user?.role === 'super_admin' ? superAdminActions : protocolAdminActions;
 
   return (
     <Card className="bg-white shadow-sm">

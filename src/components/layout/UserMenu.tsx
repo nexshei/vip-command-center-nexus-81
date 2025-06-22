@@ -46,7 +46,7 @@ export const UserMenu = () => {
           </Avatar>
           <div className="hidden md:block text-left">
             <p className="text-sm font-medium">{user.name}</p>
-            <p className="text-xs text-vip-gold/70 capitalize">{user.role.replace('_', ' ')}</p>
+            <p className="text-xs text-vip-gold/70">VVIP User</p>
           </div>
         </Button>
       </DropdownMenuTrigger>

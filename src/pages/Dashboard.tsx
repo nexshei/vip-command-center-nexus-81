@@ -13,7 +13,7 @@ const Dashboard = () => {
     <div className="p-6 max-w-7xl mx-auto bg-black min-h-screen">
       <div className="mb-6">
         <h1 className="text-3xl font-serif font-bold text-vip-gold">
-          Welcome back, {user?.email?.split('@')[0] || 'Sir Dennis'}
+          Welcome back, {user?.name || 'VVIP User'}
         </h1>
         <p className="text-vip-gold/70 mt-1">
           Your VVIP Protocol Dashboard - Live data updates automatically
