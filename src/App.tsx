@@ -25,6 +25,7 @@ function App() {
         <Router>
           <div className="min-h-screen bg-background font-sans antialiased">
             <Routes>
+              {/* Public Routes */}
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               
@@ -93,7 +94,7 @@ function App() {
                 </ProtectedRoute>
               } />
 
-              {/* Redirect unknown routes */}
+              {/* Redirect unknown routes to home */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </div>
