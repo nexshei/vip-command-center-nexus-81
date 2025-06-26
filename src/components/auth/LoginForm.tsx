@@ -41,12 +41,12 @@ const LoginForm = () => {
   const handleDemoLogin = (role: 'super' | 'protocol') => {
     const credentials = {
       super: {
-        email: 'super@sirole.com',
-        password: 'vip123'
+        email: 'senioradmin@sirolevvipprotocolltd.co.ke',
+        password: 'Olele@2025'
       },
       protocol: {
-        email: 'protocol@sirole.com',
-        password: 'vip123'
+        email: 'subadmin@sirolevvipprotocolltd.co.ke',
+        password: 'Olele@2025'
       }
     };
     setFormData(credentials[role]);
@@ -78,7 +78,7 @@ const LoginForm = () => {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="admin@sirole.com"
+                  placeholder="admin@sirolevvipprotocolltd.co.ke"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   className="pl-10 border-vip-gold/30 focus:border-vip-gold text-vip-black bg-white"

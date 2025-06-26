@@ -2,8 +2,10 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Crown, Shield, Star, Zap } from 'lucide-react';
+
 const Index = () => {
-  return <div className="min-h-screen vip-gradient text-white relative overflow-hidden">
+  return (
+    <div className="min-h-screen vip-gradient text-white relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-gradient-to-br from-black/30 to-transparent"></div>
       
@@ -28,8 +30,8 @@ const Index = () => {
 
           {/* Features Grid */}
           <div className="grid md:grid-cols-3 gap-6 my-12 animate-fade-in-up" style={{
-          animationDelay: '0.2s'
-        }}>
+            animationDelay: '0.2s'
+          }}>
             <div className="bg-black/80 border border-vip-gold/30 rounded-2xl p-6 vip-hover-lift backdrop-blur-sm">
               <Shield className="h-8 w-8 text-vip-gold mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2 text-white">Secure Access</h3>
@@ -49,8 +51,8 @@ const Index = () => {
 
           {/* CTA Section */}
           <div className="space-y-6 animate-fade-in-up" style={{
-          animationDelay: '0.4s'
-        }}>
+            animationDelay: '0.4s'
+          }}>
             <p className="text-lg opacity-90 max-w-2xl mx-auto">
               Access the premier administrative platform for VVIP protocol management, 
               client relations, and luxury service coordination.
@@ -64,9 +66,9 @@ const Index = () => {
               
               <div className="text-sm opacity-75">
                 <p>Demo Credentials:</p>
-                <p><strong>Super Admin:</strong> super@sirole.com</p>
-                <p><strong>Protocol Admin:</strong> protocol@sirole.com</p>
-                <p><strong>Password:</strong> vip123</p>
+                <p><strong>Super Admin:</strong> senioradmin@sirolevvipprotocolltd.co.ke</p>
+                <p><strong>Protocol Admin:</strong> subadmin@sirolevvipprotocolltd.co.ke</p>
+                <p><strong>Password:</strong> Olele@2025</p>
               </div>
             </div>
           </div>
@@ -77,6 +79,8 @@ const Index = () => {
           </div>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default Index;

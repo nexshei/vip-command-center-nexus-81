@@ -33,16 +33,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Mock users with roles
   const mockUsers: Record<string, User> = {
-    'super@sirole.com': {
+    'senioradmin@sirolevvipprotocolltd.co.ke': {
       id: '1',
-      email: 'super@sirole.com',
+      email: 'senioradmin@sirolevvipprotocolltd.co.ke',
       name: 'Super Admin',
       avatar: null,
       role: 'super_admin'
     },
-    'protocol@sirole.com': {
+    'subadmin@sirolevvipprotocolltd.co.ke': {
       id: '2', 
-      email: 'protocol@sirole.com',
+      email: 'subadmin@sirolevvipprotocolltd.co.ke',
       name: 'Protocol Admin',
       avatar: null,
       role: 'protocol_admin'
@@ -86,7 +86,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     // Check mock users with correct password
     const user = mockUsers[email];
-    if (!user || password !== 'vip123') {
+    if (!user || password !== 'Olele@2025') {
       throw new Error('Invalid credentials');
     }
 
