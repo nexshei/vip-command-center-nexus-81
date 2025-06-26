@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Search, Eye, Edit, Trash2, Briefcase, MapPin, Calendar, Users, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { JobOpeningModalTrigger } from '@/components/modals/JobOpeningModal';
+import { EditJobModal } from '@/components/modals/EditJobModal';
 
 interface Job {
   id: string;
@@ -99,6 +100,7 @@ const Careers = () => {
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [jobs, setJobs] = useState<Job[]>(mockJobs);
   const [applications, setApplications] = useState<Application[]>(mockApplications);
+  const [editingJob, setEditingJob] = useState<Job | null>(null);
   const { toast } = useToast();
 
   const filteredJobs = jobs.filter(job => {
@@ -148,10 +150,12 @@ const Careers = () => {
   };
 
   const handleEditJob = (job: Job) => {
-    toast({
-      title: "Feature Unavailable",
-      description: "Job editing features require database connection.",
-    });
+    setEditingJob(job);
+  };
+
+  const handleJobUpdated = (updatedJob: Job) => {
+    setJobs(prev => prev.map(job => job.id === updatedJob.id ? updatedJob : job));
+    setEditingJob(null);
   };
 
   const handleDeleteJob = (job: Job) => {
@@ -408,6 +412,14 @@ const Careers = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Edit Job Modal */}
+      <EditJobModal
+        open={!!editingJob}
+        onOpenChange={(open) => !open && setEditingJob(null)}
+        job={editingJob}
+        onJobUpdated={handleJobUpdated}
+      />
     </div>
   );
 };
