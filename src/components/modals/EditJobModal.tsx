@@ -30,15 +30,34 @@ interface EditJobModalProps {
   onJobUpdated: (job: Job) => void;
 }
 
+interface FormData {
+  title?: string;
+  department?: string | null;
+  location?: string | null;
+  description?: string | null;
+  requirements?: string;
+  employment_type?: string | null;
+  salary_range?: string | null;
+  application_deadline?: string | null;
+  status?: string;
+}
+
 export const EditJobModal = ({ open, onOpenChange, job, onJobUpdated }: EditJobModalProps) => {
-  const [formData, setFormData] = useState<Partial<Job> & { requirements?: string }>({});
+  const [formData, setFormData] = useState<FormData>({});
   const { toast } = useToast();
 
   useEffect(() => {
     if (job) {
       setFormData({
-        ...job,
-        requirements: Array.isArray(job.requirements) ? job.requirements.join('\n') : job.requirements || ''
+        title: job.title,
+        department: job.department,
+        location: job.location,
+        description: job.description,
+        requirements: Array.isArray(job.requirements) ? job.requirements.join('\n') : '',
+        employment_type: job.employment_type,
+        salary_range: job.salary_range,
+        application_deadline: job.application_deadline,
+        status: job.status
       });
     }
   }, [job]);
@@ -47,14 +66,21 @@ export const EditJobModal = ({ open, onOpenChange, job, onJobUpdated }: EditJobM
     e.preventDefault();
     if (!job) return;
 
-    const requirementsArray = typeof formData.requirements === 'string' 
+    const requirementsArray = formData.requirements 
       ? formData.requirements.split('\n').filter(req => req.trim()) 
-      : formData.requirements || [];
+      : [];
 
     const updatedJob: Job = {
       ...job,
-      ...formData,
+      title: formData.title || job.title,
+      department: formData.department !== undefined ? formData.department : job.department,
+      location: formData.location !== undefined ? formData.location : job.location,
+      description: formData.description !== undefined ? formData.description : job.description,
       requirements: requirementsArray.length > 0 ? requirementsArray : null,
+      employment_type: formData.employment_type !== undefined ? formData.employment_type : job.employment_type,
+      salary_range: formData.salary_range !== undefined ? formData.salary_range : job.salary_range,
+      application_deadline: formData.application_deadline !== undefined ? formData.application_deadline : job.application_deadline,
+      status: formData.status || job.status,
       updated_at: new Date().toISOString()
     };
 
@@ -74,12 +100,6 @@ export const EditJobModal = ({ open, onOpenChange, job, onJobUpdated }: EditJobM
   };
 
   if (!job) return null;
-
-  const requirementsValue = typeof formData.requirements === 'string' 
-    ? formData.requirements 
-    : Array.isArray(formData.requirements) 
-      ? formData.requirements.join('\n') 
-      : '';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -175,7 +195,7 @@ export const EditJobModal = ({ open, onOpenChange, job, onJobUpdated }: EditJobM
             <Label htmlFor="requirements" className="text-sm font-medium text-vip-black">Requirements</Label>
             <Textarea
               id="requirements"
-              value={requirementsValue}
+              value={formData.requirements || ''}
               onChange={(e) => setFormData(prev => ({ ...prev, requirements: e.target.value }))}
               placeholder="Enter each requirement on a new line"
               rows={4}
