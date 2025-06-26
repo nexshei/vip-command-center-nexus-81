@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,7 +20,9 @@ import {
   Percent,
   Download,
   Send,
-  Edit
+  Edit,
+  Eye,
+  Clock
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -40,6 +41,17 @@ interface LineItem {
   quantity: number;
   unitPrice: number;
   total: number;
+}
+
+interface Quote {
+  id: string;
+  quote_number: string;
+  client_name: string;
+  service_type: string;
+  total_amount: number;
+  status: 'draft' | 'pending' | 'approved' | 'rejected';
+  created_at: string;
+  expiry_date?: string;
 }
 
 const GenerateQuote = () => {
@@ -80,6 +92,50 @@ const GenerateQuote = () => {
       email: 'sarah.williams@megacorp.com',
       phone: '+254-555-123-456',
       company: 'MegaCorp International'
+    }
+  ]);
+
+  // Mock previous quotes data
+  const [previousQuotes] = useState<Quote[]>([
+    {
+      id: '1',
+      quote_number: 'Q-2024-001',
+      client_name: 'Ambassador Johnson',
+      service_type: 'Diplomatic Meeting',
+      total_amount: 850000,
+      status: 'approved',
+      created_at: '2024-06-20T10:30:00Z',
+      expiry_date: '2024-07-20'
+    },
+    {
+      id: '2',
+      quote_number: 'Q-2024-002',
+      client_name: 'Minister Chen',
+      service_type: 'State Reception',
+      total_amount: 1200000,
+      status: 'pending',
+      created_at: '2024-06-22T14:15:00Z',
+      expiry_date: '2024-07-22'
+    },
+    {
+      id: '3',
+      quote_number: 'Q-2024-003',
+      client_name: 'Sarah Williams',
+      service_type: 'Corporate Event',
+      total_amount: 650000,
+      status: 'draft',
+      created_at: '2024-06-24T09:45:00Z',
+      expiry_date: '2024-07-24'
+    },
+    {
+      id: '4',
+      quote_number: 'Q-2024-004',
+      client_name: 'Ambassador Johnson',
+      service_type: 'Government Protocol',
+      total_amount: 420000,
+      status: 'rejected',
+      created_at: '2024-06-18T16:20:00Z',
+      expiry_date: '2024-07-18'
     }
   ]);
 
@@ -163,6 +219,21 @@ const GenerateQuote = () => {
     return subtotal - discount + tax;
   };
 
+  const getStatusBadge = (status: Quote['status']) => {
+    switch (status) {
+      case 'approved':
+        return <Badge className="bg-green-500 text-white">Approved</Badge>;
+      case 'pending':
+        return <Badge className="bg-yellow-500 text-white">Pending</Badge>;
+      case 'draft':
+        return <Badge className="bg-gray-500 text-white">Draft</Badge>;
+      case 'rejected':
+        return <Badge className="bg-red-500 text-white">Rejected</Badge>;
+      default:
+        return <Badge className="bg-gray-500 text-white">{status}</Badge>;
+    }
+  };
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-KE', {
       style: 'currency',
@@ -170,6 +241,21 @@ const GenerateQuote = () => {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  const handleViewQuote = (quote: Quote) => {
+    toast({
+      title: "Quote Details",
+      description: `Viewing details for ${quote.quote_number}`,
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent, isDraft = false) => {
@@ -248,6 +334,69 @@ const GenerateQuote = () => {
             </Badge>
           </div>
         </div>
+
+        {/* Previous Quotes Section */}
+        <Card className="bg-white shadow-sm border-0">
+          <CardHeader className="border-b bg-gray-50">
+            <CardTitle className="text-gray-900 flex items-center">
+              <Clock className="h-5 w-5 mr-2 text-blue-600" />
+              Previous Quotes
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              {previousQuotes.map((quote) => (
+                <div key={quote.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-2 flex-1">
+                      <div className="flex items-center space-x-3">
+                        <FileText className="h-4 w-4 text-blue-600" />
+                        <h3 className="font-semibold text-gray-900">{quote.quote_number}</h3>
+                        {getStatusBadge(quote.status)}
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600">
+                        <div>
+                          <span className="font-medium">Client:</span> {quote.client_name}
+                        </div>
+                        <div>
+                          <span className="font-medium">Service:</span> {quote.service_type}
+                        </div>
+                        <div>
+                          <span className="font-medium">Amount:</span> {formatCurrency(quote.total_amount)}
+                        </div>
+                        <div>
+                          <span className="font-medium">Created:</span> {formatDate(quote.created_at)}
+                        </div>
+                      </div>
+                      {quote.expiry_date && (
+                        <div className="text-sm text-gray-500">
+                          <Calendar className="h-3 w-3 inline mr-1" />
+                          Expires: {formatDate(quote.expiry_date)}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleViewQuote(quote)}
+                        className="border-blue-300 text-blue-600 hover:bg-blue-50"
+                      >
+                        <Eye className="h-3 w-3 mr-1" />
+                        View
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {previousQuotes.length === 0 && (
+                <div className="text-center text-gray-500 py-8">
+                  No previous quotes found.
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Form */}
