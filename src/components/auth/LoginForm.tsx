@@ -7,49 +7,90 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Crown, Lock, Mail } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const LoginForm = () => {
-  const { login } = useAuth();
+  const { login, isLoading } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setIsSubmitting(true);
 
     try {
+      console.log('Attempting login with:', formData.email);
       await login(formData.email, formData.password);
+      
       toast({
         title: "Welcome back!",
         description: "Successfully logged into VIP Admin Dashboard"
       });
+      
+      // Navigate to dashboard after successful login
+      navigate('/dashboard');
     } catch (error) {
+      console.error('Login error:', error);
       toast({
         title: "Login Failed",
         description: "Invalid credentials. Please try again.",
         variant: "destructive"
       });
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
-  const handleDemoLogin = (role: 'super' | 'protocol') => {
+  const handleDemoLogin = async (role: 'super' | 'admin' | 'protocol' | 'user') => {
     const credentials = {
       super: {
         email: 'super@sirole.com',
         password: 'vip123'
       },
+      admin: {
+        email: 'admin@sirole.com',
+        password: 'vip123'
+      },
       protocol: {
         email: 'protocol@sirole.com',
         password: 'vip123'
+      },
+      user: {
+        email: 'user@sirole.com',
+        password: 'vip123'
       }
     };
-    setFormData(credentials[role]);
+    
+    const creds = credentials[role];
+    setFormData(creds);
+    
+    // Auto-login with the selected credentials
+    setIsSubmitting(true);
+    try {
+      console.log('Demo login for:', creds.email);
+      await login(creds.email, creds.password);
+      
+      toast({
+        title: "Demo Login Successful!",
+        description: `Logged in as ${role} user`
+      });
+      
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Demo login error:', error);
+      toast({
+        title: "Demo Login Failed",
+        description: "Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -103,8 +144,12 @@ const LoginForm = () => {
               </div>
             </div>
             
-            <Button type="submit" className="w-full bg-vip-gold hover:bg-vip-gold-light text-black font-medium h-11" disabled={isLoading}>
-              {isLoading ? 'Signing In...' : 'Sign In'}
+            <Button 
+              type="submit" 
+              className="w-full bg-vip-gold hover:bg-vip-gold-light text-black font-medium h-11" 
+              disabled={isSubmitting || isLoading}
+            >
+              {isSubmitting ? 'Signing In...' : 'Sign In'}
             </Button>
           </form>
           
@@ -114,25 +159,52 @@ const LoginForm = () => {
                 <span className="w-full border-t border-vip-gold/30" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-vip-black/60">Demo Accounts</span>
+                <span className="bg-white px-2 text-vip-black/60">Quick Demo Login</span>
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2">
               <Button
+                type="button"
                 variant="outline"
                 onClick={() => handleDemoLogin('super')}
-                className="text-vip-black border-vip-gold/30 hover:bg-vip-gold-light hover:text-black text-sm bg-white"
+                className="text-vip-black border-vip-gold/30 hover:bg-vip-gold-light hover:text-black text-xs bg-white"
+                disabled={isSubmitting}
               >
-                Super Admin
+                Senior Admin
               </Button>
               <Button
+                type="button"
+                variant="outline"
+                onClick={() => handleDemoLogin('admin')}
+                className="text-vip-black border-vip-gold/30 hover:bg-vip-gold-light hover:text-black text-xs bg-white"
+                disabled={isSubmitting}
+              >
+                Admin
+              </Button>
+              <Button
+                type="button"
                 variant="outline"
                 onClick={() => handleDemoLogin('protocol')}
-                className="text-vip-black border-vip-gold/30 hover:bg-vip-gold-light hover:text-black text-sm bg-white"
+                className="text-vip-black border-vip-gold/30 hover:bg-vip-gold-light hover:text-black text-xs bg-white"
+                disabled={isSubmitting}
               >
-                Protocol Admin
+                Sub Admin
               </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => handleDemoLogin('user')}
+                className="text-vip-black border-vip-gold/30 hover:bg-vip-gold-light hover:text-black text-xs bg-white"
+                disabled={isSubmitting}
+              >
+                User
+              </Button>
+            </div>
+
+            <div className="text-xs text-center text-vip-black/60 bg-vip-gold/10 p-3 rounded-lg">
+              <p className="font-medium mb-1">All demo accounts use password: <strong>vip123</strong></p>
+              <p>Click any role button above for instant login</p>
             </div>
           </div>
         </CardContent>

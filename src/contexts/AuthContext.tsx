@@ -84,40 +84,63 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     // Check for stored user session
+    console.log('Checking for stored user session...');
     const storedUser = localStorage.getItem('vip_admin_user');
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        console.log('Found stored user:', parsedUser);
+        setUser(parsedUser);
+      } catch (error) {
+        console.error('Error parsing stored user:', error);
+        localStorage.removeItem('vip_admin_user');
+      }
+    } else {
+      console.log('No stored user found');
     }
     setIsLoading(false);
   }, []);
 
   const hasPermission = (permission: string): boolean => {
-    if (!user) return false;
+    if (!user) {
+      console.log('No user found for permission check:', permission);
+      return false;
+    }
     
     const userPermissions = rolePermissions[user.role] || [];
+    console.log(`Checking permission "${permission}" for role "${user.role}":`, userPermissions);
     
     // Check for exact permission or base permission (without :limited suffix)
-    return userPermissions.includes(permission) || 
-           userPermissions.includes(permission.split(':')[0]);
+    const hasExactPermission = userPermissions.includes(permission);
+    const hasBasePermission = userPermissions.includes(permission.split(':')[0]);
+    
+    console.log(`Permission "${permission}" result:`, hasExactPermission || hasBasePermission);
+    return hasExactPermission || hasBasePermission;
   };
 
   const login = async (email: string, password: string) => {
+    console.log('Login attempt for:', email);
     setIsLoading(true);
+    
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     // Check mock users with correct password
-    const user = mockUsers[email];
-    if (!user || password !== 'vip123') {
+    const foundUser = mockUsers[email];
+    if (!foundUser || password !== 'vip123') {
+      console.error('Invalid credentials for:', email);
+      setIsLoading(false);
       throw new Error('Invalid credentials');
     }
 
-    setUser(user);
-    localStorage.setItem('vip_admin_user', JSON.stringify(user));
+    console.log('Login successful for user:', foundUser);
+    setUser(foundUser);
+    localStorage.setItem('vip_admin_user', JSON.stringify(foundUser));
     setIsLoading(false);
   };
 
   const logout = () => {
+    console.log('Logging out user');
     setUser(null);
     localStorage.removeItem('vip_admin_user');
   };
