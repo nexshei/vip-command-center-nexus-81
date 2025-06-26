@@ -29,16 +29,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Mock users for demo
-  const mockUsers = {
-    'admin@sirole.com': {
+  // Mock users for demo - matching the Index page credentials
+  const mockUsers: Record<string, User> = {
+    'super@sirole.com': {
       id: '1',
+      email: 'super@sirole.com',
+      name: 'Super Admin',
+      avatar: null
+    },
+    'protocol@sirole.com': {
+      id: '2', 
+      email: 'protocol@sirole.com',
+      name: 'Protocol Admin',
+      avatar: null
+    },
+    'admin@sirole.com': {
+      id: '3',
       email: 'admin@sirole.com',
       name: 'Sir Dennis Olele',
       avatar: null
     },
     'user@sirole.com': {
-      id: '2', 
+      id: '4',
       email: 'user@sirole.com',
       name: 'VVIP User',
       avatar: null
@@ -59,7 +71,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // Mock users for demo
+    // Check mock users with correct password
     const user = mockUsers[email];
     if (!user || password !== 'vip123') {
       throw new Error('Invalid credentials');
