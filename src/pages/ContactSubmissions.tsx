@@ -7,9 +7,12 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Search, Mail, MessageSquare, Trash2, Eye, Reply } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { ViewMessageModal } from "@/components/modals/ViewMessageModal";
 
 const ContactSubmissions = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedMessage, setSelectedMessage] = useState<any>(null);
   const { toast } = useToast();
 
   // Mock contact submissions data
@@ -55,10 +58,8 @@ const ContactSubmissions = () => {
   };
 
   const handleViewDetails = (submission: any) => {
-    toast({
-      title: "Contact Details",
-      description: `Opening detailed view for ${submission.name}'s message.`,
-    });
+    setSelectedMessage(submission);
+    setIsViewModalOpen(true);
   };
 
   const handleReply = (submission: any) => {
@@ -86,7 +87,6 @@ const ContactSubmissions = () => {
         </div>
       </div>
 
-      {/* Stats */}
       <div className="grid gap-6 md:grid-cols-3">
         <Card className="vip-glass border-vip-gold/20">
           <CardHeader className="pb-3">
@@ -136,7 +136,6 @@ const ContactSubmissions = () => {
         </Card>
       </div>
 
-      {/* Search */}
       <Card className="vip-glass border-vip-gold/20">
         <CardHeader>
           <CardTitle className="text-vip-black">Search Messages</CardTitle>
@@ -154,7 +153,6 @@ const ContactSubmissions = () => {
         </CardContent>
       </Card>
 
-      {/* Messages Table */}
       <Card className="vip-glass border-vip-gold/20">
         <CardHeader>
           <CardTitle className="text-vip-gold flex items-center">
@@ -269,6 +267,13 @@ const ContactSubmissions = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* View Message Modal */}
+      <ViewMessageModal
+        open={isViewModalOpen}
+        onOpenChange={setIsViewModalOpen}
+        message={selectedMessage}
+      />
     </div>
   );
 };

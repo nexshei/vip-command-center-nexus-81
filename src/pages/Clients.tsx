@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Users, Plus, Search, Mail, Phone, Building, Edit, Trash2, User } from 'lucide-react';
+import { AddClientModal } from '@/components/modals/AddClientModal';
+import { EditItemModal } from '@/components/modals/EditItemModal';
 
 interface Client {
   id: string;
@@ -51,6 +52,9 @@ const mockClients: Client[] = [
 const Clients = () => {
   const [clients, setClients] = useState<Client[]>(mockClients);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const { toast } = useToast();
 
   const filteredClients = clients.filter((client) =>
@@ -68,18 +72,17 @@ const Clients = () => {
     });
   };
 
-  const handleAddClient = () => {
-    toast({
-      title: "Feature Unavailable",
-      description: "Client management features require database connection.",
-    });
+  const handleAddClient = (newClient: Client) => {
+    setClients(prev => [newClient, ...prev]);
   };
 
   const handleEditClient = (client: Client) => {
-    toast({
-      title: "Feature Unavailable",
-      description: "Client editing features require database connection.",
-    });
+    setSelectedClient(client);
+    setIsEditModalOpen(true);
+  };
+
+  const handleClientUpdated = (updatedClient: Client) => {
+    setClients(prev => prev.map(c => c.id === updatedClient.id ? updatedClient : c));
   };
 
   return (
@@ -91,7 +94,7 @@ const Clients = () => {
             <p className="text-vip-gold/70 mt-1">Manage your VVIP client database</p>
           </div>
           <Button 
-            onClick={handleAddClient}
+            onClick={() => setIsAddModalOpen(true)}
             className="bg-vip-gold text-black hover:bg-vip-gold/90"
           >
             <Plus className="h-4 w-4 mr-2" />
@@ -192,7 +195,7 @@ const Clients = () => {
                   {searchTerm ? 'No clients match your search criteria.' : 'Start building your VVIP client database.'}
                 </p>
                 <Button 
-                  onClick={handleAddClient}
+                  onClick={() => setIsAddModalOpen(true)}
                   className="bg-vip-gold text-black hover:bg-vip-gold/90"
                 >
                   <Plus className="h-4 w-4 mr-2" />
@@ -203,6 +206,23 @@ const Clients = () => {
           </div>
         )}
       </div>
+
+      {/* Modals */}
+      <AddClientModal 
+        open={isAddModalOpen}
+        onOpenChange={setIsAddModalOpen}
+        onClientAdded={handleAddClient}
+      />
+      
+      {selectedClient && (
+        <EditItemModal
+          open={isEditModalOpen}
+          onOpenChange={setIsEditModalOpen}
+          item={selectedClient}
+          type="client"
+          onItemUpdated={handleClientUpdated}
+        />
+      )}
     </div>
   );
 };

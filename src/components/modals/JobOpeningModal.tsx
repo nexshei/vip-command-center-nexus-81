@@ -171,7 +171,7 @@ export const JobOpeningModal = ({ open, onOpenChange, onJobAdded }: JobOpeningMo
               Cancel
             </Button>
             <Button type="submit" className="px-6 bg-vip-gold text-white hover:bg-vip-gold-dark">
-              Create
+              Create Job
             </Button>
           </div>
         </form>
