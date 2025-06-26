@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Search, Package, Plus, Edit, Trash2 } from 'lucide-react';
 import { EditItemModal } from '@/components/modals/EditItemModal';
 import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
+import { AddItemModalTrigger } from '@/components/modals/AddItemModalTrigger';
 
 // Mock data for inventory items
 const mockInventoryItems = [
@@ -78,6 +78,10 @@ const Inventory = () => {
     });
   };
 
+  const handleItemAdded = (newItem: any) => {
+    setItems(prev => [...prev, { ...newItem, status: 'Available' }]);
+  };
+
   return (
     <div className="min-h-screen bg-black text-white p-6">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -138,10 +142,7 @@ const Inventory = () => {
                   className="pl-10 border-vip-gold/30 bg-white text-vip-black focus:border-vip-gold"
                 />
               </div>
-              <Button className="bg-vip-gold text-black hover:bg-vip-gold/80">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Item
-              </Button>
+              <AddItemModalTrigger onItemAdded={handleItemAdded} />
             </div>
           </CardContent>
         </Card>

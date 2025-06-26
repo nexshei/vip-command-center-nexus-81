@@ -1,12 +1,12 @@
-
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Eye, Edit, Trash2, Briefcase, MapPin, Calendar, Users } from 'lucide-react';
+import { Plus, Search, Eye, Edit, Trash2, Briefcase, MapPin, Calendar, Users, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { JobOpeningModalTrigger } from '@/components/modals/JobOpeningModal';
 
 interface Job {
   id: string;
@@ -133,11 +133,18 @@ const Careers = () => {
     }
   };
 
-  const handleAddJob = () => {
-    toast({
-      title: "Feature Unavailable",
-      description: "Job management features require database connection.",
-    });
+  const handleAddJob = (newJob: any) => {
+    const jobWithId = {
+      ...newJob,
+      id: Date.now().toString(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      employment_type: 'full-time',
+      salary_range: null,
+      application_deadline: null,
+      requirements: newJob.requirements ? [newJob.requirements] : null
+    };
+    setJobs(prev => [...prev, jobWithId]);
   };
 
   const handleEditJob = (job: Job) => {
@@ -164,6 +171,13 @@ const Careers = () => {
     });
   };
 
+  const handleDownloadCV = (application: Application) => {
+    toast({
+      title: "Download CV",
+      description: `Downloading CV for ${application.full_name}...`,
+    });
+  };
+
   return (
     <div className="space-y-6 p-6 max-w-7xl mx-auto">
       {/* Header */}
@@ -172,10 +186,7 @@ const Careers = () => {
           <h1 className="text-3xl font-serif font-bold text-vip-black">Career Portal Management</h1>
           <p className="text-vip-gold/80 mt-2">Manage job postings and track applications</p>
         </div>
-        <Button onClick={handleAddJob} className="bg-vip-gold text-black hover:bg-vip-gold/90">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Job Posting
-        </Button>
+        <JobOpeningModalTrigger onJobAdded={handleAddJob} />
       </div>
 
       {/* Summary Stats */}
@@ -375,9 +386,20 @@ const Careers = () => {
                           {new Date(application.applied_at).toLocaleDateString()}
                         </p>
                       </div>
-                      <Badge className={getApplicationStatusColor(application.status)}>
-                        {application.status}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge className={getApplicationStatusColor(application.status)}>
+                          {application.status}
+                        </Badge>
+                        <Button
+                          onClick={() => handleDownloadCV(application)}
+                          variant="outline"
+                          size="sm"
+                          className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+                        >
+                          <Download className="h-3 w-3 mr-1" />
+                          CV
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 );
