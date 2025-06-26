@@ -17,10 +17,24 @@ const Index = () => {
 
   // Show login form if requested
   if (showLogin) {
-    return <LoginForm />;
+    return (
+      <div>
+        <LoginForm />
+        <div className="fixed top-4 left-4 z-50">
+          <Button 
+            variant="outline" 
+            onClick={() => setShowLogin(false)}
+            className="bg-white text-black hover:bg-gray-100"
+          >
+            ← Back to Home
+          </Button>
+        </div>
+      </div>
+    );
   }
 
-  return <div className="min-h-screen vip-gradient text-white relative overflow-hidden">
+  return (
+    <div className="min-h-screen vip-gradient text-white relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-gradient-to-br from-black/30 to-transparent"></div>
       
@@ -45,8 +59,8 @@ const Index = () => {
 
           {/* Features Grid */}
           <div className="grid md:grid-cols-3 gap-6 my-12 animate-fade-in-up" style={{
-          animationDelay: '0.2s'
-        }}>
+            animationDelay: '0.2s'
+          }}>
             <div className="bg-black/80 border border-vip-gold/30 rounded-2xl p-6 vip-hover-lift backdrop-blur-sm">
               <Shield className="h-8 w-8 text-vip-gold mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2 text-white">Secure Access</h3>
@@ -66,15 +80,19 @@ const Index = () => {
 
           {/* CTA Section */}
           <div className="space-y-6 animate-fade-in-up" style={{
-          animationDelay: '0.4s'
-        }}>
+            animationDelay: '0.4s'
+          }}>
             <p className="text-lg opacity-90 max-w-2xl mx-auto">
               Access the premier administrative platform for VVIP protocol management, 
               client relations, and luxury service coordination.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button size="lg" className="vip-gold-gradient hover:opacity-90 text-white px-8 py-3 text-lg font-medium vip-hover-lift" onClick={() => setShowLogin(true)}>
+              <Button 
+                size="lg" 
+                className="vip-gold-gradient hover:opacity-90 text-white px-8 py-3 text-lg font-medium vip-hover-lift" 
+                onClick={() => setShowLogin(true)}
+              >
                 <Crown className="h-5 w-5 mr-2" />
                 Sign In to Dashboard
               </Button>
@@ -98,7 +116,8 @@ const Index = () => {
           </div>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
 
 export default Index;

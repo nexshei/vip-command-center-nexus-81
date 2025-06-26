@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { Navigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Shield, AlertTriangle } from 'lucide-react';
 
@@ -16,6 +17,11 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   fallback 
 }) => {
   const { hasPermission, user } = useAuth();
+
+  // If user is not logged in at all, redirect to home page for login
+  if (!user) {
+    return <Navigate to="/" replace />;
+  }
 
   if (!hasPermission(permission)) {
     if (fallback) {
