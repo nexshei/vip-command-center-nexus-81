@@ -38,20 +38,6 @@ const LoginForm = () => {
     }
   };
 
-  const handleDemoLogin = (role: 'super' | 'protocol') => {
-    const credentials = {
-      super: {
-        email: 'senioradmin@sirolevvipprotocolltd.co.ke',
-        password: 'Olele@2025'
-      },
-      protocol: {
-        email: 'subadmin@sirolevvipprotocolltd.co.ke',
-        password: 'Olele@2025'
-      }
-    };
-    setFormData(credentials[role]);
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center vip-gradient p-4">
       <div className="absolute inset-0 bg-black/20"></div>
@@ -107,34 +93,6 @@ const LoginForm = () => {
               {isLoading ? 'Signing In...' : 'Sign In'}
             </Button>
           </form>
-          
-          <div className="space-y-3">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-vip-gold/30" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-vip-black/60">Demo Accounts</span>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-3">
-              <Button
-                variant="outline"
-                onClick={() => handleDemoLogin('super')}
-                className="text-vip-black border-vip-gold/30 hover:bg-vip-gold-light hover:text-black text-sm bg-white"
-              >
-                Super Admin
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => handleDemoLogin('protocol')}
-                className="text-vip-black border-vip-gold/30 hover:bg-vip-gold-light hover:text-black text-sm bg-white"
-              >
-                Protocol Admin
-              </Button>
-            </div>
-          </div>
         </CardContent>
       </Card>
     </div>
