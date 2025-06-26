@@ -18,9 +18,9 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 }) => {
   const { hasPermission, user } = useAuth();
 
-  // If user is not logged in at all, redirect to home page for login
+  // If user is not logged in at all, redirect to login page
   if (!user) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   if (!hasPermission(permission)) {

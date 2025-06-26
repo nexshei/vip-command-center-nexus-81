@@ -1,36 +1,17 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Crown, Shield, Star, Zap } from 'lucide-react';
-import LoginForm from '@/components/auth/LoginForm';
 import { useAuth } from '@/contexts/AuthContext';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 const Index = () => {
-  const [showLogin, setShowLogin] = useState(false);
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   // If user is already logged in, redirect to dashboard
   if (user) {
     return <Navigate to="/dashboard" replace />;
-  }
-
-  // Show login form if requested
-  if (showLogin) {
-    return (
-      <div>
-        <LoginForm />
-        <div className="fixed top-4 left-4 z-50">
-          <Button 
-            variant="outline" 
-            onClick={() => setShowLogin(false)}
-            className="bg-white text-black hover:bg-gray-100"
-          >
-            ← Back to Home
-          </Button>
-        </div>
-      </div>
-    );
   }
 
   return (
@@ -91,10 +72,10 @@ const Index = () => {
               <Button 
                 size="lg" 
                 className="vip-gold-gradient hover:opacity-90 text-white px-8 py-3 text-lg font-medium vip-hover-lift" 
-                onClick={() => setShowLogin(true)}
+                onClick={() => navigate('/login')}
               >
                 <Crown className="h-5 w-5 mr-2" />
-                Sign In to Dashboard
+                Admin Login
               </Button>
               
               <div className="text-sm opacity-75 bg-black/40 p-4 rounded-lg border border-vip-gold/20">
@@ -108,11 +89,6 @@ const Index = () => {
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* Status Indicator */}
-          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-            
           </div>
         </div>
       </div>

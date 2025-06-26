@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { ToastProvider } from "@/components/ui/toast";
@@ -7,6 +6,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import Index from "@/pages/Index";
+import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 import Bookings from "@/pages/Bookings";
 import Clients from "@/pages/Clients";
@@ -25,6 +25,7 @@ function App() {
           <div className="min-h-screen bg-background font-sans antialiased">
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
               
               {/* Protected Dashboard Routes */}
               <Route path="/dashboard" element={
@@ -92,7 +93,7 @@ function App() {
               } />
 
               {/* Redirect unknown routes */}
-              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </div>
           <Toaster />
