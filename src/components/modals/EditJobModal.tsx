@@ -31,7 +31,7 @@ interface EditJobModalProps {
 }
 
 export const EditJobModal = ({ open, onOpenChange, job, onJobUpdated }: EditJobModalProps) => {
-  const [formData, setFormData] = useState<Partial<Job>>({});
+  const [formData, setFormData] = useState<Partial<Job> & { requirements?: string }>({});
   const { toast } = useToast();
 
   useEffect(() => {
@@ -47,12 +47,14 @@ export const EditJobModal = ({ open, onOpenChange, job, onJobUpdated }: EditJobM
     e.preventDefault();
     if (!job) return;
 
+    const requirementsArray = typeof formData.requirements === 'string' 
+      ? formData.requirements.split('\n').filter(req => req.trim()) 
+      : formData.requirements || [];
+
     const updatedJob: Job = {
       ...job,
       ...formData,
-      requirements: typeof formData.requirements === 'string' 
-        ? formData.requirements.split('\n').filter(req => req.trim()) 
-        : formData.requirements || null,
+      requirements: requirementsArray.length > 0 ? requirementsArray : null,
       updated_at: new Date().toISOString()
     };
 
@@ -72,6 +74,12 @@ export const EditJobModal = ({ open, onOpenChange, job, onJobUpdated }: EditJobM
   };
 
   if (!job) return null;
+
+  const requirementsValue = typeof formData.requirements === 'string' 
+    ? formData.requirements 
+    : Array.isArray(formData.requirements) 
+      ? formData.requirements.join('\n') 
+      : '';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -167,7 +175,7 @@ export const EditJobModal = ({ open, onOpenChange, job, onJobUpdated }: EditJobM
             <Label htmlFor="requirements" className="text-sm font-medium text-vip-black">Requirements</Label>
             <Textarea
               id="requirements"
-              value={typeof formData.requirements === 'string' ? formData.requirements : (formData.requirements || []).join('\n')}
+              value={requirementsValue}
               onChange={(e) => setFormData(prev => ({ ...prev, requirements: e.target.value }))}
               placeholder="Enter each requirement on a new line"
               rows={4}

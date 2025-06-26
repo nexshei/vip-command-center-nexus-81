@@ -39,8 +39,9 @@ export const EventInventoryTracker = ({ events, onUpdateEvent }: EventInventoryT
 
     const updatedAllocations = event.allocations.map((allocation, index) => {
       if (index === allocationIndex) {
-        const status = returnedQuantity === allocation.allocatedQuantity ? 'returned' : 
-                      returnedQuantity > 0 ? 'allocated' : 'missing';
+        const status: 'allocated' | 'returned' | 'missing' = 
+          returnedQuantity === allocation.allocatedQuantity ? 'returned' : 
+          returnedQuantity > 0 ? 'allocated' : 'missing';
         return { ...allocation, returnedQuantity, status };
       }
       return allocation;
