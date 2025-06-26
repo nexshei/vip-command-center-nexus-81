@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
 import { 
   Plus, 
   Calendar, 
@@ -18,7 +17,6 @@ import {
 const QuickActions = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { hasPermission } = useAuth();
   
   const actions = [
     {
@@ -26,7 +24,6 @@ const QuickActions = () => {
       description: "Create VVIP appointment",
       icon: Plus,
       action: () => navigate('/create-booking'),
-      permission: 'create-booking',
       primary: true
     },
     {
@@ -34,7 +31,6 @@ const QuickActions = () => {
       description: "Check schedule",
       icon: Calendar,
       action: () => navigate('/bookings'),
-      permission: 'bookings',
       primary: false
     },
     {
@@ -42,7 +38,6 @@ const QuickActions = () => {
       description: "Client directory",
       icon: Users,
       action: () => navigate('/clients'),
-      permission: 'clients',
       primary: false
     },
     {
@@ -50,7 +45,6 @@ const QuickActions = () => {
       description: "Communication",
       icon: Mail,
       action: () => navigate('/email'),
-      permission: 'email',
       primary: false
     },
     {
@@ -58,7 +52,6 @@ const QuickActions = () => {
       description: "Create estimate",
       icon: FileText,
       action: () => navigate('/generate-quote'),
-      permission: 'generate-quote',
       primary: false
     },
     {
@@ -79,13 +72,9 @@ const QuickActions = () => {
           description: "Report downloaded successfully.",
         });
       },
-      permission: 'dashboard',
       primary: false
     }
   ];
-
-  // Filter actions based on user permissions
-  const allowedActions = actions.filter(action => hasPermission(action.permission));
 
   return (
     <Card className="bg-white shadow-sm">
@@ -97,7 +86,7 @@ const QuickActions = () => {
       </CardHeader>
       <CardContent>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {allowedActions.map((action, index) => (
+          {actions.map((action, index) => (
             <Button
               key={action.title}
               onClick={action.action}

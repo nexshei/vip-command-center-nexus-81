@@ -13,117 +13,98 @@ import {
 } from "@/components/ui/sidebar";
 import { Home, Calendar, FileText, Users, Settings, Plus, Package, Mail, UserCheck, MessageSquare, List, Image, UserCog, Briefcase } from "lucide-react";
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
 import { cn } from "@/lib/utils";
 
 export const VipSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { hasPermission, user } = useAuth();
 
   const navigationItems = [
     {
       name: 'Dashboard',
       icon: Home,
       path: '/dashboard',
-      permission: 'dashboard',
       description: 'Overview of all VIP services'
     },
     {
       name: 'Create Booking',
       icon: Plus,
       path: '/create-booking',
-      permission: 'create-booking',
       description: 'Schedule new VVIP events'
     },
     {
       name: 'Events',
       icon: Calendar,
       path: '/bookings',
-      permission: 'bookings',
       description: 'View and manage all events'
     },
     {
       name: 'List Bookings',
       icon: List,
       path: '/list-bookings',
-      permission: 'list-bookings',
       description: 'View meeting requests from frontend'
     },
     {
       name: 'Generate Quote',
       icon: FileText,
       path: '/generate-quote',
-      permission: 'generate-quote',
       description: 'Create custom service quotes'
     },
     {
       name: 'Clients',
       icon: Users,
       path: '/clients',
-      permission: 'clients',
       description: 'Manage VVIP client database'
     },
     {
       name: 'Contact Messages',
       icon: MessageSquare,
       path: '/contact-submissions',
-      permission: 'contact-messages',
       description: 'View contact form submissions'
     },
     {
       name: 'Inventory',
       icon: Package,
       path: '/inventory',
-      permission: 'inventory',
       description: 'Track protocol equipment'
     },
     {
       name: 'Careers',
       icon: Briefcase,
       path: '/careers',
-      permission: 'careers',
       description: 'Manage job postings and applications'
     },
     {
       name: 'Gallery',
       icon: Image,
       path: '/gallery',
-      permission: 'gallery',
       description: 'Manage photo gallery'
     },
     {
       name: 'Staff',
       icon: UserCog,
       path: '/staff',
-      permission: 'staff',
       description: 'Manage staff members'
     },
     {
       name: 'Email',
       icon: Mail,
       path: '/email',
-      permission: 'email',
       description: 'Send and track communications'
     },
     {
       name: 'VVIP Subscribers',
       icon: UserCheck,
       path: '/subscribers',
-      permission: 'subscribers',
       description: 'Manage subscription members'
     },
     {
       name: 'Settings',
       icon: Settings,
       path: '/settings',
-      permission: 'settings',
       description: 'Configure system settings'
     },
   ];
-
-  // Filter navigation items based on user permissions
-  const allowedItems = navigationItems.filter(item => hasPermission(item.permission));
 
   return (
     <Sidebar className="border-r border-vip-gold/30 bg-black">
@@ -136,9 +117,7 @@ export const VipSidebar = () => {
           />
           <div>
             <h2 className="text-lg font-serif font-bold text-vip-gold">VVIP Panel</h2>
-            <p className="text-xs text-vip-gold/70">
-              {user?.role || 'User'} Access
-            </p>
+            <p className="text-xs text-vip-gold/70">Manage exclusive services</p>
           </div>
         </div>
       </SidebarHeader>
@@ -150,7 +129,7 @@ export const VipSidebar = () => {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {allowedItems.map((item) => (
+              {navigationItems.map((item) => (
                 <SidebarMenuItem key={item.name}>
                   <SidebarMenuButton 
                     asChild

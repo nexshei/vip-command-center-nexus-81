@@ -2,20 +2,8 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Crown, Shield, Star, Zap } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { Navigate, useNavigate } from 'react-router-dom';
-
 const Index = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-
-  // If user is already logged in, redirect to dashboard
-  if (user) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  return (
-    <div className="min-h-screen vip-gradient text-white relative overflow-hidden">
+  return <div className="min-h-screen vip-gradient text-white relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-gradient-to-br from-black/30 to-transparent"></div>
       
@@ -40,8 +28,8 @@ const Index = () => {
 
           {/* Features Grid */}
           <div className="grid md:grid-cols-3 gap-6 my-12 animate-fade-in-up" style={{
-            animationDelay: '0.2s'
-          }}>
+          animationDelay: '0.2s'
+        }}>
             <div className="bg-black/80 border border-vip-gold/30 rounded-2xl p-6 vip-hover-lift backdrop-blur-sm">
               <Shield className="h-8 w-8 text-vip-gold mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2 text-white">Secure Access</h3>
@@ -61,39 +49,34 @@ const Index = () => {
 
           {/* CTA Section */}
           <div className="space-y-6 animate-fade-in-up" style={{
-            animationDelay: '0.4s'
-          }}>
+          animationDelay: '0.4s'
+        }}>
             <p className="text-lg opacity-90 max-w-2xl mx-auto">
               Access the premier administrative platform for VVIP protocol management, 
               client relations, and luxury service coordination.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button 
-                size="lg" 
-                className="vip-gold-gradient hover:opacity-90 text-white px-8 py-3 text-lg font-medium vip-hover-lift" 
-                onClick={() => navigate('/login')}
-              >
+              <Button size="lg" className="vip-gold-gradient hover:opacity-90 text-white px-8 py-3 text-lg font-medium vip-hover-lift" onClick={() => window.location.href = '/dashboard'}>
                 <Crown className="h-5 w-5 mr-2" />
-                Admin Login
+                Enter Dashboard
               </Button>
               
-              <div className="text-sm opacity-75 bg-black/40 p-4 rounded-lg border border-vip-gold/20">
-                <p className="text-vip-gold font-semibold mb-2">Demo Credentials:</p>
-                <div className="space-y-1 text-left">
-                  <p><strong>Senior Admin:</strong> super@sirole.com</p>
-                  <p><strong>Senior Admin:</strong> admin@sirole.com</p>
-                  <p><strong>Sub Admin:</strong> protocol@sirole.com</p>
-                  <p><strong>User:</strong> user@sirole.com</p>
-                  <p><strong>Password:</strong> vip123</p>
-                </div>
+              <div className="text-sm opacity-75">
+                <p>Demo Credentials:</p>
+                <p><strong>Super Admin:</strong> super@sirole.com</p>
+                <p><strong>Protocol Admin:</strong> protocol@sirole.com</p>
+                <p><strong>Password:</strong> vip123</p>
               </div>
             </div>
           </div>
+
+          {/* Status Indicator */}
+          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+            
+          </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
