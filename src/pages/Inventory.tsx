@@ -5,253 +5,216 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
-import { Package, Plus, Search, MapPin, Edit, Trash2, Lock } from 'lucide-react';
+import { Search, Package, Plus, Edit, Trash2 } from 'lucide-react';
+import { EditItemModal } from '@/components/modals/EditItemModal';
+import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
 
-interface InventoryItem {
-  id: string;
-  item_name: string;
-  description: string | null;
-  quantity: number;
-  location: string;
-  status: string;
-  created_at: string;
-}
-
-// Mock data for inventory
-const mockInventory: InventoryItem[] = [
+// Mock data for inventory items
+const mockInventoryItems = [
   {
     id: '1',
-    item_name: 'Luxury Vehicle Fleet',
-    description: 'Mercedes S-Class vehicles for VIP transport',
-    quantity: 5,
-    location: 'Main Garage',
-    status: 'available',
-    created_at: '2024-01-15T10:00:00Z'
+    item_name: 'VIP Welcome Banners',
+    description: 'Premium fabric banners for event entrances',
+    quantity: 25,
+    location: 'Storage Room A',
+    status: 'Available'
   },
   {
     id: '2',
-    item_name: 'Security Equipment',
-    description: 'Metal detectors and communication devices',
-    quantity: 15,
-    location: 'Security Office',
-    status: 'in_use',
-    created_at: '2024-01-16T10:00:00Z'
+    item_name: 'Red Carpet Runners',
+    description: '50ft premium red carpet runners',
+    quantity: 8,
+    location: 'Storage Room B',
+    status: 'Available'
   },
   {
     id: '3',
-    item_name: 'Event Decorations',
-    description: 'Premium flowers and decorative elements',
-    quantity: 25,
-    location: 'Storage Room A',
-    status: 'available',
-    created_at: '2024-01-17T10:00:00Z'
+    item_name: 'Protocol Podiums',
+    description: 'Adjustable height speaking podiums',
+    quantity: 3,
+    location: 'Equipment Room',
+    status: 'In Use'
   }
 ];
 
 const Inventory = () => {
-  const [inventory, setInventory] = useState<InventoryItem[]>(mockInventory);
+  const [items, setItems] = useState(mockInventoryItems);
   const [searchTerm, setSearchTerm] = useState('');
+  const [editingItem, setEditingItem] = useState(null);
+  const [deletingItem, setDeletingItem] = useState(null);
   const { toast } = useToast();
-  const { user, hasPermission } = useAuth();
 
-  const isProtocolAdmin = user?.role === 'protocol_admin';
-
-  const filteredInventory = inventory.filter((item) =>
-    item.item_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.location?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredItems = items.filter(item =>
+    item.item_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleDeleteItem = (item: InventoryItem) => {
-    if (isProtocolAdmin) {
-      toast({
-        title: "Access Restricted",
-        description: "Item deletion is restricted for Protocol Admin users.",
-        variant: "destructive"
-      });
-      return;
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'Available':
+        return <Badge className="bg-green-500 text-white">Available</Badge>;
+      case 'In Use':
+        return <Badge className="bg-yellow-500 text-white">In Use</Badge>;
+      case 'Maintenance':
+        return <Badge className="bg-red-500 text-white">Maintenance</Badge>;
+      default:
+        return <Badge className="bg-gray-500 text-white">{status}</Badge>;
     }
-    setInventory(prev => prev.filter(i => i.id !== item.id));
+  };
+
+  const handleItemUpdated = () => {
+    toast({
+      title: "Item Updated",
+      description: "Inventory item has been updated successfully.",
+    });
+  };
+
+  const handleDeleteItem = (itemId: string) => {
+    setItems(prev => prev.filter(item => item.id !== itemId));
+    setDeletingItem(null);
     toast({
       title: "Item Deleted",
-      description: `${item.item_name} has been removed from inventory.`,
+      description: "Inventory item has been removed.",
     });
-  };
-
-  const handleAddItem = () => {
-    if (isProtocolAdmin) {
-      toast({
-        title: "Access Restricted",
-        description: "Adding new inventory categories is restricted for Protocol Admin users.",
-        variant: "destructive"
-      });
-      return;
-    }
-    toast({
-      title: "Feature Unavailable",
-      description: "Inventory management features require database connection.",
-    });
-  };
-
-  const handleEditItem = (item: InventoryItem) => {
-    if (isProtocolAdmin) {
-      toast({
-        title: "Limited Access",
-        description: "You can edit basic item details but not critical system settings.",
-      });
-    } else {
-      toast({
-        title: "Feature Unavailable",
-        description: "Inventory editing features require database connection.",
-      });
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case 'available':
-        return 'bg-green-500/20 text-green-400 border-green-500/30';
-      case 'in_use':
-        return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
-      case 'maintenance':
-        return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
-      case 'unavailable':
-        return 'bg-red-500/20 text-red-400 border-red-500/30';
-      default:
-        return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
-    }
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto bg-black min-h-screen">
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-6">
+    <div className="min-h-screen bg-black text-white p-6">
+      <div className="max-w-7xl mx-auto space-y-8">
+        <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-serif font-bold text-vip-gold">
-              Inventory Management {isProtocolAdmin && '(Limited Access)'}
+            <h1 className="text-4xl font-serif font-bold text-white mb-2">
+              VVIP Inventory Management
             </h1>
-            <p className="text-vip-gold/70 mt-1">
-              {isProtocolAdmin 
-                ? 'Manage existing items (restricted from adding/deleting categories)'
-                : 'Track and manage VVIP protocol equipment'
-              }
+            <p className="text-xl text-vip-gold">
+              Track and manage protocol equipment and supplies
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            {isProtocolAdmin && (
-              <div className="flex items-center text-vip-gold/60">
-                <Lock className="h-4 w-4 mr-2" />
-                <span className="text-sm">Limited Access</span>
+          <div className="flex items-center space-x-4">
+            <Package className="h-8 w-8 text-vip-gold" />
+            <span className="text-2xl font-bold text-white">{items.length}</span>
+            <span className="text-vip-gold">Total Items</span>
+          </div>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid gap-6 md:grid-cols-3">
+          <Card className="bg-white border border-vip-gold/20">
+            <CardContent className="p-6 text-center">
+              <div className="text-2xl font-bold text-vip-black mb-2">
+                {items.filter(item => item.status === 'Available').length}
               </div>
-            )}
-            <Button 
-              onClick={handleAddItem}
-              className="bg-vip-gold text-black hover:bg-vip-gold/90"
-              disabled={isProtocolAdmin}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Item
-            </Button>
-          </div>
+              <p className="text-vip-gold font-medium">Available Items</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white border border-vip-gold/20">
+            <CardContent className="p-6 text-center">
+              <div className="text-2xl font-bold text-vip-black mb-2">
+                {items.filter(item => item.status === 'In Use').length}
+              </div>
+              <p className="text-vip-gold font-medium">Items In Use</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white border border-vip-gold/20">
+            <CardContent className="p-6 text-center">
+              <div className="text-2xl font-bold text-vip-black mb-2">
+                {items.reduce((sum, item) => sum + item.quantity, 0)}
+              </div>
+              <p className="text-vip-gold font-medium">Total Quantity</p>
+            </CardContent>
+          </Card>
         </div>
 
-        <div className="flex items-center space-x-4 mb-6">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-vip-gold/60" />
-            <Input
-              placeholder="Search inventory..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 border-vip-gold/30 bg-black text-vip-gold"
-            />
-          </div>
-          <Badge variant="outline" className="border-vip-gold/30 text-vip-gold">
-            {filteredInventory.length} Items
-          </Badge>
-        </div>
-      </div>
+        {/* Search and Add */}
+        <Card className="bg-white border border-vip-gold/20">
+          <CardContent className="p-6">
+            <div className="flex justify-between items-center gap-4">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-vip-gold" />
+                <Input
+                  placeholder="Search inventory items..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 border-vip-gold/30 bg-white text-vip-black focus:border-vip-gold"
+                />
+              </div>
+              <Button className="bg-vip-gold text-black hover:bg-vip-gold/80">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Item
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {filteredInventory.map((item) => (
-          <Card key={item.id} className="bg-black border-vip-gold/30 hover:border-vip-gold/50 transition-colors">
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="h-10 w-10 rounded-full bg-vip-gold/20 flex items-center justify-center">
-                    <Package className="h-5 w-5 text-vip-gold" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg text-vip-gold">{item.item_name}</CardTitle>
-                    <div className="flex items-center space-x-2 mt-1">
-                      <Badge className={getStatusColor(item.status)}>
-                        {item.status?.replace('_', ' ') || 'Unknown'}
-                      </Badge>
-                      <span className="text-sm text-vip-gold/70">Qty: {item.quantity || 0}</span>
+        {/* Inventory Items */}
+        <Card className="bg-white border border-vip-gold/20">
+          <CardHeader className="border-b border-vip-gold/10">
+            <CardTitle className="text-xl font-serif text-vip-black">Inventory Items</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="space-y-4 p-6">
+              {filteredItems.map((item) => (
+                <div key={item.id} className="border border-vip-gold/20 rounded-lg p-4 hover:bg-vip-gold/5 transition-colors">
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-2 flex-1">
+                      <div className="flex items-center space-x-3">
+                        <Package className="h-5 w-5 text-vip-gold" />
+                        <h3 className="font-semibold text-vip-black">{item.item_name}</h3>
+                        {getStatusBadge(item.status)}
+                      </div>
+                      <p className="text-vip-black/70">{item.description}</p>
+                      <div className="flex space-x-4 text-sm text-vip-black/60">
+                        <span>Quantity: {item.quantity}</span>
+                        <span>Location: {item.location}</span>
+                      </div>
+                    </div>
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditingItem(item)}
+                        className="border-vip-gold/30 text-vip-black hover:bg-vip-gold hover:text-black"
+                      >
+                        <Edit className="h-3 w-3 mr-1" />
+                        Edit
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setDeletingItem(item)}
+                        className="border-red-300 text-red-600 hover:bg-red-500 hover:text-white"
+                      >
+                        <Trash2 className="h-3 w-3 mr-1" />
+                        Delete
+                      </Button>
                     </div>
                   </div>
                 </div>
-                <div className="flex space-x-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleEditItem(item)}
-                    className="text-vip-gold hover:text-vip-gold-light hover:bg-vip-gold/10"
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDeleteItem(item)}
-                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                    disabled={isProtocolAdmin}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {item.description && (
-                <p className="text-sm text-vip-gold/80">{item.description}</p>
-              )}
-              {item.location && (
-                <div className="flex items-center space-x-2 text-sm">
-                  <MapPin className="h-4 w-4 text-vip-gold/60" />
-                  <span className="text-vip-gold/80">{item.location}</span>
+              ))}
+              {filteredItems.length === 0 && (
+                <div className="text-center text-vip-black/60 py-8">
+                  {searchTerm ? 'No items match your search.' : 'No inventory items yet.'}
                 </div>
               )}
-              <div className="text-xs text-vip-gold/50 pt-2 border-t border-vip-gold/20">
-                Added: {new Date(item.created_at).toLocaleDateString()}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-
-        {filteredInventory.length === 0 && (
-          <div className="col-span-full">
-            <Card className="bg-black border-vip-gold/30">
-              <CardContent className="p-8 text-center">
-                <Package className="h-12 w-12 text-vip-gold/40 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-vip-gold mb-2">No Items Found</h3>
-                <p className="text-vip-gold/70 mb-4">
-                  {searchTerm ? 'No items match your search criteria.' : 'Start tracking your VVIP protocol equipment.'}
-                </p>
-                {!isProtocolAdmin && (
-                  <Button 
-                    onClick={handleAddItem}
-                    className="bg-vip-gold text-black hover:bg-vip-gold/90"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add First Item
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
+
+      {/* Modals */}
+      <EditItemModal
+        open={!!editingItem}
+        onOpenChange={(open) => !open && setEditingItem(null)}
+        item={editingItem}
+        onItemUpdated={handleItemUpdated}
+      />
+      <DeleteConfirmationModal
+        open={!!deletingItem}
+        onOpenChange={(open) => !open && setDeletingItem(null)}
+        title="Delete Inventory Item"
+        description={`Are you sure you want to delete "${deletingItem?.item_name}"? This action cannot be undone.`}
+        onConfirm={() => deletingItem && handleDeleteItem(deletingItem.id)}
+      />
     </div>
   );
 };

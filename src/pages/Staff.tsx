@@ -1,310 +1,238 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Eye, Edit, Trash2, Users, Phone, Mail, Lock } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
-
-interface StaffMember {
-  id: string;
-  full_name: string | null;
-  role: string | null;
-  email: string | null;
-  phone: string | null;
-  status: string | null;
-  notes: string | null;
-  created_at: string | null;
-}
+import { Search, Users, Plus, Edit, Trash2, Mail, Phone } from 'lucide-react';
+import { AddStaffModal } from '@/components/modals/AddStaffModal';
+import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
 
 // Mock data for staff members
-const mockStaff: StaffMember[] = [
+const mockStaffMembers = [
   {
     id: '1',
-    full_name: 'John Smith',
-    role: 'Protocol Officer',
-    email: 'john.smith@vip.com',
-    phone: '+1 (555) 123-4567',
-    status: 'active',
-    notes: 'Senior protocol officer with diplomatic experience',
-    created_at: '2024-01-15T10:00:00Z'
+    full_name: 'Sarah Johnson',
+    email: 'sarah.johnson@vipprotocol.com',
+    phone: '+254-700-123-456',
+    role: 'Senior Protocol Officer',
+    status: 'Active',
+    notes: 'Specialized in diplomatic events'
   },
   {
     id: '2',
-    full_name: 'Sarah Johnson',
-    role: 'Event Coordinator',
-    email: 'sarah.johnson@vip.com',
-    phone: '+1 (555) 234-5678',
-    status: 'active',
-    notes: 'Specializes in large-scale VIP events',
-    created_at: '2024-01-16T10:00:00Z'
+    full_name: 'Michael Chen',
+    email: 'michael.chen@vipprotocol.com',
+    phone: '+254-700-234-567',
+    role: 'Security Coordinator',
+    status: 'Active',
+    notes: 'Former military background'
   },
   {
     id: '3',
-    full_name: 'Michael Brown',
-    role: 'Security Head',
-    email: 'michael.brown@vip.com',
-    phone: '+1 (555) 345-6789',
-    status: 'on_leave',
-    notes: 'Currently on medical leave',
-    created_at: '2024-01-17T10:00:00Z'
+    full_name: 'Amanda Williams',
+    email: 'amanda.w@vipprotocol.com',
+    phone: '+254-700-345-678',
+    role: 'Event Coordinator',
+    status: 'On Leave',
+    notes: 'Temporary leave until next month'
   }
 ];
 
 const Staff = () => {
+  const [staff, setStaff] = useState(mockStaffMembers);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedRole, setSelectedRole] = useState('all');
-  const [selectedStatus, setSelectedStatus] = useState('all');
-  const [staffMembers, setStaffMembers] = useState<StaffMember[]>(mockStaff);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [deletingStaff, setDeletingStaff] = useState(null);
   const { toast } = useToast();
-  const { user, hasPermission } = useAuth();
 
-  const isProtocolAdmin = user?.role === 'protocol_admin';
+  const filteredStaff = staff.filter(member =>
+    member.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    member.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    member.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  const filteredStaff = staffMembers.filter(staff => {
-    const matchesSearch = staff.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         staff.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         staff.role?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = selectedRole === 'all' || staff.role === selectedRole;
-    const matchesStatus = selectedStatus === 'all' || staff.status === selectedStatus;
-    return matchesSearch && matchesRole && matchesStatus;
-  });
-
-  const roles = Array.from(new Set(staffMembers.map(staff => staff.role).filter(Boolean)));
-  const statuses = Array.from(new Set(staffMembers.map(staff => staff.status).filter(Boolean)));
-  const activeStaff = staffMembers.filter(staff => staff.status === 'active').length;
-
-  const getStatusColor = (status: string | null) => {
+  const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-800';
-      case 'inactive': return 'bg-red-100 text-red-800';
-      case 'on_leave': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'Active':
+        return <Badge className="bg-green-500 text-white">Active</Badge>;
+      case 'On Leave':
+        return <Badge className="bg-yellow-500 text-white">On Leave</Badge>;
+      case 'Inactive':
+        return <Badge className="bg-red-500 text-white">Inactive</Badge>;
+      default:
+        return <Badge className="bg-gray-500 text-white">{status}</Badge>;
     }
   };
 
-  const handleAddStaff = () => {
+  const handleStaffAdded = () => {
     toast({
-      title: "Access Restricted",
-      description: "Staff management is restricted for Protocol Admin users.",
-      variant: "destructive"
+      title: "Staff Member Added",
+      description: "New staff member has been added successfully.",
     });
   };
 
-  const handleEditStaff = (staff: StaffMember) => {
+  const handleDeleteStaff = (staffId: string) => {
+    setStaff(prev => prev.filter(member => member.id !== staffId));
+    setDeletingStaff(null);
     toast({
-      title: "Access Restricted", 
-      description: "Staff editing is restricted for Protocol Admin users.",
-      variant: "destructive"
-    });
-  };
-
-  const handleDeleteStaff = (staff: StaffMember) => {
-    toast({
-      title: "Access Restricted",
-      description: "Staff deletion is restricted for Protocol Admin users.",
-      variant: "destructive"
-    });
-  };
-
-  const handleViewStaff = (staff: StaffMember) => {
-    toast({
-      title: "Staff Details",
-      description: `Viewing details for ${staff.full_name} - ${staff.role}`,
+      title: "Staff Member Removed",
+      description: "Staff member has been removed from the system.",
     });
   };
 
   return (
-    <div className="space-y-6 p-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-serif font-bold text-vip-black">
-            Staff Management {isProtocolAdmin && '(View Only)'}
-          </h1>
-          <p className="text-vip-gold/80 mt-2">
-            {isProtocolAdmin 
-              ? 'View team member information (management restricted)'
-              : 'Manage your team members and their roles'
-            }
-          </p>
+    <div className="min-h-screen bg-black text-white p-6">
+      <div className="max-w-7xl mx-auto space-y-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-serif font-bold text-white mb-2">
+              VVIP Staff Management
+            </h1>
+            <p className="text-xl text-vip-gold">
+              Manage your protocol team and staff members
+            </p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <Users className="h-8 w-8 text-vip-gold" />
+            <span className="text-2xl font-bold text-white">{staff.length}</span>
+            <span className="text-vip-gold">Total Staff</span>
+          </div>
         </div>
-        {!isProtocolAdmin && (
-          <Button onClick={handleAddStaff} className="bg-vip-gold text-black hover:bg-vip-gold/90">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Staff Member
-          </Button>
-        )}
-        {isProtocolAdmin && (
-          <div className="flex items-center text-vip-gold/60">
-            <Lock className="h-4 w-4 mr-2" />
-            <span className="text-sm">Management Restricted</span>
-          </div>
-        )}
-      </div>
 
-      {/* Summary Stats */}
-      <div className="grid gap-6 md:grid-cols-3">
-        <Card className="vip-glass border-vip-gold/20">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">Total Staff</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-vip-black">{staffMembers.length}</div>
-            <p className="text-xs text-vip-gold/60">Team members</p>
-          </CardContent>
-        </Card>
-        
-        <Card className="vip-glass border-vip-gold/20">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">Active Staff</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-vip-black">{activeStaff}</div>
-            <p className="text-xs text-green-600">Currently active</p>
-          </CardContent>
-        </Card>
+        {/* Stats Cards */}
+        <div className="grid gap-6 md:grid-cols-3">
+          <Card className="bg-white border border-vip-gold/20">
+            <CardContent className="p-6 text-center">
+              <div className="text-2xl font-bold text-vip-black mb-2">
+                {staff.filter(member => member.status === 'Active').length}
+              </div>
+              <p className="text-vip-gold font-medium">Active Staff</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white border border-vip-gold/20">
+            <CardContent className="p-6 text-center">
+              <div className="text-2xl font-bold text-vip-black mb-2">
+                {staff.filter(member => member.status === 'On Leave').length}
+              </div>
+              <p className="text-vip-gold font-medium">On Leave</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white border border-vip-gold/20">
+            <CardContent className="p-6 text-center">
+              <div className="text-2xl font-bold text-vip-black mb-2">
+                {staff.length}
+              </div>
+              <p className="text-vip-gold font-medium">Total Staff</p>
+            </CardContent>
+          </Card>
+        </div>
 
-        <Card className="vip-glass border-vip-gold/20">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">Roles</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-vip-black">{roles.length}</div>
-            <p className="text-xs text-blue-600">Different roles</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Filters */}
-      <Card className="vip-glass border-vip-gold/20">
-        <CardContent className="p-4">
-          <div className="flex gap-4 items-center">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-vip-gold/50" />
-              <Input
-                placeholder="Search staff..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 border-vip-gold/30"
-              />
+        {/* Search and Add */}
+        <Card className="bg-white border border-vip-gold/20">
+          <CardContent className="p-6">
+            <div className="flex justify-between items-center gap-4">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-vip-gold" />
+                <Input
+                  placeholder="Search staff members..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 border-vip-gold/30 bg-white text-vip-black focus:border-vip-gold"
+                />
+              </div>
+              <Button 
+                onClick={() => setShowAddModal(true)}
+                className="bg-vip-gold text-black hover:bg-vip-gold/80"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Staff Member
+              </Button>
             </div>
-            <Select value={selectedRole} onValueChange={setSelectedRole}>
-              <SelectTrigger className="w-48 border-vip-gold/30">
-                <SelectValue placeholder="Filter by role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Roles</SelectItem>
-                {roles.map(role => (
-                  <SelectItem key={role} value={role}>
-                    {role}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-              <SelectTrigger className="w-48 border-vip-gold/30">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                {statuses.map(status => (
-                  <SelectItem key={status} value={status}>
-                    {status}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* Staff List */}
-      <Card className="vip-glass border-vip-gold/20">
-        <CardHeader>
-          <CardTitle className="flex items-center text-vip-black">
-            <Users className="h-5 w-5 mr-2 text-vip-gold" />
-            Staff Members ({filteredStaff.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {filteredStaff.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-vip-gold/60">No staff members found.</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {filteredStaff.map((staff) => (
-                <div key={staff.id} className="p-4 border border-vip-gold/20 rounded-lg vip-glass-light hover:bg-vip-gold/5 transition-colors">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="font-semibold text-vip-black">{staff.full_name || 'Unknown'}</h3>
-                        {staff.status && (
-                          <Badge className={getStatusColor(staff.status)}>
-                            {staff.status}
-                          </Badge>
-                        )}
+        {/* Staff Members */}
+        <Card className="bg-white border border-vip-gold/20">
+          <CardHeader className="border-b border-vip-gold/10">
+            <CardTitle className="text-xl font-serif text-vip-black">Staff Members</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="space-y-4 p-6">
+              {filteredStaff.map((member) => (
+                <div key={member.id} className="border border-vip-gold/20 rounded-lg p-4 hover:bg-vip-gold/5 transition-colors">
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-2 flex-1">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-vip-gold/20 rounded-full flex items-center justify-center">
+                          <Users className="h-4 w-4 text-vip-gold" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-vip-black">{member.full_name}</h3>
+                          <p className="text-sm text-vip-gold">{member.role}</p>
+                        </div>
+                        {getStatusBadge(member.status)}
                       </div>
-                      <div className="space-y-1 text-sm text-vip-gold/80">
-                        {staff.role && <p>Role: {staff.role}</p>}
-                        {staff.email && (
-                          <div className="flex items-center gap-1">
-                            <Mail className="h-3 w-3" />
-                            {staff.email}
-                          </div>
-                        )}
-                        {staff.phone && (
-                          <div className="flex items-center gap-1">
-                            <Phone className="h-3 w-3" />
-                            {staff.phone}
-                          </div>
-                        )}
-                        {staff.created_at && (
-                          <p>Joined: {new Date(staff.created_at).toLocaleDateString()}</p>
-                        )}
+                      <div className="flex items-center space-x-4 text-sm text-vip-black/60">
+                        <div className="flex items-center space-x-1">
+                          <Mail className="h-3 w-3" />
+                          <span>{member.email}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Phone className="h-3 w-3" />
+                          <span>{member.phone}</span>
+                        </div>
                       </div>
+                      {member.notes && (
+                        <p className="text-sm text-vip-black/60">{member.notes}</p>
+                      )}
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex space-x-2">
                       <Button
-                        onClick={() => handleViewStaff(staff)}
                         variant="outline"
                         size="sm"
-                        className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+                        className="border-vip-gold/30 text-vip-black hover:bg-vip-gold hover:text-black"
                       >
-                        <Eye className="h-4 w-4" />
+                        <Edit className="h-3 w-3 mr-1" />
+                        Edit
                       </Button>
-                      {!isProtocolAdmin && (
-                        <>
-                          <Button
-                            onClick={() => handleEditStaff(staff)}
-                            variant="outline"
-                            size="sm"
-                            className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            onClick={() => handleDeleteStaff(staff)}
-                            variant="outline"
-                            size="sm"
-                            className="border-red-300 text-red-600 hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </>
-                      )}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setDeletingStaff(member)}
+                        className="border-red-300 text-red-600 hover:bg-red-500 hover:text-white"
+                      >
+                        <Trash2 className="h-3 w-3 mr-1" />
+                        Remove
+                      </Button>
                     </div>
                   </div>
                 </div>
               ))}
+              {filteredStaff.length === 0 && (
+                <div className="text-center text-vip-black/60 py-8">
+                  {searchTerm ? 'No staff members match your search.' : 'No staff members yet.'}
+                </div>
+              )}
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Modals */}
+      <AddStaffModal
+        open={showAddModal}
+        onOpenChange={setShowAddModal}
+        onStaffAdded={handleStaffAdded}
+      />
+      <DeleteConfirmationModal
+        open={!!deletingStaff}
+        onOpenChange={(open) => !open && setDeletingStaff(null)}
+        title="Remove Staff Member"
+        description={`Are you sure you want to remove "${deletingStaff?.full_name}"? This action cannot be undone.`}
+        onConfirm={() => deletingStaff && handleDeleteStaff(deletingStaff.id)}
+      />
     </div>
   );
 };
