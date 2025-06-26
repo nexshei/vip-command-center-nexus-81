@@ -1,8 +1,25 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Crown, Shield, Star, Zap } from 'lucide-react';
+import LoginForm from '@/components/auth/LoginForm';
+import { useAuth } from '@/contexts/AuthContext';
+import { Navigate } from 'react-router-dom';
+
 const Index = () => {
+  const [showLogin, setShowLogin] = useState(false);
+  const { user } = useAuth();
+
+  // If user is already logged in, redirect to dashboard
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  // Show login form if requested
+  if (showLogin) {
+    return <LoginForm />;
+  }
+
   return <div className="min-h-screen vip-gradient text-white relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-gradient-to-br from-black/30 to-transparent"></div>
@@ -57,16 +74,20 @@ const Index = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button size="lg" className="vip-gold-gradient hover:opacity-90 text-white px-8 py-3 text-lg font-medium vip-hover-lift" onClick={() => window.location.href = '/dashboard'}>
+              <Button size="lg" className="vip-gold-gradient hover:opacity-90 text-white px-8 py-3 text-lg font-medium vip-hover-lift" onClick={() => setShowLogin(true)}>
                 <Crown className="h-5 w-5 mr-2" />
-                Enter Dashboard
+                Sign In to Dashboard
               </Button>
               
-              <div className="text-sm opacity-75">
-                <p>Demo Credentials:</p>
-                <p><strong>Super Admin:</strong> super@sirole.com</p>
-                <p><strong>Protocol Admin:</strong> protocol@sirole.com</p>
-                <p><strong>Password:</strong> vip123</p>
+              <div className="text-sm opacity-75 bg-black/40 p-4 rounded-lg border border-vip-gold/20">
+                <p className="text-vip-gold font-semibold mb-2">Demo Credentials:</p>
+                <div className="space-y-1 text-left">
+                  <p><strong>Senior Admin:</strong> super@sirole.com</p>
+                  <p><strong>Senior Admin:</strong> admin@sirole.com</p>
+                  <p><strong>Sub Admin:</strong> protocol@sirole.com</p>
+                  <p><strong>User:</strong> user@sirole.com</p>
+                  <p><strong>Password:</strong> vip123</p>
+                </div>
               </div>
             </div>
           </div>
@@ -79,4 +100,5 @@ const Index = () => {
       </div>
     </div>;
 };
+
 export default Index;
