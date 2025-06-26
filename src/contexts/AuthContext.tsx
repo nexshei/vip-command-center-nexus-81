@@ -6,6 +6,7 @@ export interface User {
   name: string;
   email: string;
   avatar?: string;
+  role: 'super_admin' | 'protocol_admin' | 'admin' | 'user';
 }
 
 interface AuthContextType {
@@ -13,6 +14,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
+  hasAccess: (requiredRole: string | string[]) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -29,31 +31,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Mock users for demo - matching the Index page credentials
+  // Mock users with roles
   const mockUsers: Record<string, User> = {
     'super@sirole.com': {
       id: '1',
       email: 'super@sirole.com',
       name: 'Super Admin',
-      avatar: null
+      avatar: null,
+      role: 'super_admin'
     },
     'protocol@sirole.com': {
       id: '2', 
       email: 'protocol@sirole.com',
       name: 'Protocol Admin',
-      avatar: null
+      avatar: null,
+      role: 'protocol_admin'
     },
     'admin@sirole.com': {
       id: '3',
       email: 'admin@sirole.com',
       name: 'Sir Dennis Olele',
-      avatar: null
+      avatar: null,
+      role: 'admin'
     },
     'user@sirole.com': {
       id: '4',
       email: 'user@sirole.com',
       name: 'VVIP User',
-      avatar: null
+      avatar: null,
+      role: 'user'
     }
   };
 
@@ -65,6 +71,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     setIsLoading(false);
   }, []);
+
+  const hasAccess = (requiredRole: string | string[]) => {
+    if (!user) return false;
+    
+    const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
+    return roles.includes(user.role);
+  };
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
@@ -88,7 +101,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading, hasAccess }}>
       {children}
     </AuthContext.Provider>
   );

@@ -11,100 +11,107 @@ import {
   SidebarMenuItem,
   SidebarHeader
 } from "@/components/ui/sidebar";
-import { Home, Calendar, FileText, Users, Settings, Plus, Package, Mail, UserCheck, MessageSquare, List, Image, UserCog, Briefcase } from "lucide-react";
+import { Home, Calendar, FileText, Users, Plus, Package, Mail, UserCheck, MessageSquare, List, Briefcase } from "lucide-react";
 import { useNavigate, useLocation } from 'react-router-dom';
 import { cn } from "@/lib/utils";
+import { useAuth } from '@/contexts/AuthContext';
 
 export const VipSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { hasAccess } = useAuth();
 
   const navigationItems = [
     {
       name: 'Dashboard',
       icon: Home,
       path: '/dashboard',
-      description: 'Overview of all VIP services'
+      description: 'Overview of all VIP services',
+      allowedRoles: ['super_admin', 'protocol_admin', 'admin', 'user']
     },
     {
       name: 'Create Booking',
       icon: Plus,
       path: '/create-booking',
-      description: 'Schedule new VVIP events'
+      description: 'Schedule new VVIP events',
+      allowedRoles: ['super_admin', 'protocol_admin', 'admin']
     },
     {
       name: 'Events',
       icon: Calendar,
       path: '/bookings',
-      description: 'View and manage all events'
+      description: 'View and manage all events',
+      allowedRoles: ['super_admin', 'protocol_admin', 'admin']
     },
     {
       name: 'List Bookings',
       icon: List,
       path: '/list-bookings',
-      description: 'View meeting requests from frontend'
+      description: 'View meeting requests from frontend',
+      allowedRoles: ['super_admin', 'protocol_admin', 'admin']
     },
     {
       name: 'Generate Quote',
       icon: FileText,
       path: '/generate-quote',
-      description: 'Create custom service quotes'
+      description: 'Create custom service quotes',
+      allowedRoles: ['super_admin', 'protocol_admin', 'admin']
     },
     {
       name: 'Clients',
       icon: Users,
       path: '/clients',
-      description: 'Manage VVIP client database'
+      description: 'Manage VVIP client database',
+      allowedRoles: ['super_admin', 'protocol_admin', 'admin']
     },
     {
       name: 'Contact Messages',
       icon: MessageSquare,
       path: '/contact-submissions',
-      description: 'View contact form submissions'
+      description: 'View contact form submissions',
+      allowedRoles: ['super_admin', 'protocol_admin', 'admin']
     },
     {
       name: 'Inventory',
       icon: Package,
       path: '/inventory',
-      description: 'Track protocol equipment'
+      description: 'Track protocol equipment',
+      allowedRoles: ['super_admin', 'protocol_admin', 'admin']
     },
     {
       name: 'Careers',
       icon: Briefcase,
       path: '/careers',
-      description: 'Manage job postings and applications'
-    },
-    {
-      name: 'Gallery',
-      icon: Image,
-      path: '/gallery',
-      description: 'Manage photo gallery'
+      description: 'Manage job postings and applications',
+      allowedRoles: ['super_admin', 'protocol_admin', 'admin']
     },
     {
       name: 'Staff',
-      icon: UserCog,
+      icon: Users,
       path: '/staff',
-      description: 'Manage staff members'
+      description: 'View staff members',
+      allowedRoles: ['super_admin'] // Only super admin can access staff management
     },
     {
       name: 'Email',
       icon: Mail,
       path: '/email',
-      description: 'Send and track communications'
+      description: 'Send communications',
+      allowedRoles: ['super_admin'] // Only super admin can access email configuration
     },
     {
       name: 'VVIP Subscribers',
       icon: UserCheck,
       path: '/subscribers',
-      description: 'Manage subscription members'
-    },
-    {
-      name: 'Settings',
-      icon: Settings,
-      path: '/settings',
-      description: 'Configure system settings'
-    },
+      description: 'Manage subscription members',
+      allowedRoles: ['super_admin', 'protocol_admin', 'admin']
+    }
   ];
+
+  // Filter navigation items based on user role
+  const filteredItems = navigationItems.filter(item => 
+    hasAccess(item.allowedRoles)
+  );
 
   return (
     <Sidebar className="border-r border-vip-gold/30 bg-black">
@@ -129,7 +136,7 @@ export const VipSidebar = () => {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navigationItems.map((item) => (
+              {filteredItems.map((item) => (
                 <SidebarMenuItem key={item.name}>
                   <SidebarMenuButton 
                     asChild

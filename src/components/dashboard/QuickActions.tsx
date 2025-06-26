@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   Plus, 
   Calendar, 
@@ -17,6 +18,7 @@ import {
 const QuickActions = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { hasAccess } = useAuth();
   
   const actions = [
     {
@@ -24,41 +26,54 @@ const QuickActions = () => {
       description: "Create VVIP appointment",
       icon: Plus,
       action: () => navigate('/create-booking'),
-      primary: true
+      primary: true,
+      allowedRoles: ['super_admin', 'protocol_admin', 'admin']
     },
     {
       title: "View Calendar",
       description: "Check schedule",
       icon: Calendar,
       action: () => navigate('/bookings'),
-      primary: false
+      primary: false,
+      allowedRoles: ['super_admin', 'protocol_admin', 'admin']
     },
     {
       title: "Manage Clients",
       description: "Client directory",
       icon: Users,
       action: () => navigate('/clients'),
-      primary: false
+      primary: false,
+      allowedRoles: ['super_admin', 'protocol_admin', 'admin']
     },
     {
       title: "Send Message",
       description: "Communication",
       icon: Mail,
       action: () => navigate('/email'),
-      primary: false
+      primary: false,
+      allowedRoles: ['super_admin'] // Only super admin can access email configuration
     },
     {
       title: "Generate Quote",
       description: "Create estimate",
       icon: FileText,
       action: () => navigate('/generate-quote'),
-      primary: false
+      primary: false,
+      allowedRoles: ['super_admin', 'protocol_admin', 'admin']
     },
     {
       title: "Export Data",
       description: "Download reports",
       icon: Download,
       action: () => {
+        if (!hasAccess(['super_admin', 'admin'])) {
+          toast({
+            title: "Access Restricted",
+            description: "You don't have permission to export data.",
+            variant: "destructive"
+          });
+          return;
+        }
         const csvContent = "data:text/csv;charset=utf-8,Date,Revenue,Bookings,Clients\n2024-01,KSH 8900000,24,156\n2024-02,KSH 9200000,28,162";
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
@@ -72,9 +87,13 @@ const QuickActions = () => {
           description: "Report downloaded successfully.",
         });
       },
-      primary: false
+      primary: false,
+      allowedRoles: ['super_admin', 'admin'] // No data export for protocol admin
     }
   ];
+
+  // Filter actions based on user role
+  const filteredActions = actions.filter(action => hasAccess(action.allowedRoles));
 
   return (
     <Card className="bg-white shadow-sm">
@@ -86,7 +105,7 @@ const QuickActions = () => {
       </CardHeader>
       <CardContent>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {actions.map((action, index) => (
+          {filteredActions.map((action, index) => (
             <Button
               key={action.title}
               onClick={action.action}

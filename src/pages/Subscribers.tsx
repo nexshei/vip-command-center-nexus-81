@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Search, Mail, UserCheck, UserX } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Subscriber {
   id: string;
@@ -40,6 +41,10 @@ const Subscribers = () => {
   const [subscribers, setSubscribers] = useState<Subscriber[]>(mockSubscribers);
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
+  const { hasAccess } = useAuth();
+
+  // Protocol admin has limited access - can only view and send pre-approved messages
+  const canModifySubscriptions = hasAccess(['super_admin', 'admin']);
 
   const filteredSubscribers = subscribers.filter(subscriber =>
     subscriber.email.toLowerCase().includes(searchTerm.toLowerCase())
@@ -51,7 +56,7 @@ const Subscribers = () => {
         title: "Send Message",
         description: `Opening communication with ${subscriber.email}`,
       });
-    } else {
+    } else if (action === 'toggle' && canModifySubscriptions) {
       const newStatus = !subscriber.subscribed;
       setSubscribers(prev => 
         prev.map(s => 
@@ -64,6 +69,12 @@ const Subscribers = () => {
         title: "Status Updated",
         description: `${subscriber.email} is now ${newStatus ? 'subscribed' : 'unsubscribed'}`,
       });
+    } else {
+      toast({
+        title: "Access Restricted",
+        description: "You don't have permission to modify subscription status.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -75,7 +86,10 @@ const Subscribers = () => {
             VVIP Subscribers
           </h1>
           <p className="text-vip-gold/80 mt-2">
-            Manage your VVIP subscriber database
+            {canModifySubscriptions ? 
+              'Manage your VVIP subscriber database' : 
+              'View VVIP subscribers and send communications'
+            }
           </p>
         </div>
       </div>
@@ -124,27 +138,29 @@ const Subscribers = () => {
                       <Mail className="h-3 w-3 mr-1" />
                       Message
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleSubscriberAction(subscriber, 'toggle')}
-                      className={subscriber.subscribed 
-                        ? "border-red-300 text-red-600 hover:bg-red-50"
-                        : "border-green-300 text-green-600 hover:bg-green-50"
-                      }
-                    >
-                      {subscriber.subscribed ? (
-                        <>
-                          <UserX className="h-3 w-3 mr-1" />
-                          Unsubscribe
-                        </>
-                      ) : (
-                        <>
-                          <UserCheck className="h-3 w-3 mr-1" />
-                          Subscribe
-                        </>
-                      )}
-                    </Button>
+                    {canModifySubscriptions && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleSubscriberAction(subscriber, 'toggle')}
+                        className={subscriber.subscribed 
+                          ? "border-red-300 text-red-600 hover:bg-red-50"
+                          : "border-green-300 text-green-600 hover:bg-green-50"
+                        }
+                      >
+                        {subscriber.subscribed ? (
+                          <>
+                            <UserX className="h-3 w-3 mr-1" />
+                            Unsubscribe
+                          </>
+                        ) : (
+                          <>
+                            <UserCheck className="h-3 w-3 mr-1" />
+                            Subscribe
+                          </>
+                        )}
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>

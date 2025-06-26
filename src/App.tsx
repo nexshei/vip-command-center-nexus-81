@@ -30,8 +30,14 @@ import Settings from "@/pages/Settings";
 
 const queryClient = new QueryClient();
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, isLoading } = useAuth();
+const ProtectedRoute = ({ 
+  children, 
+  requiredRoles 
+}: { 
+  children: React.ReactNode;
+  requiredRoles?: string[];
+}) => {
+  const { user, isLoading, hasAccess } = useAuth();
   
   if (isLoading) {
     return (
@@ -46,6 +52,23 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   
   if (!user) {
     return <LoginForm />;
+  }
+
+  if (requiredRoles && !hasAccess(requiredRoles)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="text-center text-white">
+          <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
+          <p className="text-vip-gold/70 mb-4">You don't have permission to access this page.</p>
+          <button 
+            onClick={() => window.history.back()} 
+            className="bg-vip-gold text-black px-4 py-2 rounded hover:bg-vip-gold/80"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
   }
   
   return <DashboardLayout>{children}</DashboardLayout>;
@@ -68,6 +91,7 @@ const ProfilePage = () => {
             <div>
               <h2 className="text-2xl font-semibold text-vip-black">{user?.name}</h2>
               <p className="text-sm text-vip-gold/60">{user?.email}</p>
+              <p className="text-sm text-vip-gold/60 capitalize">{user?.role?.replace('_', ' ')}</p>
             </div>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
@@ -78,6 +102,10 @@ const ProfilePage = () => {
             <div className="space-y-2">
               <label className="text-sm font-medium text-vip-gold/80">Email</label>
               <p className="text-vip-black">{user?.email}</p>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-vip-gold/80">Role</label>
+              <p className="text-vip-black capitalize">{user?.role?.replace('_', ' ')}</p>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-vip-gold/80">Phone</label>
@@ -102,62 +130,65 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
       <Route path="/create-booking" element={
-        <ProtectedRoute>
+        <ProtectedRoute requiredRoles={['super_admin', 'protocol_admin', 'admin']}>
           <CreateBooking />
         </ProtectedRoute>
       } />
       <Route path="/generate-quote" element={
-        <ProtectedRoute>
+        <ProtectedRoute requiredRoles={['super_admin', 'protocol_admin', 'admin']}>
           <GenerateQuote />
         </ProtectedRoute>
       } />
       <Route path="/bookings" element={
-        <ProtectedRoute>
+        <ProtectedRoute requiredRoles={['super_admin', 'protocol_admin', 'admin']}>
           <Bookings />
         </ProtectedRoute>
       } />
       <Route path="/list-bookings" element={
-        <ProtectedRoute>
+        <ProtectedRoute requiredRoles={['super_admin', 'protocol_admin', 'admin']}>
           <ListBookings />
         </ProtectedRoute>
       } />
       <Route path="/clients" element={
-        <ProtectedRoute>
+        <ProtectedRoute requiredRoles={['super_admin', 'protocol_admin', 'admin']}>
           <Clients />
         </ProtectedRoute>
       } />
       <Route path="/inventory" element={
-        <ProtectedRoute>
+        <ProtectedRoute requiredRoles={['super_admin', 'protocol_admin', 'admin']}>
           <Inventory />
         </ProtectedRoute>
       } />
       <Route path="/careers" element={
-        <ProtectedRoute>
+        <ProtectedRoute requiredRoles={['super_admin', 'protocol_admin', 'admin']}>
           <Careers />
         </ProtectedRoute>
       } />
+      {/* Gallery removed - no longer accessible */}
       <Route path="/gallery" element={
-        <ProtectedRoute>
+        <ProtectedRoute requiredRoles={['super_admin']}>
           <Gallery />
         </ProtectedRoute>
       } />
+      {/* Staff - Super Admin only */}
       <Route path="/staff" element={
-        <ProtectedRoute>
+        <ProtectedRoute requiredRoles={['super_admin']}>
           <Staff />
         </ProtectedRoute>
       } />
       <Route path="/subscriptions" element={
-        <ProtectedRoute>
+        <ProtectedRoute requiredRoles={['super_admin', 'protocol_admin', 'admin']}>
           <Subscriptions />
         </ProtectedRoute>
       } />
+      {/* Email - Super Admin only */}
       <Route path="/email" element={
-        <ProtectedRoute>
+        <ProtectedRoute requiredRoles={['super_admin']}>
           <Email />
         </ProtectedRoute>
       } />
       <Route path="/analytics" element={
-        <ProtectedRoute>
+        <ProtectedRoute requiredRoles={['super_admin', 'admin']}>
           <Analytics />
         </ProtectedRoute>
       } />
@@ -166,18 +197,19 @@ const AppRoutes = () => {
           <ProfilePage />
         </ProtectedRoute>
       } />
+      {/* Settings - Super Admin only */}
       <Route path="/settings" element={
-        <ProtectedRoute>
+        <ProtectedRoute requiredRoles={['super_admin']}>
           <Settings />
         </ProtectedRoute>
       } />
       <Route path="/subscribers" element={
-        <ProtectedRoute>
+        <ProtectedRoute requiredRoles={['super_admin', 'protocol_admin', 'admin']}>
           <Subscribers />
         </ProtectedRoute>
       } />
       <Route path="/contact-submissions" element={
-        <ProtectedRoute>
+        <ProtectedRoute requiredRoles={['super_admin', 'protocol_admin', 'admin']}>
           <React.Suspense fallback={<div>Loading...</div>}>
             <ContactSubmissions />
           </React.Suspense>
