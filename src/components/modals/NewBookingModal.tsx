@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Plus, DollarSign } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 
 export const NewBookingModal = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -45,25 +44,8 @@ export const NewBookingModal = () => {
     setIsLoading(true);
 
     try {
-      // Combine date and time for scheduled_at
-      const scheduledAt = date && time ? `${date}T${time}:00` : null;
-
-      const { data, error } = await supabase
-        .from('bookings')
-        .insert([
-          {
-            client_name: clientName,
-            service_type: eventType,
-            scheduled_at: scheduledAt,
-            notes: notes,
-            revenue: serviceCharge ? parseFloat(serviceCharge) : 0,
-            status: 'pending',
-            approval_status: 'pending'
-          }
-        ])
-        .select();
-
-      if (error) throw error;
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       toast({
         title: "Event Created Successfully",

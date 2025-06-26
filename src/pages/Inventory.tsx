@@ -207,12 +207,14 @@ const Inventory = () => {
         onOpenChange={(open) => !open && setEditingItem(null)}
         item={editingItem}
         onItemUpdated={handleItemUpdated}
+        type="inventory"
       />
       <DeleteConfirmationModal
         open={!!deletingItem}
         onOpenChange={(open) => !open && setDeletingItem(null)}
         title="Delete Inventory Item"
-        description={`Are you sure you want to delete "${deletingItem?.item_name}"? This action cannot be undone.`}
+        description={`Are you sure you want to delete`}
+        itemName={deletingItem?.item_name || ''}
         onConfirm={() => deletingItem && handleDeleteItem(deletingItem.id)}
       />
     </div>

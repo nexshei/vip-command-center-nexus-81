@@ -230,7 +230,8 @@ const Staff = () => {
         open={!!deletingStaff}
         onOpenChange={(open) => !open && setDeletingStaff(null)}
         title="Remove Staff Member"
-        description={`Are you sure you want to remove "${deletingStaff?.full_name}"? This action cannot be undone.`}
+        description={`Are you sure you want to remove`}
+        itemName={deletingStaff?.full_name || ''}
         onConfirm={() => deletingStaff && handleDeleteStaff(deletingStaff.id)}
       />
     </div>

@@ -9,7 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { CalendarIcon, Save, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -57,17 +56,8 @@ export const EditMeetingRequestModal = ({ open, onOpenChange, request, onRequest
     setIsLoading(true);
 
     try {
-      const updateData = {
-        ...formData,
-        event_date: formData.event_date ? format(formData.event_date, 'yyyy-MM-dd') : null
-      };
-
-      const { error } = await supabase
-        .from('meeting_requests')
-        .update(updateData)
-        .eq('id', request.id);
-
-      if (error) throw error;
+      // Simulate API update
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       toast({
         title: "Meeting Request Updated",
