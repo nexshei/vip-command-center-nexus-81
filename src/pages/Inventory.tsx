@@ -9,7 +9,6 @@ import { EditItemModal } from '@/components/modals/EditItemModal';
 import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
 import { AddItemModalTrigger } from '@/components/modals/AddItemModalTrigger';
 import { InventoryEventModal } from '@/components/modals/InventoryEventModal';
-import { InventoryNotifications } from '@/components/inventory/InventoryNotifications';
 import { EventInventoryTracker } from '@/components/inventory/EventInventoryTracker';
 
 // Mock data for inventory items
@@ -179,12 +178,6 @@ const Inventory = () => {
             </CardContent>
           </Card>
         </div>
-
-        {/* Inventory Notifications */}
-        <InventoryNotifications 
-          lowStockItems={lowStockItems}
-          onReorderItem={handleReorderItem}
-        />
 
         {/* Event Inventory Tracking */}
         <EventInventoryTracker 
