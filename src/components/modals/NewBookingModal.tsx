@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -68,7 +67,7 @@ export const NewBookingModal = () => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-vip-gold text-white hover:bg-vip-gold-dark">
+        <Button className="bg-vip-gold text-black hover:bg-vip-gold-light">
           <Plus className="h-4 w-4 mr-2" />
           Add New Event
         </Button>
@@ -171,14 +170,14 @@ export const NewBookingModal = () => {
               variant="outline" 
               onClick={resetFormAndClose} 
               disabled={isLoading}
-              className="px-6 border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+              className="px-6 border-vip-gold/30 text-vip-gold hover:bg-vip-gold-light hover:text-black"
             >
               Cancel
             </Button>
             <Button 
               type="submit" 
               disabled={isLoading}
-              className="px-6 bg-vip-gold text-white hover:bg-vip-gold-dark"
+              className="px-6 bg-vip-gold text-black hover:bg-vip-gold-light"
             >
               {isLoading ? 'Creating...' : 'Create Event'}
             </Button>

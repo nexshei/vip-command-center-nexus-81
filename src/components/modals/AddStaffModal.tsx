@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -132,13 +131,13 @@ export const AddStaffModal = ({ open, onOpenChange, onStaffAdded }: AddStaffModa
               type="button" 
               variant="outline" 
               onClick={() => onOpenChange(false)}
-              className="border-vip-gold/30 text-vip-black hover:bg-vip-gold/10"
+              className="border-vip-gold/30 text-vip-black hover:bg-vip-gold-light hover:text-black"
             >
               Cancel
             </Button>
             <Button 
               type="submit" 
-              className="bg-vip-gold text-black hover:bg-vip-gold-dark"
+              className="bg-vip-gold text-black hover:bg-vip-gold-light"
             >
               Add Staff Member
             </Button>

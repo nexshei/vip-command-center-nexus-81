@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -20,7 +19,7 @@ export const FilterModal = () => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="border-vip-gold/30 text-vip-black bg-white hover:bg-vip-gold hover:text-black shadow-sm">
+        <Button variant="outline" className="border-vip-gold/30 text-vip-black bg-white hover:bg-vip-gold-light hover:text-black shadow-sm">
           <Filter className="h-4 w-4 mr-2" />
           Filter
         </Button>
@@ -37,10 +36,10 @@ export const FilterModal = () => {
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent className="bg-white border-vip-gold/20">
-                <SelectItem value="active" className="text-vip-black hover:bg-vip-gold/10">Active</SelectItem>
-                <SelectItem value="pending" className="text-vip-black hover:bg-vip-gold/10">Pending</SelectItem>
-                <SelectItem value="completed" className="text-vip-black hover:bg-vip-gold/10">Completed</SelectItem>
-                <SelectItem value="cancelled" className="text-vip-black hover:bg-vip-gold/10">Cancelled</SelectItem>
+                <SelectItem value="active" className="text-vip-black hover:bg-vip-gold-light">Active</SelectItem>
+                <SelectItem value="pending" className="text-vip-black hover:bg-vip-gold-light">Pending</SelectItem>
+                <SelectItem value="completed" className="text-vip-black hover:bg-vip-gold-light">Completed</SelectItem>
+                <SelectItem value="cancelled" className="text-vip-black hover:bg-vip-gold-light">Cancelled</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -51,10 +50,10 @@ export const FilterModal = () => {
                 <SelectValue placeholder="Select date range" />
               </SelectTrigger>
               <SelectContent className="bg-white border-vip-gold/20">
-                <SelectItem value="today" className="text-vip-black hover:bg-vip-gold/10">Today</SelectItem>
-                <SelectItem value="week" className="text-vip-black hover:bg-vip-gold/10">This Week</SelectItem>
-                <SelectItem value="month" className="text-vip-black hover:bg-vip-gold/10">This Month</SelectItem>
-                <SelectItem value="quarter" className="text-vip-black hover:bg-vip-gold/10">This Quarter</SelectItem>
+                <SelectItem value="today" className="text-vip-black hover:bg-vip-gold-light">Today</SelectItem>
+                <SelectItem value="week" className="text-vip-black hover:bg-vip-gold-light">This Week</SelectItem>
+                <SelectItem value="month" className="text-vip-black hover:bg-vip-gold-light">This Month</SelectItem>
+                <SelectItem value="quarter" className="text-vip-black hover:bg-vip-gold-light">This Quarter</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -65,10 +64,10 @@ export const FilterModal = () => {
                 <SelectValue placeholder="Select client type" />
               </SelectTrigger>
               <SelectContent className="bg-white border-vip-gold/20">
-                <SelectItem value="vip" className="text-vip-black hover:bg-vip-gold/10">VIP</SelectItem>
-                <SelectItem value="premium" className="text-vip-black hover:bg-vip-gold/10">Premium</SelectItem>
-                <SelectItem value="standard" className="text-vip-black hover:bg-vip-gold/10">Standard</SelectItem>
-                <SelectItem value="corporate" className="text-vip-black hover:bg-vip-gold/10">Corporate</SelectItem>
+                <SelectItem value="vip" className="text-vip-black hover:bg-vip-gold-light">VIP</SelectItem>
+                <SelectItem value="premium" className="text-vip-black hover:bg-vip-gold-light">Premium</SelectItem>
+                <SelectItem value="standard" className="text-vip-black hover:bg-vip-gold-light">Standard</SelectItem>
+                <SelectItem value="corporate" className="text-vip-black hover:bg-vip-gold-light">Corporate</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -77,13 +76,13 @@ export const FilterModal = () => {
           <Button 
             variant="outline" 
             onClick={() => { setStatus(''); setDateRange(''); setClientType(''); }}
-            className="border-vip-gold/30 text-vip-black hover:bg-vip-gold/10"
+            className="border-vip-gold/30 text-vip-black hover:bg-vip-gold-light hover:text-black"
           >
             Clear
           </Button>
           <Button 
             onClick={handleApplyFilter} 
-            className="bg-vip-gold text-black hover:bg-vip-gold-dark shadow-sm"
+            className="bg-vip-gold text-black hover:bg-vip-gold-light shadow-sm"
           >
             Apply Filters
           </Button>

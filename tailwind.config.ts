@@ -23,8 +23,8 @@ export default {
 				// Sir Ole VVIP Brand Colors
 				'vip-black': '#000000',
 				'vip-gold': '#D4AF37',
-				'vip-gold-light': '#F4E4BC',
-				'vip-gold-dark': '#B8941F',
+				'vip-gold-light': '#F3E5AB', // Updated to your preferred color
+				'vip-gold-dark': '#E1D39A', // Updated to your preferred hover color
 				'vip-red': '#DC143C',
 				'vip-shield-border': '#C9B037',
 				

@@ -103,7 +103,7 @@ const LoginForm = () => {
               </div>
             </div>
             
-            <Button type="submit" className="w-full vip-gold-gradient hover:opacity-90 text-white font-medium h-11" disabled={isLoading}>
+            <Button type="submit" className="w-full bg-vip-gold hover:bg-vip-gold-light text-black font-medium h-11" disabled={isLoading}>
               {isLoading ? 'Signing In...' : 'Sign In'}
             </Button>
           </form>
@@ -122,14 +122,14 @@ const LoginForm = () => {
               <Button
                 variant="outline"
                 onClick={() => handleDemoLogin('super')}
-                className="text-vip-black border-vip-gold/30 hover:bg-vip-gold hover:text-white text-sm bg-white"
+                className="text-vip-black border-vip-gold/30 hover:bg-vip-gold-light hover:text-black text-sm bg-white"
               >
                 Super Admin
               </Button>
               <Button
                 variant="outline"
                 onClick={() => handleDemoLogin('protocol')}
-                className="text-vip-black border-vip-gold/30 hover:bg-vip-gold hover:text-white text-sm bg-white"
+                className="text-vip-black border-vip-gold/30 hover:bg-vip-gold-light hover:text-black text-sm bg-white"
               >
                 Protocol Admin
               </Button>

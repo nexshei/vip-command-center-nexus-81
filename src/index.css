@@ -9,8 +9,8 @@
     /* Core Brand Colors - Professional Palette */
     --vip-black: #000000;
     --vip-gold: #D4AF37;
-    --vip-gold-light: #E8C547;
-    --vip-gold-dark: #B8941F;
+    --vip-gold-light: #F3E5AB; /* Updated to your preferred color */
+    --vip-gold-dark: #E1D39A; /* Updated to your preferred hover color */
     --vip-white: #FFFFFF;
     --vip-off-white: #FAFAFA;
     --vip-gray-light: #F5F5F5;
@@ -88,13 +88,13 @@
   }
   
   ::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #D4AF37, #B8941F);
+    background: linear-gradient(135deg, #D4AF37, #E1D39A);
     border-radius: 4px;
     transition: all 0.3s ease;
   }
   
   ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #E8C547, #D4AF37);
+    background: linear-gradient(135deg, #F3E5AB, #D4AF37);
   }
 
   /* Ensure all dropdowns have white backgrounds */
@@ -121,7 +121,7 @@
   }
   
   .vip-gold-gradient {
-    background: linear-gradient(135deg, #D4AF37 0%, #E8C547 100%);
+    background: linear-gradient(135deg, #D4AF37 0%, #F3E5AB 100%);
   }
   
   .vip-professional-gradient {
@@ -197,7 +197,7 @@
   }
 
   .professional-button-outline {
-    @apply border-2 border-vip-gold text-vip-gold bg-white hover:bg-vip-gold hover:text-black transition-all duration-200;
+    @apply border-2 border-vip-gold text-vip-gold bg-white hover:bg-vip-gold-light hover:text-black transition-all duration-200;
   }
 
   .professional-card {
@@ -210,7 +210,7 @@
   }
 
   .professional-dropdown-item {
-    @apply text-black hover:bg-vip-gold/10 hover:text-black transition-colors;
+    @apply text-black hover:bg-vip-gold-light hover:text-black transition-colors;
   }
 }
 

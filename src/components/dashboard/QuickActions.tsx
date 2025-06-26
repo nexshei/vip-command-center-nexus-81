@@ -93,7 +93,7 @@ const QuickActions = () => {
               variant={action.primary ? "default" : "outline"}
               className={`h-auto p-4 flex flex-col items-start space-y-2 transition-all duration-200 ${
                 action.primary 
-                  ? 'bg-vip-gold text-black hover:bg-vip-gold/90' 
+                  ? 'bg-vip-gold text-black hover:bg-vip-gold-light' 
                   : 'border-gray-200 hover:bg-gray-50'
               }`}
             >

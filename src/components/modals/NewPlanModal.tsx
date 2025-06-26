@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -37,7 +36,7 @@ export const NewPlanModal = () => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="bg-vip-gold text-white hover:bg-vip-gold-dark">
+        <Button className="bg-vip-gold text-black hover:bg-vip-gold-light">
           <Plus className="h-4 w-4 mr-2" />
           New Plan
         </Button>
@@ -111,7 +110,7 @@ export const NewPlanModal = () => {
           </div>
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline">Cancel</Button>
-            <Button type="submit" className="bg-vip-gold text-white hover:bg-vip-gold-dark">
+            <Button type="submit" className="bg-vip-gold text-black hover:bg-vip-gold-light">
               Create Plan
             </Button>
           </div>
