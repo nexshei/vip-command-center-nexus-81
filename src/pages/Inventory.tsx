@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,8 +9,6 @@ import { Search, Package, Plus, Edit, Trash2 } from 'lucide-react';
 import { EditItemModal } from '@/components/modals/EditItemModal';
 import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
 import { AddItemModalTrigger } from '@/components/modals/AddItemModalTrigger';
-import { InventoryEventModal } from '@/components/modals/InventoryEventModal';
-import { EventInventoryTracker } from '@/components/inventory/EventInventoryTracker';
 
 // Mock data for inventory items
 const mockInventoryItems = [
@@ -44,28 +43,7 @@ const Inventory = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [editingItem, setEditingItem] = useState(null);
   const [deletingItem, setDeletingItem] = useState(null);
-  const [events, setEvents] = useState([]);
   const { toast } = useToast();
-
-  // Mock low stock items for demonstration
-  const lowStockItems = [
-    {
-      id: '1',
-      item_name: 'VIP Welcome Banners',
-      current_quantity: 3,
-      minimum_threshold: 10,
-      location: 'Storage Room A',
-      urgency: 'warning' as const
-    },
-    {
-      id: '4',
-      item_name: 'Protocol Flags',
-      current_quantity: 1,
-      minimum_threshold: 5,
-      location: 'Protocol Office',
-      urgency: 'critical' as const
-    }
-  ];
 
   const filteredItems = items.filter(item =>
     item.item_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -103,33 +81,6 @@ const Inventory = () => {
 
   const handleItemAdded = (newItem: any) => {
     setItems(prev => [...prev, { ...newItem, status: 'Available' }]);
-  };
-
-  const handleEventCreated = (eventData: any) => {
-    setEvents(prev => [...prev, eventData]);
-    // Update inventory quantities based on allocations
-    const updatedItems = items.map(item => {
-      const allocation = eventData.allocations.find(a => a.itemId === item.id);
-      if (allocation) {
-        return { ...item, quantity: item.quantity - allocation.allocatedQuantity };
-      }
-      return item;
-    });
-    setItems(updatedItems);
-  };
-
-  const handleUpdateEvent = (eventId: string, updates: any) => {
-    setEvents(prev => prev.map(event => 
-      event.id === eventId ? { ...event, ...updates } : event
-    ));
-  };
-
-  const handleReorderItem = (itemId: string) => {
-    const item = items.find(i => i.id === itemId);
-    toast({
-      title: "Reorder Initiated",
-      description: `Reorder request created for ${item?.item_name || 'item'}.`,
-    });
   };
 
   return (
@@ -179,12 +130,6 @@ const Inventory = () => {
           </Card>
         </div>
 
-        {/* Event Inventory Tracking */}
-        <EventInventoryTracker 
-          events={events}
-          onUpdateEvent={handleUpdateEvent}
-        />
-
         {/* Search and Add */}
         <Card className="bg-white border border-vip-gold/20">
           <CardContent className="p-6">
@@ -198,13 +143,7 @@ const Inventory = () => {
                   className="pl-10 border-vip-gold/30 bg-white text-vip-black focus:border-vip-gold"
                 />
               </div>
-              <div className="flex gap-2">
-                <InventoryEventModal 
-                  inventoryItems={items}
-                  onEventCreated={handleEventCreated}
-                />
-                <AddItemModalTrigger onItemAdded={handleItemAdded} />
-              </div>
+              <AddItemModalTrigger onItemAdded={handleItemAdded} />
             </div>
           </CardContent>
         </Card>
