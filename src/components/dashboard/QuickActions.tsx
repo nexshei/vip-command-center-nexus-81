@@ -51,7 +51,7 @@ const QuickActions = () => {
       icon: Mail,
       action: () => navigate('/email'),
       primary: false,
-      allowedRoles: ['super_admin'] // Only super admin can access email configuration
+      allowedRoles: ['super_admin', 'admin'] // Removed protocol_admin access
     },
     {
       title: "Generate Quote",

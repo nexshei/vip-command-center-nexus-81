@@ -164,15 +164,15 @@ const AppRoutes = () => {
           <Careers />
         </ProtectedRoute>
       } />
-      {/* Gallery removed - no longer accessible */}
+      {/* Gallery removed entirely for protocol_admin, available only for super_admin and admin */}
       <Route path="/gallery" element={
-        <ProtectedRoute requiredRoles={['super_admin']}>
+        <ProtectedRoute requiredRoles={['super_admin', 'admin']}>
           <Gallery />
         </ProtectedRoute>
       } />
-      {/* Staff - Super Admin only */}
+      {/* Staff - Super Admin and Admin only (removed protocol_admin) */}
       <Route path="/staff" element={
-        <ProtectedRoute requiredRoles={['super_admin']}>
+        <ProtectedRoute requiredRoles={['super_admin', 'admin']}>
           <Staff />
         </ProtectedRoute>
       } />
@@ -181,9 +181,9 @@ const AppRoutes = () => {
           <Subscriptions />
         </ProtectedRoute>
       } />
-      {/* Email - Super Admin only */}
+      {/* Email - Super Admin and Admin only (removed protocol_admin) */}
       <Route path="/email" element={
-        <ProtectedRoute requiredRoles={['super_admin']}>
+        <ProtectedRoute requiredRoles={['super_admin', 'admin']}>
           <Email />
         </ProtectedRoute>
       } />
@@ -197,7 +197,7 @@ const AppRoutes = () => {
           <ProfilePage />
         </ProtectedRoute>
       } />
-      {/* Settings - Super Admin only */}
+      {/* Settings - Super Admin only (removed protocol_admin and admin) */}
       <Route path="/settings" element={
         <ProtectedRoute requiredRoles={['super_admin']}>
           <Settings />

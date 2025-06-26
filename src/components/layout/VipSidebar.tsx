@@ -90,14 +90,14 @@ export const VipSidebar = () => {
       icon: Users,
       path: '/staff',
       description: 'View staff members',
-      allowedRoles: ['super_admin'] // Only super admin can access staff management
+      allowedRoles: ['super_admin', 'admin'] // Removed protocol_admin access
     },
     {
       name: 'Email',
       icon: Mail,
       path: '/email',
       description: 'Send communications',
-      allowedRoles: ['super_admin'] // Only super admin can access email configuration
+      allowedRoles: ['super_admin', 'admin'] // Removed protocol_admin access
     },
     {
       name: 'VVIP Subscribers',
