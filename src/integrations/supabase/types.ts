@@ -201,39 +201,6 @@ export type Database = {
         }
         Relationships: []
       }
-      gallery_items: {
-        Row: {
-          category: string | null
-          created_at: string | null
-          description: string | null
-          id: string
-          image_url: string
-          is_featured: boolean | null
-          title: string
-          updated_at: string | null
-        }
-        Insert: {
-          category?: string | null
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          image_url: string
-          is_featured?: boolean | null
-          title: string
-          updated_at?: string | null
-        }
-        Update: {
-          category?: string | null
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          image_url?: string
-          is_featured?: boolean | null
-          title?: string
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
       inventory_items: {
         Row: {
           category: string

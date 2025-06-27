@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,55 +8,40 @@ import { useToast } from '@/hooks/use-toast';
 import { Users, Plus, Search, Mail, Phone, Building, Edit, Trash2, User } from 'lucide-react';
 import { AddClientModal } from '@/components/modals/AddClientModal';
 import { EditItemModal } from '@/components/modals/EditItemModal';
-
-interface Client {
-  id: string;
-  full_name: string;
-  email: string | null;
-  phone: string | null;
-  company: string | null;
-  notes: string | null;
-  created_at: string;
-}
-
-// Mock data for clients
-const mockClients: Client[] = [
-  {
-    id: '1',
-    full_name: 'Ambassador Johnson',
-    email: 'ambassador.johnson@embassy.com',
-    phone: '+1 (555) 123-4567',
-    company: 'Embassy of Example',
-    notes: 'High-profile diplomatic meetings',
-    created_at: '2024-01-15T10:00:00Z'
-  },
-  {
-    id: '2',
-    full_name: 'CEO Sarah Williams',
-    email: 'sarah.williams@megacorp.com',
-    phone: '+1 (555) 234-5678',
-    company: 'MegaCorp International',
-    notes: 'Corporate events and business summits',
-    created_at: '2024-01-16T10:00:00Z'
-  },
-  {
-    id: '3',
-    full_name: 'Minister David Chen',
-    email: 'minister.chen@gov.example',
-    phone: '+1 (555) 345-6789',
-    company: 'Ministry of Trade',
-    notes: 'Government protocol events',
-    created_at: '2024-01-17T10:00:00Z'
-  }
-];
+import { useClients, useDeleteClient, type Client } from '@/hooks/useClients';
+import { supabase } from '@/integrations/supabase/client';
 
 const Clients = () => {
-  const [clients, setClients] = useState<Client[]>(mockClients);
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const { toast } = useToast();
+
+  const { data: clients = [], isLoading, error } = useClients();
+  const deleteClientMutation = useDeleteClient();
+
+  // Set up real-time subscription
+  useEffect(() => {
+    const channel = supabase
+      .channel('clients-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'clients'
+        },
+        (payload) => {
+          console.log('Clients table changed:', payload);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   const filteredClients = clients.filter((client) =>
     client.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -64,16 +50,20 @@ const Clients = () => {
     client.phone?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleDeleteClient = (client: Client) => {
-    setClients(prev => prev.filter(c => c.id !== client.id));
-    toast({
-      title: "Client Deleted",
-      description: `${client.full_name} has been removed from the client database.`,
-    });
-  };
-
-  const handleAddClient = (newClient: Client) => {
-    setClients(prev => [newClient, ...prev]);
+  const handleDeleteClient = async (client: Client) => {
+    try {
+      await deleteClientMutation.mutateAsync(client.id);
+      toast({
+        title: "Client Deleted",
+        description: `${client.full_name} has been removed from the client database.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete client.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleEditClient = (client: Client) => {
@@ -81,9 +71,26 @@ const Clients = () => {
     setIsEditModalOpen(true);
   };
 
-  const handleClientUpdated = (updatedClient: Client) => {
-    setClients(prev => prev.map(c => c.id === updatedClient.id ? updatedClient : c));
+  const handleClientUpdated = () => {
+    setSelectedClient(null);
+    setIsEditModalOpen(false);
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-black">
+        <div className="text-vip-gold">Loading clients...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-black">
+        <div className="text-red-600">Error loading clients. Please try again.</div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 max-w-7xl mx-auto bg-black min-h-screen">
@@ -128,7 +135,7 @@ const Clients = () => {
                     <User className="h-5 w-5 text-vip-gold" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg text-vip-gold">{client.full_name || 'Unnamed Client'}</CardTitle>
+                    <CardTitle className="text-lg text-vip-gold">{client.full_name}</CardTitle>
                     {client.company && (
                       <div className="flex items-center space-x-1 mt-1">
                         <Building className="h-3 w-3 text-vip-gold/60" />
@@ -151,6 +158,7 @@ const Clients = () => {
                     size="sm"
                     onClick={() => handleDeleteClient(client)}
                     className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                    disabled={deleteClientMutation.isPending}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -211,7 +219,7 @@ const Clients = () => {
       <AddClientModal 
         open={isAddModalOpen}
         onOpenChange={setIsAddModalOpen}
-        onClientAdded={handleAddClient}
+        onClientAdded={() => {}}
       />
       
       {selectedClient && (
