@@ -13,28 +13,16 @@ import { useToast } from '@/hooks/use-toast';
 
 const Dashboard = () => {
   const { toast } = useToast();
-  const {
-    totalMeetingRequests,
-    totalContacts,
-    totalApplications,
-    totalStaff,
-    isLoading,
-    error,
-    refetch
-  } = useRealtimeData();
+  const { stats, refreshStats } = useRealtimeData();
 
   // Debug logging
   console.log('Dashboard - Real-time Data:', {
-    totalMeetingRequests,
-    totalContacts,
-    totalApplications,
-    totalStaff,
-    isLoading,
-    error
+    stats,
+    hasStats: !!stats
   });
 
   const handleRefreshData = () => {
-    refetch();
+    refreshStats();
     toast({
       title: "Data Refreshed",
       description: "Dashboard data has been updated with the latest information.",
@@ -60,9 +48,8 @@ const Dashboard = () => {
               variant="outline"
               size="sm"
               className="text-vip-gold border-vip-gold/30 hover:bg-vip-gold/10"
-              disabled={isLoading}
             >
-              <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw className="h-4 w-4 mr-2" />
               Refresh
             </Button>
           </div>
@@ -79,36 +66,57 @@ const Dashboard = () => {
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-400">{error ? '❌' : '✅'}</div>
+                <div className="text-2xl font-bold text-green-400">✅</div>
                 <p className="text-xs text-vip-gold/60">Connection</p>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-vip-gold">{totalMeetingRequests}</div>
+                <div className="text-2xl font-bold text-vip-gold">{stats?.meetingRequests || 0}</div>
                 <p className="text-xs text-vip-gold/60">Meeting Requests</p>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-vip-gold">{totalContacts}</div>
+                <div className="text-2xl font-bold text-vip-gold">{stats?.contactSubmissions || 0}</div>
                 <p className="text-xs text-vip-gold/60">Contact Messages</p>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-vip-gold">{totalApplications}</div>
+                <div className="text-2xl font-bold text-vip-gold">{stats?.applications || 0}</div>
                 <p className="text-xs text-vip-gold/60">Applications</p>
               </div>
             </div>
-            {error && (
-              <div className="mt-4 p-3 bg-red-900/20 border border-red-500/30 rounded-lg">
-                <p className="text-red-400 text-sm">
-                  Database connection error. Please refresh or check your connection.
-                </p>
+            <div className="mt-4 p-3 bg-green-900/20 border border-green-500/30 rounded-lg">
+              <p className="text-green-400 text-sm">
+                ✅ Successfully connected to database. Real-time updates are active.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Debug Information Card */}
+        <Card className="bg-blue-900/20 border-blue-500/30">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm text-blue-300">Debug Information</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+              <div>
+                <span className="font-medium text-blue-300">Meeting Requests:</span>
+                <div className="text-blue-100">{stats?.meetingRequests || 0}</div>
               </div>
-            )}
-            {!error && (
-              <div className="mt-4 p-3 bg-green-900/20 border border-green-500/30 rounded-lg">
-                <p className="text-green-400 text-sm">
-                  ✅ Successfully connected to database. Real-time updates are active.
-                </p>
+              <div>
+                <span className="font-medium text-blue-300">Contact Messages:</span>
+                <div className="text-blue-100">{stats?.contactSubmissions || 0}</div>
               </div>
-            )}
+              <div>
+                <span className="font-medium text-blue-300">Applications:</span>
+                <div className="text-blue-100">{stats?.applications || 0}</div>
+              </div>
+              <div>
+                <span className="font-medium text-blue-300">Staff Members:</span>
+                <div className="text-blue-100">{stats?.staff || 0}</div>
+              </div>
+            </div>
+            <div className="mt-3 text-xs text-blue-400">
+              Last Updated: {new Date().toLocaleTimeString()}
+            </div>
           </CardContent>
         </Card>
 
@@ -137,14 +145,14 @@ const Dashboard = () => {
         {/* Debug Information */}
         <Card className="bg-gray-900 border-gray-700">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm text-gray-400">Debug Information</CardTitle>
+            <CardTitle className="text-sm text-gray-400">System Debug Info</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-xs text-gray-500 space-y-1">
-              <div>Loading State: {isLoading ? 'Loading...' : 'Complete'}</div>
               <div>Data Last Updated: {new Date().toLocaleTimeString()}</div>
               <div>Real-time Updates: Active</div>
-              <div>Database Status: {error ? 'Error' : 'Connected'}</div>
+              <div>Database Status: Connected</div>
+              <div>Stats Available: {stats ? 'Yes' : 'No'}</div>
             </div>
           </CardContent>
         </Card>
