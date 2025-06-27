@@ -302,7 +302,6 @@ const Inventory = () => {
       <AddItemModal 
         open={isAddModalOpen} 
         onOpenChange={setIsAddModalOpen}
-        onItemAdded={handleItemAdded}
       />
 
       <DeleteConfirmationModal

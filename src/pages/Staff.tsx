@@ -57,13 +57,6 @@ const Staff = () => {
     }
   };
 
-  const handleStaffAdded = (newStaff: any) => {
-    toast({
-      title: "Staff Member Added",
-      description: `${newStaff.name} has been added to the team.`,
-    });
-  };
-
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'active':
@@ -251,7 +244,6 @@ const Staff = () => {
       <AddStaffModal 
         open={isAddModalOpen} 
         onOpenChange={setIsAddModalOpen}
-        onStaffAdded={handleStaffAdded}
       />
 
       <DeleteConfirmationModal
