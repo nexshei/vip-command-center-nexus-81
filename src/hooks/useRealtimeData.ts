@@ -33,66 +33,7 @@ export const useRealtimeData = () => {
     try {
       console.log('🔍 Fetching real-time database counts...');
       
-      // Test individual table connections with proper table names
-      console.log('📊 Testing individual table connections...');
-      
-      try {
-        const clientsTest = await supabase.from('clients').select('id', { count: 'exact', head: true });
-        console.log(`✅ clients: ${clientsTest.count} records, error: ${clientsTest.error?.message || 'none'}`);
-      } catch (err) {
-        console.error('❌ clients test failed:', err);
-      }
-
-      try {
-        const meetingRequestsTest = await supabase.from('meeting_requests').select('id', { count: 'exact', head: true });
-        console.log(`✅ meeting_requests: ${meetingRequestsTest.count} records, error: ${meetingRequestsTest.error?.message || 'none'}`);
-      } catch (err) {
-        console.error('❌ meeting_requests test failed:', err);
-      }
-
-      try {
-        const contactSubmissionsTest = await supabase.from('contact_submissions').select('id', { count: 'exact', head: true });
-        console.log(`✅ contact_submissions: ${contactSubmissionsTest.count} records, error: ${contactSubmissionsTest.error?.message || 'none'}`);
-      } catch (err) {
-        console.error('❌ contact_submissions test failed:', err);
-      }
-
-      try {
-        const applicationsTest = await supabase.from('career_applications').select('id', { count: 'exact', head: true });
-        console.log(`✅ career_applications: ${applicationsTest.count} records, error: ${applicationsTest.error?.message || 'none'}`);
-      } catch (err) {
-        console.error('❌ career_applications test failed:', err);
-      }
-
-      try {
-        const staffTest = await supabase.from('staff_members').select('id', { count: 'exact', head: true });
-        console.log(`✅ staff_members: ${staffTest.count} records, error: ${staffTest.error?.message || 'none'}`);
-      } catch (err) {
-        console.error('❌ staff_members test failed:', err);
-      }
-
-      try {
-        const inventoryTest = await supabase.from('inventory_items').select('id', { count: 'exact', head: true });
-        console.log(`✅ inventory_items: ${inventoryTest.count} records, error: ${inventoryTest.error?.message || 'none'}`);
-      } catch (err) {
-        console.error('❌ inventory_items test failed:', err);
-      }
-
-      try {
-        const jobsTest = await supabase.from('job_postings').select('id', { count: 'exact', head: true });
-        console.log(`✅ job_postings: ${jobsTest.count} records, error: ${jobsTest.error?.message || 'none'}`);
-      } catch (err) {
-        console.error('❌ job_postings test failed:', err);
-      }
-
-      try {
-        const subscribersTest = await supabase.from('newsletter_subscriptions').select('id', { count: 'exact', head: true });
-        console.log(`✅ newsletter_subscriptions: ${subscribersTest.count} records, error: ${subscribersTest.error?.message || 'none'}`);
-      } catch (err) {
-        console.error('❌ newsletter_subscriptions test failed:', err);
-      }
-      
-      // Fetch all counts with proper table names
+      // Fetch all counts using Promise.all for better performance
       const [
         { count: clientsCount, error: clientsError },
         { count: meetingRequestsCount, error: meetingError },
@@ -152,7 +93,7 @@ export const useRealtimeData = () => {
     // Initial fetch
     fetchAllCounts();
 
-    // Set up real-time subscriptions with proper table names
+    // Set up real-time subscriptions
     const channels = [
       supabase
         .channel('clients-realtime')

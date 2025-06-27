@@ -18,6 +18,7 @@ const SupabaseConnectionTest = () => {
   const [testing, setTesting] = useState(false);
   const [lastTest, setLastTest] = useState<Date | null>(null);
 
+  // Define table names as literal types to satisfy TypeScript
   const tableNames = [
     'contact_submissions',
     'meeting_requests',
@@ -27,7 +28,7 @@ const SupabaseConnectionTest = () => {
     'inventory_items',
     'job_postings',
     'newsletter_subscriptions'
-  ];
+  ] as const;
 
   const testConnections = async () => {
     setTesting(true);

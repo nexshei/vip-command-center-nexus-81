@@ -33,7 +33,7 @@ export const useSupabaseOperations = <T extends TableName>(tableName: T) => {
       }
       
       console.log(`✅ Successfully fetched ${data?.length || 0} records from ${tableName}`);
-      return (data as TableRow<T>[]) || [];
+      return (data || []) as TableRow<T>[];
       
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
@@ -58,7 +58,7 @@ export const useSupabaseOperations = <T extends TableName>(tableName: T) => {
       
       const { data, error } = await supabase
         .from(tableName)
-        .insert(record)
+        .insert(record as any)
         .select()
         .single();
       
@@ -99,7 +99,7 @@ export const useSupabaseOperations = <T extends TableName>(tableName: T) => {
       
       const { data, error } = await supabase
         .from(tableName)
-        .update(updates)
+        .update(updates as any)
         .eq('id', id)
         .select()
         .single();
