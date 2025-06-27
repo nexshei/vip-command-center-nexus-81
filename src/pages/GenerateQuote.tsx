@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -66,9 +67,6 @@ const GenerateQuote = () => {
       return data || [];
     }
   });
-
-  // You could also fetch previous quotes from a quotes table if it exists
-  // For now, we'll show empty state until quotes are added to database
 
   const serviceCategories = [
     {
@@ -159,6 +157,74 @@ const GenerateQuote = () => {
     }).format(amount);
   };
 
+  const saveQuoteToStorage = async (quoteData: any, isDraft = false) => {
+    try {
+      // First, ensure the documents bucket exists
+      const { data: buckets } = await supabase.storage.listBuckets();
+      const documentsBucket = buckets?.find(bucket => bucket.name === 'documents');
+      
+      if (!documentsBucket) {
+        // Create the documents bucket if it doesn't exist
+        const { error: bucketError } = await supabase.storage.createBucket('documents', {
+          public: false,
+          allowedMimeTypes: ['application/json', 'application/pdf', 'text/plain'],
+          fileSizeLimit: 1024 * 1024 * 10 // 10MB
+        });
+        
+        if (bucketError) {
+          console.error('Error creating documents bucket:', bucketError);
+          throw new Error(`Failed to create documents bucket: ${bucketError.message}`);
+        }
+      }
+
+      // Create a quote document with all details
+      const quoteDocument = {
+        id: quoteData.id,
+        clientName: quoteData.clientName,
+        serviceType: quoteData.serviceType,
+        lineItems: quoteData.lineItems,
+        subtotal: quoteData.subtotal,
+        discount: quoteData.discount,
+        tax: quoteData.tax,
+        total: quoteData.total,
+        taxRate: quoteData.taxRate,
+        discountAmount: quoteData.discountAmount,
+        discountType: quoteData.discountType,
+        expiryDate: quoteData.expiryDate,
+        quoteDetails: quoteData.quoteDetails,
+        status: isDraft ? 'draft' : 'pending',
+        createdAt: new Date().toISOString(),
+      };
+
+      // Convert to JSON string for storage
+      const documentBlob = new Blob([JSON.stringify(quoteDocument, null, 2)], {
+        type: 'application/json',
+      });
+
+      // Generate filename
+      const fileName = `quote_${quoteData.id}_${Date.now()}.json`;
+
+      // Upload to Supabase storage
+      const { data, error } = await supabase.storage
+        .from('documents')
+        .upload(`quotes/${fileName}`, documentBlob, {
+          cacheControl: '3600',
+          upsert: false,
+        });
+
+      if (error) {
+        console.error('Storage error:', error);
+        throw new Error(`Failed to save quote: ${error.message}`);
+      }
+
+      console.log('Quote saved successfully:', data);
+      return data;
+    } catch (error: any) {
+      console.error('Error saving quote:', error);
+      throw error;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent, isDraft = false) => {
     e.preventDefault();
 
@@ -174,12 +240,29 @@ const GenerateQuote = () => {
     setIsSubmitting(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const quoteId = Date.now().toString().slice(-6);
+      const quoteData = {
+        id: quoteId,
+        clientName,
+        serviceType,
+        lineItems,
+        subtotal: calculateSubtotal(),
+        discount: calculateDiscount(),
+        tax: calculateTax(),
+        total: calculateTotal(),
+        taxRate,
+        discountAmount,
+        discountType,
+        expiryDate,
+        quoteDetails
+      };
+
+      // Save quote to storage
+      await saveQuoteToStorage(quoteData, isDraft);
 
       toast({
         title: isDraft ? "Quote Saved as Draft" : "Quote Generated",
-        description: isDraft ? "Quote has been saved as draft." : "Quote has been successfully generated and is pending approval.",
+        description: isDraft ? "Quote has been saved as draft in documents storage." : "Quote has been successfully generated and saved to documents storage.",
       });
 
       // Reset form
