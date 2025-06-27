@@ -7,8 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import AddClientModal from '@/components/modals/AddClientModal';
-import DeleteConfirmationModal from '@/components/modals/DeleteConfirmationModal';
+import { AddClientModal } from '@/components/modals/AddClientModal';
+import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
 import {
   Table,
   TableBody,
