@@ -33,28 +33,66 @@ export const useRealtimeData = () => {
     try {
       console.log('🔍 Fetching real-time database counts...');
       
-      // Test connection to each table individually
-      const tableTests = [
-        'clients',
-        'meeting_requests',
-        'contact_submissions',
-        'career_applications',
-        'staff_members',
-        'inventory_items',
-        'job_postings',
-        'newsletter_subscriptions'
-      ];
-
+      // Test individual table connections with proper table names
       console.log('📊 Testing individual table connections...');
-      for (const tableName of tableTests) {
-        try {
-          const testResult = await supabase.from(tableName).select('id', { count: 'exact', head: true });
-          console.log(`✅ ${tableName}: ${testResult.count} records, error: ${testResult.error?.message || 'none'}`);
-        } catch (err) {
-          console.error(`❌ ${tableName} test failed:`, err);
-        }
+      
+      try {
+        const clientsTest = await supabase.from('clients').select('id', { count: 'exact', head: true });
+        console.log(`✅ clients: ${clientsTest.count} records, error: ${clientsTest.error?.message || 'none'}`);
+      } catch (err) {
+        console.error('❌ clients test failed:', err);
+      }
+
+      try {
+        const meetingRequestsTest = await supabase.from('meeting_requests').select('id', { count: 'exact', head: true });
+        console.log(`✅ meeting_requests: ${meetingRequestsTest.count} records, error: ${meetingRequestsTest.error?.message || 'none'}`);
+      } catch (err) {
+        console.error('❌ meeting_requests test failed:', err);
+      }
+
+      try {
+        const contactSubmissionsTest = await supabase.from('contact_submissions').select('id', { count: 'exact', head: true });
+        console.log(`✅ contact_submissions: ${contactSubmissionsTest.count} records, error: ${contactSubmissionsTest.error?.message || 'none'}`);
+      } catch (err) {
+        console.error('❌ contact_submissions test failed:', err);
+      }
+
+      try {
+        const applicationsTest = await supabase.from('career_applications').select('id', { count: 'exact', head: true });
+        console.log(`✅ career_applications: ${applicationsTest.count} records, error: ${applicationsTest.error?.message || 'none'}`);
+      } catch (err) {
+        console.error('❌ career_applications test failed:', err);
+      }
+
+      try {
+        const staffTest = await supabase.from('staff_members').select('id', { count: 'exact', head: true });
+        console.log(`✅ staff_members: ${staffTest.count} records, error: ${staffTest.error?.message || 'none'}`);
+      } catch (err) {
+        console.error('❌ staff_members test failed:', err);
+      }
+
+      try {
+        const inventoryTest = await supabase.from('inventory_items').select('id', { count: 'exact', head: true });
+        console.log(`✅ inventory_items: ${inventoryTest.count} records, error: ${inventoryTest.error?.message || 'none'}`);
+      } catch (err) {
+        console.error('❌ inventory_items test failed:', err);
+      }
+
+      try {
+        const jobsTest = await supabase.from('job_postings').select('id', { count: 'exact', head: true });
+        console.log(`✅ job_postings: ${jobsTest.count} records, error: ${jobsTest.error?.message || 'none'}`);
+      } catch (err) {
+        console.error('❌ job_postings test failed:', err);
+      }
+
+      try {
+        const subscribersTest = await supabase.from('newsletter_subscriptions').select('id', { count: 'exact', head: true });
+        console.log(`✅ newsletter_subscriptions: ${subscribersTest.count} records, error: ${subscribersTest.error?.message || 'none'}`);
+      } catch (err) {
+        console.error('❌ newsletter_subscriptions test failed:', err);
       }
       
+      // Fetch all counts with proper table names
       const [
         { count: clientsCount, error: clientsError },
         { count: meetingRequestsCount, error: meetingError },
@@ -114,41 +152,184 @@ export const useRealtimeData = () => {
     // Initial fetch
     fetchAllCounts();
 
-    // Set up real-time subscriptions for all tables
+    // Set up real-time subscriptions with proper table names
     const channels = [
-      'clients',
-      'meeting_requests', 
-      'contact_submissions',
-      'career_applications',
-      'staff_members',
-      'inventory_items',
-      'job_postings',
-      'newsletter_subscriptions'
-    ].map(tableName => {
-      return supabase
-        .channel(`${tableName}-realtime`)
+      supabase
+        .channel('clients-realtime')
         .on(
           'postgres_changes',
           {
             event: '*',
             schema: 'public',
-            table: tableName
+            table: 'clients'
           },
           (payload) => {
-            console.log(`Real-time update in ${tableName}:`, payload);
+            console.log('Real-time update in clients:', payload);
             fetchAllCounts();
-            
-            // Show toast for new records
             if (payload.eventType === 'INSERT') {
               toast({
                 title: "Database Updated",
-                description: `New record added to ${tableName.replace('_', ' ')}`
+                description: "New record added to clients"
               });
             }
           }
         )
-        .subscribe();
-    });
+        .subscribe(),
+
+      supabase
+        .channel('meeting-requests-realtime')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'meeting_requests'
+          },
+          (payload) => {
+            console.log('Real-time update in meeting_requests:', payload);
+            fetchAllCounts();
+            if (payload.eventType === 'INSERT') {
+              toast({
+                title: "Database Updated",
+                description: "New record added to meeting requests"
+              });
+            }
+          }
+        )
+        .subscribe(),
+
+      supabase
+        .channel('contact-submissions-realtime')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'contact_submissions'
+          },
+          (payload) => {
+            console.log('Real-time update in contact_submissions:', payload);
+            fetchAllCounts();
+            if (payload.eventType === 'INSERT') {
+              toast({
+                title: "Database Updated",
+                description: "New record added to contact submissions"
+              });
+            }
+          }
+        )
+        .subscribe(),
+
+      supabase
+        .channel('career-applications-realtime')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'career_applications'
+          },
+          (payload) => {
+            console.log('Real-time update in career_applications:', payload);
+            fetchAllCounts();
+            if (payload.eventType === 'INSERT') {
+              toast({
+                title: "Database Updated",
+                description: "New record added to career applications"
+              });
+            }
+          }
+        )
+        .subscribe(),
+
+      supabase
+        .channel('staff-members-realtime')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'staff_members'
+          },
+          (payload) => {
+            console.log('Real-time update in staff_members:', payload);
+            fetchAllCounts();
+            if (payload.eventType === 'INSERT') {
+              toast({
+                title: "Database Updated",
+                description: "New record added to staff members"
+              });
+            }
+          }
+        )
+        .subscribe(),
+
+      supabase
+        .channel('inventory-items-realtime')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'inventory_items'
+          },
+          (payload) => {
+            console.log('Real-time update in inventory_items:', payload);
+            fetchAllCounts();
+            if (payload.eventType === 'INSERT') {
+              toast({
+                title: "Database Updated",
+                description: "New record added to inventory items"
+              });
+            }
+          }
+        )
+        .subscribe(),
+
+      supabase
+        .channel('job-postings-realtime')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'job_postings'
+          },
+          (payload) => {
+            console.log('Real-time update in job_postings:', payload);
+            fetchAllCounts();
+            if (payload.eventType === 'INSERT') {
+              toast({
+                title: "Database Updated",
+                description: "New record added to job postings"
+              });
+            }
+          }
+        )
+        .subscribe(),
+
+      supabase
+        .channel('newsletter-subscriptions-realtime')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'newsletter_subscriptions'
+          },
+          (payload) => {
+            console.log('Real-time update in newsletter_subscriptions:', payload);
+            fetchAllCounts();
+            if (payload.eventType === 'INSERT') {
+              toast({
+                title: "Database Updated",
+                description: "New record added to newsletter subscriptions"
+              });
+            }
+          }
+        )
+        .subscribe()
+    ];
 
     return () => {
       channels.forEach(channel => supabase.removeChannel(channel));
