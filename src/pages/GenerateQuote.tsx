@@ -26,14 +26,8 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-
-interface Client {
-  id: string;
-  full_name: string;
-  email?: string;
-  phone?: string;
-  company?: string;
-}
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 interface LineItem {
   id: string;
@@ -41,17 +35,6 @@ interface LineItem {
   quantity: number;
   unitPrice: number;
   total: number;
-}
-
-interface Quote {
-  id: string;
-  quote_number: string;
-  client_name: string;
-  service_type: string;
-  total_amount: number;
-  status: 'draft' | 'pending' | 'approved' | 'rejected';
-  created_at: string;
-  expiry_date?: string;
 }
 
 const GenerateQuote = () => {
@@ -70,74 +53,22 @@ const GenerateQuote = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Mock clients data
-  const [clients] = useState<Client[]>([
-    {
-      id: '1',
-      full_name: 'Ambassador Johnson',
-      email: 'ambassador.johnson@embassy.com',
-      phone: '+254-123-456-789',
-      company: 'Embassy of Excellence'
-    },
-    {
-      id: '2',
-      full_name: 'Minister Chen',
-      email: 'minister.chen@gov.example',
-      phone: '+254-987-654-321',
-      company: 'Government Office'
-    },
-    {
-      id: '3',
-      full_name: 'Sarah Williams',
-      email: 'sarah.williams@megacorp.com',
-      phone: '+254-555-123-456',
-      company: 'MegaCorp International'
+  // Fetch clients from database
+  const { data: clients = [] } = useQuery({
+    queryKey: ['clients'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('clients')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
     }
-  ]);
+  });
 
-  // Mock previous quotes data
-  const [previousQuotes] = useState<Quote[]>([
-    {
-      id: '1',
-      quote_number: 'Q-2024-001',
-      client_name: 'Ambassador Johnson',
-      service_type: 'Diplomatic Meeting',
-      total_amount: 850000,
-      status: 'approved',
-      created_at: '2024-06-20T10:30:00Z',
-      expiry_date: '2024-07-20'
-    },
-    {
-      id: '2',
-      quote_number: 'Q-2024-002',
-      client_name: 'Minister Chen',
-      service_type: 'State Reception',
-      total_amount: 1200000,
-      status: 'pending',
-      created_at: '2024-06-22T14:15:00Z',
-      expiry_date: '2024-07-22'
-    },
-    {
-      id: '3',
-      quote_number: 'Q-2024-003',
-      client_name: 'Sarah Williams',
-      service_type: 'Corporate Event',
-      total_amount: 650000,
-      status: 'draft',
-      created_at: '2024-06-24T09:45:00Z',
-      expiry_date: '2024-07-24'
-    },
-    {
-      id: '4',
-      quote_number: 'Q-2024-004',
-      client_name: 'Ambassador Johnson',
-      service_type: 'Government Protocol',
-      total_amount: 420000,
-      status: 'rejected',
-      created_at: '2024-06-18T16:20:00Z',
-      expiry_date: '2024-07-18'
-    }
-  ]);
+  // You could also fetch previous quotes from a quotes table if it exists
+  // For now, we'll show empty state until quotes are added to database
 
   const serviceCategories = [
     {
@@ -219,21 +150,6 @@ const GenerateQuote = () => {
     return subtotal - discount + tax;
   };
 
-  const getStatusBadge = (status: Quote['status']) => {
-    switch (status) {
-      case 'approved':
-        return <Badge className="bg-green-500 text-white">Approved</Badge>;
-      case 'pending':
-        return <Badge className="bg-yellow-500 text-white">Pending</Badge>;
-      case 'draft':
-        return <Badge className="bg-gray-500 text-white">Draft</Badge>;
-      case 'rejected':
-        return <Badge className="bg-red-500 text-white">Rejected</Badge>;
-      default:
-        return <Badge className="bg-gray-500 text-white">{status}</Badge>;
-    }
-  };
-
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-KE', {
       style: 'currency',
@@ -241,21 +157,6 @@ const GenerateQuote = () => {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount);
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
-
-  const handleViewQuote = (quote: Quote) => {
-    toast({
-      title: "Quote Details",
-      description: `Viewing details for ${quote.quote_number}`,
-    });
   };
 
   const handleSubmit = async (e: React.FormEvent, isDraft = false) => {
@@ -335,69 +236,6 @@ const GenerateQuote = () => {
           </div>
         </div>
 
-        {/* Previous Quotes Section */}
-        <Card className="bg-white shadow-sm border-0">
-          <CardHeader className="border-b bg-gray-50">
-            <CardTitle className="text-gray-900 flex items-center">
-              <Clock className="h-5 w-5 mr-2 text-blue-600" />
-              Previous Quotes
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div className="space-y-4">
-              {previousQuotes.map((quote) => (
-                <div key={quote.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                  <div className="flex justify-between items-start">
-                    <div className="space-y-2 flex-1">
-                      <div className="flex items-center space-x-3">
-                        <FileText className="h-4 w-4 text-blue-600" />
-                        <h3 className="font-semibold text-gray-900">{quote.quote_number}</h3>
-                        {getStatusBadge(quote.status)}
-                      </div>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600">
-                        <div>
-                          <span className="font-medium">Client:</span> {quote.client_name}
-                        </div>
-                        <div>
-                          <span className="font-medium">Service:</span> {quote.service_type}
-                        </div>
-                        <div>
-                          <span className="font-medium">Amount:</span> {formatCurrency(quote.total_amount)}
-                        </div>
-                        <div>
-                          <span className="font-medium">Created:</span> {formatDate(quote.created_at)}
-                        </div>
-                      </div>
-                      {quote.expiry_date && (
-                        <div className="text-sm text-gray-500">
-                          <Calendar className="h-3 w-3 inline mr-1" />
-                          Expires: {formatDate(quote.expiry_date)}
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleViewQuote(quote)}
-                        className="border-blue-300 text-blue-600 hover:bg-blue-50"
-                      >
-                        <Eye className="h-3 w-3 mr-1" />
-                        View
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              {previousQuotes.length === 0 && (
-                <div className="text-center text-gray-500 py-8">
-                  No previous quotes found.
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Form */}
           <div className="lg:col-span-2">
@@ -420,17 +258,23 @@ const GenerateQuote = () => {
                         <SelectValue placeholder="Select client" />
                       </SelectTrigger>
                       <SelectContent className="bg-white border-gray-200 z-50">
-                        {clients.map((client: Client) => (
-                          <SelectItem key={client.id} value={client.full_name} className="hover:bg-blue-50">
-                            <div className="flex items-center">
-                              <User className="h-4 w-4 mr-2 text-blue-600" />
-                              <div>
-                                <div className="font-medium">{client.full_name}</div>
-                                {client.email && <div className="text-xs text-gray-500">{client.email}</div>}
+                        {clients.length > 0 ? (
+                          clients.map((client) => (
+                            <SelectItem key={client.id} value={client.full_name} className="hover:bg-blue-50">
+                              <div className="flex items-center">
+                                <User className="h-4 w-4 mr-2 text-blue-600" />
+                                <div>
+                                  <div className="font-medium">{client.full_name}</div>
+                                  {client.email && <div className="text-xs text-gray-500">{client.email}</div>}
+                                </div>
                               </div>
-                            </div>
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="no-clients" disabled>
+                            No clients found - Add clients first
                           </SelectItem>
-                        ))}
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
@@ -615,6 +459,33 @@ const GenerateQuote = () => {
                       className="bg-white border-gray-300 focus:border-blue-500 placeholder:text-gray-400"
                     />
                   </div>
+
+                  {/* Submit Buttons */}
+                  <div className="flex space-x-4 pt-6">
+                    <Button
+                      type="submit"
+                      onClick={(e) => handleSubmit(e, false)}
+                      disabled={isSubmitting}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      {isSubmitting ? 'Generating...' : 'Generate Quote'}
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={(e) => handleSubmit(e, true)}
+                      disabled={isSubmitting}
+                      variant="outline"
+                    >
+                      Save as Draft
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={handleCancel}
+                      variant="outline"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
                 </form>
               </CardContent>
             </Card>
@@ -672,8 +543,10 @@ const GenerateQuote = () => {
                     </div>
                     {discountAmount > 0 && (
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Discount</span>
-                        <span className="font-medium text-red-600">-{formatCurrency(calculateDiscount())}</span>
+                        <span className="text-gray-600">
+                          Discount ({discountType === 'percentage' ? `${discountAmount}%` : 'Fixed'})
+                        </span>
+                        <span className="font-medium text-green-600">-{formatCurrency(calculateDiscount())}</span>
                       </div>
                     )}
                     <div className="flex justify-between text-sm">
@@ -687,36 +560,14 @@ const GenerateQuote = () => {
                     </div>
                   </div>
 
-                  {/* Actions */}
-                  <div className="space-y-2 pt-4">
-                    <Button
-                      onClick={(e) => handleSubmit(e, false)}
-                      disabled={isSubmitting || !clientName || !serviceType || lineItems.length === 0}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                          Generating...
-                        </>
-                      ) : (
-                        <>
-                          <Save className="h-4 w-4 mr-2" />
-                          Generate Quote
-                        </>
-                      )}
-                    </Button>
-                    
-                    <Button
-                      onClick={(e) => handleSubmit(e, true)}
-                      disabled={isSubmitting}
-                      variant="outline"
-                      className="w-full border-gray-300 text-gray-700 hover:bg-gray-50"
-                    >
-                      <Edit className="h-4 w-4 mr-2" />
-                      Save as Draft
-                    </Button>
-                  </div>
+                  {expiryDate && (
+                    <div className="mt-4 p-3 bg-yellow-50 rounded">
+                      <div className="flex items-center text-sm text-yellow-800">
+                        <Calendar className="h-4 w-4 mr-1" />
+                        Expires: {new Date(expiryDate).toLocaleDateString()}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

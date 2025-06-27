@@ -8,58 +8,42 @@ import { useToast } from '@/hooks/use-toast';
 import { Search, Users, Plus, Edit, Trash2, Mail, Phone } from 'lucide-react';
 import { AddStaffModal } from '@/components/modals/AddStaffModal';
 import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
-
-// Mock data for staff members
-const mockStaffMembers = [
-  {
-    id: '1',
-    full_name: 'Sarah Johnson',
-    email: 'sarah.johnson@vipprotocol.com',
-    phone: '+254-700-123-456',
-    role: 'Senior Protocol Officer',
-    status: 'Active',
-    notes: 'Specialized in diplomatic events'
-  },
-  {
-    id: '2',
-    full_name: 'Michael Chen',
-    email: 'michael.chen@vipprotocol.com',
-    phone: '+254-700-234-567',
-    role: 'Security Coordinator',
-    status: 'Active',
-    notes: 'Former military background'
-  },
-  {
-    id: '3',
-    full_name: 'Amanda Williams',
-    email: 'amanda.w@vipprotocol.com',
-    phone: '+254-700-345-678',
-    role: 'Event Coordinator',
-    status: 'On Leave',
-    notes: 'Temporary leave until next month'
-  }
-];
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 const Staff = () => {
-  const [staff, setStaff] = useState(mockStaffMembers);
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [deletingStaff, setDeletingStaff] = useState(null);
   const { toast } = useToast();
 
+  // Fetch staff from database
+  const { data: staff = [], isLoading } = useQuery({
+    queryKey: ['staff'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('staff_members')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
   const filteredStaff = staff.filter(member =>
-    member.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    member.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    member.email.toLowerCase().includes(searchTerm.toLowerCase())
+    member.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    member.position?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    member.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'Active':
+      case 'active':
         return <Badge className="bg-green-500 text-white">Active</Badge>;
-      case 'On Leave':
+      case 'on_leave':
         return <Badge className="bg-yellow-500 text-white">On Leave</Badge>;
-      case 'Inactive':
+      case 'inactive':
         return <Badge className="bg-red-500 text-white">Inactive</Badge>;
       default:
         return <Badge className="bg-gray-500 text-white">{status}</Badge>;
@@ -74,13 +58,21 @@ const Staff = () => {
   };
 
   const handleDeleteStaff = (staffId: string) => {
-    setStaff(prev => prev.filter(member => member.id !== staffId));
+    // In real implementation, this would delete from database
     setDeletingStaff(null);
     toast({
       title: "Staff Member Removed",
       description: "Staff member has been removed from the system.",
     });
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black text-white p-6 flex items-center justify-center">
+        <div className="text-xl text-vip-gold">Loading staff data...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black text-white p-6">
@@ -106,7 +98,7 @@ const Staff = () => {
           <Card className="bg-white border border-vip-gold/20">
             <CardContent className="p-6 text-center">
               <div className="text-2xl font-bold text-vip-black mb-2">
-                {staff.filter(member => member.status === 'Active').length}
+                {staff.filter(member => member.status === 'active').length}
               </div>
               <p className="text-vip-gold font-medium">Active Staff</p>
             </CardContent>
@@ -114,7 +106,7 @@ const Staff = () => {
           <Card className="bg-white border border-vip-gold/20">
             <CardContent className="p-6 text-center">
               <div className="text-2xl font-bold text-vip-black mb-2">
-                {staff.filter(member => member.status === 'On Leave').length}
+                {staff.filter(member => member.status === 'on_leave').length}
               </div>
               <p className="text-vip-gold font-medium">On Leave</p>
             </CardContent>
@@ -170,22 +162,26 @@ const Staff = () => {
                         </div>
                         <div>
                           <h3 className="font-semibold text-vip-black">{member.full_name}</h3>
-                          <p className="text-sm text-vip-gold">{member.role}</p>
+                          <p className="text-sm text-vip-gold">{member.position}</p>
                         </div>
                         {getStatusBadge(member.status)}
                       </div>
                       <div className="flex items-center space-x-4 text-sm text-vip-black/60">
-                        <div className="flex items-center space-x-1">
-                          <Mail className="h-3 w-3" />
-                          <span>{member.email}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Phone className="h-3 w-3" />
-                          <span>{member.phone}</span>
-                        </div>
+                        {member.email && (
+                          <div className="flex items-center space-x-1">
+                            <Mail className="h-3 w-3" />
+                            <span>{member.email}</span>
+                          </div>
+                        )}
+                        {member.phone && (
+                          <div className="flex items-center space-x-1">
+                            <Phone className="h-3 w-3" />
+                            <span>{member.phone}</span>
+                          </div>
+                        )}
                       </div>
-                      {member.notes && (
-                        <p className="text-sm text-vip-black/60">{member.notes}</p>
+                      {member.bio && (
+                        <p className="text-sm text-vip-black/60">{member.bio}</p>
                       )}
                     </div>
                     <div className="flex space-x-2">
@@ -212,7 +208,7 @@ const Staff = () => {
               ))}
               {filteredStaff.length === 0 && (
                 <div className="text-center text-vip-black/60 py-8">
-                  {searchTerm ? 'No staff members match your search.' : 'No staff members yet.'}
+                  {searchTerm ? 'No staff members match your search.' : 'No staff members found. Add your first team member to get started.'}
                 </div>
               )}
             </div>

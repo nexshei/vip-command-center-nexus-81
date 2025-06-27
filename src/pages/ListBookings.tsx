@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { ViewMeetingRequestModal } from '@/components/modals/ViewMeetingRequestModal';
 import { EditMeetingRequestModal } from '@/components/modals/EditMeetingRequestModal';
+import { useMeetingRequests } from '@/hooks/useMeetingRequests';
 
 const ListBookings = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -22,42 +23,8 @@ const ListBookings = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Mock meeting requests data
-  const [meetingRequests] = useState([
-    {
-      id: '1',
-      full_name: 'Ambassador Johnson',
-      email: 'ambassador.johnson@embassy.com',
-      phone: '+254-123-456-789',
-      event_type: 'Diplomatic Meeting',
-      event_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      location: 'Embassy Conference Room',
-      status: 'pending',
-      created_at: new Date().toISOString()
-    },
-    {
-      id: '2',
-      full_name: 'Minister Chen',
-      email: 'minister.chen@gov.example',
-      phone: '+254-987-654-321',
-      event_type: 'State Reception',
-      event_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-      location: 'State House',
-      status: 'confirmed',
-      created_at: new Date().toISOString()
-    },
-    {
-      id: '3',
-      full_name: 'Sarah Williams',
-      email: 'sarah.williams@megacorp.com',
-      phone: '+254-555-123-456',
-      event_type: 'Corporate Event',
-      event_date: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString(),
-      location: 'Nairobi Hotel',
-      status: 'pending',
-      created_at: new Date().toISOString()
-    }
-  ]);
+  // Fetch meeting requests from database
+  const { data: meetingRequests = [], isLoading, refetch } = useMeetingRequests();
 
   const formatDateTime = (dateTimeString: string) => {
     if (!dateTimeString) return { date: 'Not set', time: 'Not set' };
@@ -103,22 +70,16 @@ const ListBookings = () => {
 
   const handleDeleteRequest = (id: string) => {
     toast({
-      title: "Demo Mode",
-      description: "In a real application, this would delete the meeting request.",
-    });
-  };
-
-  const handleUpdateStatus = (id: string, newStatus: string) => {
-    toast({
-      title: "Demo Mode",
-      description: `In a real application, status would be updated to ${newStatus}.`,
+      title: "Delete Request",
+      description: "Request deletion functionality would be implemented here.",
     });
   };
 
   const handleRequestUpdated = () => {
+    refetch();
     toast({
-      title: "Demo Mode",
-      description: "Request updated successfully in demo mode.",
+      title: "Request Updated",
+      description: "Meeting request has been updated successfully.",
     });
   };
 
@@ -140,17 +101,25 @@ const ListBookings = () => {
     return eventDate >= new Date();
   }).length;
 
+  if (isLoading) {
+    return (
+      <div className="space-y-6 p-6 max-w-7xl mx-auto flex items-center justify-center min-h-screen">
+        <div className="text-xl text-vip-gold">Loading meeting requests...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 p-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-serif font-bold text-vip-black">Meeting Requests</h1>
-          <p className="text-vip-gold/80 mt-2">View and manage meeting requests (Demo Data)</p>
+          <p className="text-vip-gold/80 mt-2">View and manage meeting requests</p>
         </div>
         <div className="flex gap-2">
           <Button 
-            onClick={() => toast({ title: "Demo Mode", description: "This is demo data for display purposes." })} 
+            onClick={() => refetch()} 
             variant="outline"
             className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
           >
@@ -175,7 +144,7 @@ const ListBookings = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-vip-black">{totalRequests}</div>
-            <p className="text-xs text-vip-gold/60">All time requests</p>
+            <p className="text-xs text-vip-gold/60">All requests</p>
           </CardContent>
         </Card>
         
@@ -354,9 +323,12 @@ const ListBookings = () => {
           </div>
           {filteredMeetingRequests.length === 0 && (
             <div className="text-center py-8">
-              <p className="text-vip-gold/60">No meeting requests found matching your search criteria.</p>
+              <p className="text-vip-gold/60">No meeting requests found.</p>
               <p className="text-sm text-vip-gold/40 mt-2">
-                This is demo data for display purposes.
+                {searchTerm || eventTypeFilter !== 'all' || statusFilter !== 'all' 
+                  ? 'Try adjusting your search criteria.' 
+                  : 'Create your first meeting request to get started.'
+                }
               </p>
             </div>
           )}

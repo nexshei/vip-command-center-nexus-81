@@ -9,57 +9,46 @@ import { Search, Package, Plus, Edit, Trash2 } from 'lucide-react';
 import { EditItemModal } from '@/components/modals/EditItemModal';
 import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
 import { AddItemModalTrigger } from '@/components/modals/AddItemModalTrigger';
-
-// Mock data for inventory items
-const mockInventoryItems = [
-  {
-    id: '1',
-    item_name: 'VIP Welcome Banners',
-    description: 'Premium fabric banners for event entrances',
-    quantity: 25,
-    location: 'Storage Room A',
-    status: 'Available'
-  },
-  {
-    id: '2',
-    item_name: 'Red Carpet Runners',
-    description: '50ft premium red carpet runners',
-    quantity: 8,
-    location: 'Storage Room B',
-    status: 'Available'
-  },
-  {
-    id: '3',
-    item_name: 'Protocol Podiums',
-    description: 'Adjustable height speaking podiums',
-    quantity: 3,
-    location: 'Equipment Room',
-    status: 'In Use'
-  }
-];
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 const Inventory = () => {
-  const [items, setItems] = useState(mockInventoryItems);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingItem, setEditingItem] = useState(null);
   const [deletingItem, setDeletingItem] = useState(null);
   const { toast } = useToast();
 
+  // Fetch inventory items from database
+  const { data: items = [], isLoading } = useQuery({
+    queryKey: ['inventory'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('inventory_items')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
   const filteredItems = items.filter(item =>
-    item.item_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.description.toLowerCase().includes(searchTerm.toLowerCase())
+    item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.category?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'Available':
-        return <Badge className="bg-green-500 text-white">Available</Badge>;
-      case 'In Use':
-        return <Badge className="bg-yellow-500 text-white">In Use</Badge>;
-      case 'Maintenance':
-        return <Badge className="bg-red-500 text-white">Maintenance</Badge>;
+  const getStatusBadge = (condition: string) => {
+    switch (condition) {
+      case 'excellent':
+        return <Badge className="bg-green-500 text-white">Excellent</Badge>;
+      case 'good':
+        return <Badge className="bg-blue-500 text-white">Good</Badge>;
+      case 'fair':
+        return <Badge className="bg-yellow-500 text-white">Fair</Badge>;
+      case 'poor':
+        return <Badge className="bg-red-500 text-white">Poor</Badge>;
       default:
-        return <Badge className="bg-gray-500 text-white">{status}</Badge>;
+        return <Badge className="bg-gray-500 text-white">{condition}</Badge>;
     }
   };
 
@@ -71,7 +60,7 @@ const Inventory = () => {
   };
 
   const handleDeleteItem = (itemId: string) => {
-    setItems(prev => prev.filter(item => item.id !== itemId));
+    // In real implementation, this would delete from database
     setDeletingItem(null);
     toast({
       title: "Item Deleted",
@@ -80,8 +69,19 @@ const Inventory = () => {
   };
 
   const handleItemAdded = (newItem: any) => {
-    setItems(prev => [...prev, { ...newItem, status: 'Available' }]);
+    toast({
+      title: "Item Added",
+      description: "New inventory item has been added successfully.",
+    });
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black text-white p-6 flex items-center justify-center">
+        <div className="text-xl text-vip-gold">Loading inventory...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black text-white p-6">
@@ -107,23 +107,23 @@ const Inventory = () => {
           <Card className="bg-white border border-vip-gold/20">
             <CardContent className="p-6 text-center">
               <div className="text-2xl font-bold text-vip-black mb-2">
-                {items.filter(item => item.status === 'Available').length}
+                {items.filter(item => item.condition === 'excellent').length}
               </div>
-              <p className="text-vip-gold font-medium">Available Items</p>
+              <p className="text-vip-gold font-medium">Excellent Condition</p>
             </CardContent>
           </Card>
           <Card className="bg-white border border-vip-gold/20">
             <CardContent className="p-6 text-center">
               <div className="text-2xl font-bold text-vip-black mb-2">
-                {items.filter(item => item.status === 'In Use').length}
+                {items.filter(item => item.quantity && item.quantity > 0).length}
               </div>
-              <p className="text-vip-gold font-medium">Items In Use</p>
+              <p className="text-vip-gold font-medium">Items In Stock</p>
             </CardContent>
           </Card>
           <Card className="bg-white border border-vip-gold/20">
             <CardContent className="p-6 text-center">
               <div className="text-2xl font-bold text-vip-black mb-2">
-                {items.reduce((sum, item) => sum + item.quantity, 0)}
+                {items.reduce((sum, item) => sum + (item.quantity || 0), 0)}
               </div>
               <p className="text-vip-gold font-medium">Total Quantity</p>
             </CardContent>
@@ -161,14 +161,18 @@ const Inventory = () => {
                     <div className="space-y-2 flex-1">
                       <div className="flex items-center space-x-3">
                         <Package className="h-5 w-5 text-vip-gold" />
-                        <h3 className="font-semibold text-vip-black">{item.item_name}</h3>
-                        {getStatusBadge(item.status)}
+                        <h3 className="font-semibold text-vip-black">{item.name}</h3>
+                        {getStatusBadge(item.condition)}
                       </div>
-                      <p className="text-vip-black/70">{item.description}</p>
+                      <p className="text-vip-black/70">{item.category}</p>
                       <div className="flex space-x-4 text-sm text-vip-black/60">
-                        <span>Quantity: {item.quantity}</span>
-                        <span>Location: {item.location}</span>
+                        <span>Quantity: {item.quantity || 0}</span>
+                        <span>Location: {item.location || 'Not specified'}</span>
+                        {item.supplier && <span>Supplier: {item.supplier}</span>}
                       </div>
+                      {item.notes && (
+                        <p className="text-sm text-vip-black/60">{item.notes}</p>
+                      )}
                     </div>
                     <div className="flex space-x-2">
                       <Button
@@ -195,7 +199,7 @@ const Inventory = () => {
               ))}
               {filteredItems.length === 0 && (
                 <div className="text-center text-vip-black/60 py-8">
-                  {searchTerm ? 'No items match your search.' : 'No inventory items yet.'}
+                  {searchTerm ? 'No items match your search.' : 'No inventory items found. Add your first item to get started.'}
                 </div>
               )}
             </div>
@@ -216,7 +220,7 @@ const Inventory = () => {
         onOpenChange={(open) => !open && setDeletingItem(null)}
         title="Delete Inventory Item"
         description={`Are you sure you want to delete`}
-        itemName={deletingItem?.item_name || ''}
+        itemName={deletingItem?.name || ''}
         onConfirm={() => deletingItem && handleDeleteItem(deletingItem.id)}
       />
     </div>

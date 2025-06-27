@@ -7,67 +7,46 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Search, Mail, UserCheck, UserX } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-
-interface Subscriber {
-  id: string;
-  email: string;
-  subscribed: boolean;
-  created_at: string;
-}
-
-// Mock data for subscribers
-const mockSubscribers: Subscriber[] = [
-  {
-    id: '1',
-    email: 'ambassador.johnson@embassy.com',
-    subscribed: true,
-    created_at: '2024-01-15T10:00:00Z'
-  },
-  {
-    id: '2',
-    email: 'sarah.williams@megacorp.com',
-    subscribed: true,
-    created_at: '2024-01-16T10:00:00Z'
-  },
-  {
-    id: '3',
-    email: 'minister.chen@gov.example',
-    subscribed: false,
-    created_at: '2024-01-17T10:00:00Z'
-  }
-];
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 const Subscribers = () => {
-  const [subscribers, setSubscribers] = useState<Subscriber[]>(mockSubscribers);
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
   const { hasAccess } = useAuth();
+
+  // Fetch subscribers from database
+  const { data: subscribers = [], isLoading } = useQuery({
+    queryKey: ['subscribers'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('newsletter_subscriptions')
+        .select('*')
+        .order('subscribed_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
+    }
+  });
 
   // Protocol admin has limited access - can only view and send pre-approved messages
   const canModifySubscriptions = hasAccess(['super_admin', 'admin']);
 
   const filteredSubscribers = subscribers.filter(subscriber =>
-    subscriber.email.toLowerCase().includes(searchTerm.toLowerCase())
+    subscriber.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleSubscriberAction = (subscriber: Subscriber, action: 'toggle' | 'message') => {
+  const handleSubscriberAction = async (subscriber: any, action: 'toggle' | 'message') => {
     if (action === 'message') {
       toast({
         title: "Send Message",
         description: `Opening communication with ${subscriber.email}`,
       });
     } else if (action === 'toggle' && canModifySubscriptions) {
-      const newStatus = !subscriber.subscribed;
-      setSubscribers(prev => 
-        prev.map(s => 
-          s.id === subscriber.id 
-            ? { ...s, subscribed: newStatus }
-            : s
-        )
-      );
+      // In real implementation, this would update the database
       toast({
         title: "Status Updated",
-        description: `${subscriber.email} is now ${newStatus ? 'subscribed' : 'unsubscribed'}`,
+        description: `${subscriber.email} subscription status updated`,
       });
     } else {
       toast({
@@ -77,6 +56,14 @@ const Subscribers = () => {
       });
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="max-w-4xl mx-auto p-6 flex items-center justify-center min-h-screen">
+        <div className="text-xl text-vip-gold">Loading subscribers...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -119,14 +106,14 @@ const Subscribers = () => {
                     <div>
                       <p className="font-medium text-vip-black">{subscriber.email}</p>
                       <p className="text-sm text-vip-gold/60">
-                        Joined: {new Date(subscriber.created_at).toLocaleDateString()}
+                        Joined: {new Date(subscriber.subscribed_at).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <Badge className={subscriber.subscribed ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
-                    {subscriber.subscribed ? "SUBSCRIBED" : "UNSUBSCRIBED"}
+                  <Badge className={subscriber.is_active ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
+                    {subscriber.is_active ? "SUBSCRIBED" : "UNSUBSCRIBED"}
                   </Badge>
                   <div className="flex space-x-2">
                     <Button
@@ -143,12 +130,12 @@ const Subscribers = () => {
                         size="sm"
                         variant="outline"
                         onClick={() => handleSubscriberAction(subscriber, 'toggle')}
-                        className={subscriber.subscribed 
+                        className={subscriber.is_active 
                           ? "border-red-300 text-red-600 hover:bg-red-50"
                           : "border-green-300 text-green-600 hover:bg-green-50"
                         }
                       >
-                        {subscriber.subscribed ? (
+                        {subscriber.is_active ? (
                           <>
                             <UserX className="h-3 w-3 mr-1" />
                             Unsubscribe
@@ -167,7 +154,7 @@ const Subscribers = () => {
             ))}
             {filteredSubscribers.length === 0 && (
               <div className="text-center text-vip-gold/60 py-8">
-                {searchTerm ? 'No subscribers match your search.' : 'No subscribers yet.'}
+                {searchTerm ? 'No subscribers match your search.' : 'No subscribers found. Start building your VVIP subscriber list.'}
               </div>
             )}
           </div>

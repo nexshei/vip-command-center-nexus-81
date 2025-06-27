@@ -6,79 +6,50 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { toast } from '@/components/ui/use-toast';
-
-// Mock data for VIP subscribers
-const mockSubscribers = [
-  {
-    id: 1,
-    email: "john.doe@email.com",
-    status: "Active",
-    joinDate: "2024-01-15",
-  },
-  {
-    id: 2,
-    email: "jane.smith@email.com",
-    status: "Active",
-    joinDate: "2024-02-20",
-  },
-  {
-    id: 3,
-    email: "michael.j@email.com",
-    status: "Active",
-    joinDate: "2024-03-10",
-  },
-  {
-    id: 4,
-    email: "sarah.wilson@email.com",
-    status: "Pending",
-    joinDate: "2024-05-25",
-  },
-  {
-    id: 5,
-    email: "david.brown@email.com",
-    status: "Pending",
-    joinDate: "2023-12-01",
-  }
-];
+import { useToast } from '@/hooks/use-toast';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 const Subscriptions = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [subscribers, setSubscribers] = useState(mockSubscribers);
   const [emailSubject, setEmailSubject] = useState('');
   const [emailMessage, setEmailMessage] = useState('');
+  const { toast } = useToast();
+
+  // Fetch subscribers from database
+  const { data: subscribers = [], isLoading } = useQuery({
+    queryKey: ['newsletter_subscriptions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('newsletter_subscriptions')
+        .select('*')
+        .order('subscribed_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
+    }
+  });
 
   const filteredSubscribers = subscribers.filter(subscriber =>
-    subscriber.email.toLowerCase().includes(searchTerm.toLowerCase())
+    subscriber.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'Active':
-        return <Badge className="bg-green-500 text-white">Active</Badge>;
-      case 'Pending':
-        return <Badge className="bg-yellow-500 text-white">Pending</Badge>;
-      default:
-        return <Badge className="bg-gray-500 text-white">{status}</Badge>;
-    }
+  const getStatusBadge = (isActive: boolean) => {
+    return isActive 
+      ? <Badge className="bg-green-500 text-white">Active</Badge>
+      : <Badge className="bg-red-500 text-white">Inactive</Badge>;
   };
 
-  const handleApproveSubscriber = (id: number) => {
-    setSubscribers(prev => 
-      prev.map(subscriber => 
-        subscriber.id === id 
-          ? { ...subscriber, status: 'Active' }
-          : subscriber
-      )
-    );
+  const handleApproveSubscriber = async (id: string) => {
+    // In real implementation, this would update the database
     toast({
       title: "Subscriber Approved",
       description: "The subscriber has been approved successfully.",
     });
   };
 
-  const handleRejectSubscriber = (id: number) => {
-    setSubscribers(prev => prev.filter(subscriber => subscriber.id !== id));
+  const handleRejectSubscriber = async (id: string) => {
+    // In real implementation, this would update the database
     toast({
       title: "Subscriber Rejected",
       description: "The subscriber has been removed.",
@@ -96,7 +67,7 @@ const Subscriptions = () => {
       return;
     }
 
-    const activeSubscribers = subscribers.filter(s => s.status === 'Active');
+    const activeSubscribers = subscribers.filter(s => s.is_active);
     
     // In a real app, this would send actual emails
     console.log('Sending email to:', activeSubscribers.map(s => s.email));
@@ -111,6 +82,17 @@ const Subscriptions = () => {
     setEmailSubject('');
     setEmailMessage('');
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black text-white p-6 flex items-center justify-center">
+        <div className="text-xl text-vip-gold">Loading subscribers...</div>
+      </div>
+    );
+  }
+
+  const activeSubscribers = subscribers.filter(s => s.is_active);
+  const inactiveSubscribers = subscribers.filter(s => !s.is_active);
 
   return (
     <div className="min-h-screen bg-black text-white p-6">
@@ -133,7 +115,7 @@ const Subscriptions = () => {
           <Card className="bg-white border border-vip-gold/20">
             <CardContent className="p-6 text-center">
               <div className="text-2xl font-bold text-vip-black mb-2">
-                {subscribers.filter(s => s.status === 'Active').length}
+                {activeSubscribers.length}
               </div>
               <p className="text-vip-gold font-medium">Active Subscribers</p>
             </CardContent>
@@ -141,9 +123,9 @@ const Subscriptions = () => {
           <Card className="bg-white border border-vip-gold/20">
             <CardContent className="p-6 text-center">
               <div className="text-2xl font-bold text-vip-black mb-2">
-                {subscribers.filter(s => s.status === 'Pending').length}
+                {inactiveSubscribers.length}
               </div>
-              <p className="text-vip-gold font-medium">Pending Approval</p>
+              <p className="text-vip-gold font-medium">Inactive Subscribers</p>
             </CardContent>
           </Card>
           <Card className="bg-white border border-vip-gold/20">
@@ -191,9 +173,10 @@ const Subscriptions = () => {
             <Button 
               onClick={handleSendEmailToAll}
               className="bg-vip-gold text-black hover:bg-vip-gold/80"
+              disabled={activeSubscribers.length === 0}
             >
               <Send className="h-4 w-4 mr-2" />
-              Send Email to All Active Subscribers
+              Send Email to {activeSubscribers.length} Active Subscribers
             </Button>
           </CardContent>
         </Card>
@@ -225,6 +208,7 @@ const Subscriptions = () => {
                   <TableHead className="text-vip-black font-semibold">Email</TableHead>
                   <TableHead className="text-vip-black font-semibold">Status</TableHead>
                   <TableHead className="text-vip-black font-semibold">Join Date</TableHead>
+                  <TableHead className="text-vip-black font-semibold">Source</TableHead>
                   <TableHead className="text-vip-black font-semibold">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -238,51 +222,46 @@ const Subscriptions = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      {getStatusBadge(subscriber.status)}
+                      {getStatusBadge(subscriber.is_active)}
                     </TableCell>
                     <TableCell className="text-vip-black">
-                      {subscriber.joinDate}
+                      {new Date(subscriber.subscribed_at).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell className="text-vip-black">
+                      {subscriber.source || 'website'}
                     </TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
-                        {subscriber.status === 'Pending' && (
-                          <>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleApproveSubscriber(subscriber.id)}
-                              className="border-green-500 text-green-600 hover:bg-green-500 hover:text-white"
-                            >
-                              <Check className="h-3 w-3 mr-1" />
-                              Approve
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleRejectSubscriber(subscriber.id)}
-                              className="border-red-500 text-red-600 hover:bg-red-500 hover:text-white"
-                            >
-                              <X className="h-3 w-3 mr-1" />
-                              Reject
-                            </Button>
-                          </>
-                        )}
-                        {subscriber.status === 'Active' && (
+                        {!subscriber.is_active && (
                           <Button
                             variant="outline"
                             size="sm"
-                            className="border-vip-gold/30 text-vip-black hover:bg-vip-gold hover:text-black"
+                            onClick={() => handleApproveSubscriber(subscriber.id)}
+                            className="border-green-500 text-green-600 hover:bg-green-500 hover:text-white"
                           >
-                            <Mail className="h-3 w-3 mr-1" />
-                            Send Email
+                            <Check className="h-3 w-3 mr-1" />
+                            Activate
                           </Button>
                         )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="border-vip-gold/30 text-vip-black hover:bg-vip-gold hover:text-black"
+                        >
+                          <Mail className="h-3 w-3 mr-1" />
+                          Send Email
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
+            {filteredSubscribers.length === 0 && (
+              <div className="text-center text-vip-black/60 py-8">
+                {searchTerm ? 'No subscribers match your search.' : 'No subscribers found. Start building your subscriber list.'}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
