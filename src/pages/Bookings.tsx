@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Calendar, Search, Plus, Eye, Edit, MapPin, Users, Clock } from 'lucide-react';
+import { Calendar, Search, Plus, Eye, Edit, MapPin, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useMeetingRequests } from '@/hooks/useMeetingRequests';
@@ -89,13 +89,22 @@ const Bookings = () => {
           <h1 className="text-3xl font-serif font-bold text-gray-900">Event Management</h1>
           <p className="text-gray-600 mt-2">Manage and track upcoming VVIP events</p>
         </div>
-        <Button 
-          onClick={() => navigate('/create-booking')} 
-          className="bg-blue-600 text-white hover:bg-blue-700"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          New Event
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            onClick={() => navigate('/all-bookings')} 
+            variant="outline"
+            className="border-gray-300 text-gray-600 hover:bg-gray-50"
+          >
+            View All Bookings
+          </Button>
+          <Button 
+            onClick={() => navigate('/create-booking')} 
+            className="bg-blue-600 text-white hover:bg-blue-700"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            New Event
+          </Button>
+        </div>
       </div>
 
       {/* Summary Stats */}

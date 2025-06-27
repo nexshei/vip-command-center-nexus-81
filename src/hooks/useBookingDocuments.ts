@@ -10,6 +10,24 @@ export const useBookingDocuments = () => {
   const saveBookingDocument = async (bookingId: string, bookingData: any) => {
     setIsUploading(true);
     try {
+      // First, ensure the documents bucket exists
+      const { data: buckets } = await supabase.storage.listBuckets();
+      const documentsBucket = buckets?.find(bucket => bucket.name === 'documents');
+      
+      if (!documentsBucket) {
+        // Create the documents bucket if it doesn't exist
+        const { error: bucketError } = await supabase.storage.createBucket('documents', {
+          public: false,
+          allowedMimeTypes: ['application/json', 'application/pdf', 'text/plain'],
+          fileSizeLimit: 1024 * 1024 * 10 // 10MB
+        });
+        
+        if (bucketError) {
+          console.error('Error creating documents bucket:', bucketError);
+          throw new Error(`Failed to create documents bucket: ${bucketError.message}`);
+        }
+      }
+
       // Create a document with booking details
       const documentContent = {
         id: bookingId,
