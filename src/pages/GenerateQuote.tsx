@@ -13,17 +13,11 @@ import {
   Calculator, 
   User, 
   Plus, 
-  Save, 
   ArrowLeft, 
   Trash2, 
   Calendar,
   DollarSign,
-  Percent,
-  Download,
-  Send,
-  Edit,
-  Eye,
-  Clock
+  Percent
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -43,7 +37,7 @@ const GenerateQuote = () => {
   const [serviceType, setServiceType] = useState('');
   const [quoteDetails, setQuoteDetails] = useState('');
   const [lineItems, setLineItems] = useState<LineItem[]>([]);
-  const [taxRate, setTaxRate] = useState(16); // Default VAT rate
+  const [taxRate, setTaxRate] = useState(16);
   const [discountAmount, setDiscountAmount] = useState(0);
   const [discountType, setDiscountType] = useState<'percentage' | 'fixed'>('percentage');
   const [expiryDate, setExpiryDate] = useState('');
@@ -159,24 +153,8 @@ const GenerateQuote = () => {
 
   const saveQuoteToStorage = async (quoteData: any, isDraft = false) => {
     try {
-      // First, ensure the documents bucket exists
-      const { data: buckets } = await supabase.storage.listBuckets();
-      const documentsBucket = buckets?.find(bucket => bucket.name === 'documents');
+      console.log('Saving quote to storage...');
       
-      if (!documentsBucket) {
-        // Create the documents bucket if it doesn't exist
-        const { error: bucketError } = await supabase.storage.createBucket('documents', {
-          public: false,
-          allowedMimeTypes: ['application/json', 'application/pdf', 'text/plain'],
-          fileSizeLimit: 1024 * 1024 * 10 // 10MB
-        });
-        
-        if (bucketError) {
-          console.error('Error creating documents bucket:', bucketError);
-          throw new Error(`Failed to create documents bucket: ${bucketError.message}`);
-        }
-      }
-
       // Create a quote document with all details
       const quoteDocument = {
         id: quoteData.id,
@@ -196,6 +174,8 @@ const GenerateQuote = () => {
         createdAt: new Date().toISOString(),
       };
 
+      console.log('Quote document:', quoteDocument);
+
       // Convert to JSON string for storage
       const documentBlob = new Blob([JSON.stringify(quoteDocument, null, 2)], {
         type: 'application/json',
@@ -203,6 +183,8 @@ const GenerateQuote = () => {
 
       // Generate filename
       const fileName = `quote_${quoteData.id}_${Date.now()}.json`;
+
+      console.log('Uploading file:', fileName);
 
       // Upload to Supabase storage
       const { data, error } = await supabase.storage
@@ -257,6 +239,8 @@ const GenerateQuote = () => {
         quoteDetails
       };
 
+      console.log('Submitting quote:', quoteData);
+
       // Save quote to storage
       await saveQuoteToStorage(quoteData, isDraft);
 
@@ -274,14 +258,14 @@ const GenerateQuote = () => {
       setDiscountAmount(0);
       setExpiryDate('');
 
-      // Navigate to bookings page
-      navigate('/bookings');
+      // Navigate to list quotes page
+      navigate('/list-quotes');
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating quote:', error);
       toast({
         title: "Error",
-        description: "Failed to generate quote. Please try again.",
+        description: error.message || "Failed to generate quote. Please try again.",
         variant: "destructive"
       });
     } finally {
