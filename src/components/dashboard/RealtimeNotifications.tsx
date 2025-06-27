@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -241,7 +240,7 @@ const RealtimeNotifications = () => {
                   )}
                 </div>
                 <div className="text-right">
-                  <Badge className={getStatusColor(booking.status)} size="sm">
+                  <Badge className={`text-xs px-2 py-1 ${getStatusColor(booking.status)}`}>
                     {booking.status?.toUpperCase() || 'PENDING'}
                   </Badge>
                   <p className="text-xs text-vip-gold/60 mt-1">{formatTime(booking.created_at)}</p>
@@ -266,7 +265,7 @@ const RealtimeNotifications = () => {
                   <p className="text-xs text-vip-gold/50 truncate max-w-48">{contact.message?.substring(0, 50)}...</p>
                 </div>
                 <div className="text-right">
-                  <Badge className={getStatusColor(contact.status)} size="sm">
+                  <Badge className={`text-xs px-2 py-1 ${getStatusColor(contact.status)}`}>
                     {contact.status?.toUpperCase() || 'PENDING'}
                   </Badge>
                   <p className="text-xs text-vip-gold/60 mt-1">{formatTime(contact.created_at)}</p>
@@ -291,7 +290,7 @@ const RealtimeNotifications = () => {
                   <p className="text-xs text-vip-gold/50">{application.email}</p>
                 </div>
                 <div className="text-right">
-                  <Badge className={getStatusColor(application.status)} size="sm">
+                  <Badge className={`text-xs px-2 py-1 ${getStatusColor(application.status)}`}>
                     {application.status?.toUpperCase() || 'PENDING'}
                   </Badge>
                   <p className="text-xs text-vip-gold/60 mt-1">{formatTime(application.created_at)}</p>
