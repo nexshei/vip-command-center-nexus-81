@@ -3,7 +3,7 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Mail, Phone, Building, Calendar, Reply } from 'lucide-react';
+import { Mail, Calendar, Reply } from 'lucide-react';
 
 interface ViewMessageModalProps {
   open: boolean;
@@ -15,8 +15,25 @@ export const ViewMessageModal = ({ open, onOpenChange, message }: ViewMessageMod
   if (!message) return null;
 
   const handleReply = () => {
-    const mailtoLink = `mailto:${message.email}?subject=Re: ${message.subject || 'Your Contact Submission'}&body=Dear ${message.name},%0D%0A%0D%0AThank you for contacting us.%0D%0A%0D%0ABest regards,%0D%0AVVIP Protocol Team`;
+    const mailtoLink = `mailto:${message.email}?subject=Re: ${message.subject || 'Your Contact Submission'}&body=Dear ${message.full_name},%0D%0A%0D%0AThank you for contacting us.%0D%0A%0D%0ABest regards,%0D%0AVVIP Protocol Team`;
     window.open(mailtoLink, '_blank');
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'reviewing':
+        return 'bg-blue-100 text-blue-800';
+      case 'approved':
+        return 'bg-green-100 text-green-800';
+      case 'completed':
+        return 'bg-purple-100 text-purple-800';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
   };
 
   return (
@@ -35,7 +52,7 @@ export const ViewMessageModal = ({ open, onOpenChange, message }: ViewMessageMod
             <div className="space-y-3">
               <div>
                 <label className="text-sm font-medium text-vip-gold/80">Name</label>
-                <p className="text-vip-black font-medium">{message.name}</p>
+                <p className="text-vip-black font-medium">{message.full_name}</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-vip-gold/80">Email</label>
@@ -55,6 +72,12 @@ export const ViewMessageModal = ({ open, onOpenChange, message }: ViewMessageMod
               <div>
                 <label className="text-sm font-medium text-vip-gold/80">Subject</label>
                 <p className="text-vip-black font-medium">{message.subject || "No Subject"}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-vip-gold/80">Status</label>
+                <Badge className={getStatusColor(message.status)}>
+                  {message.status?.toUpperCase() || 'PENDING'}
+                </Badge>
               </div>
               <div>
                 <label className="text-sm font-medium text-vip-gold/80">Date Received</label>
@@ -83,6 +106,18 @@ export const ViewMessageModal = ({ open, onOpenChange, message }: ViewMessageMod
               </p>
             </div>
           </div>
+
+          {/* Admin Notes */}
+          {message.admin_notes && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-vip-gold/80">Admin Notes</label>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-blue-900 whitespace-pre-wrap leading-relaxed">
+                  {message.admin_notes}
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Actions */}
           <div className="flex justify-end gap-3 pt-6 border-t border-vip-gold/20">
