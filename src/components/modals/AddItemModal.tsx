@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -12,9 +11,10 @@ import { useCreateInventoryItem } from '@/hooks/useInventory';
 interface AddItemModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onItemAdded?: (item: any) => void;
 }
 
-export const AddItemModal = ({ open, onOpenChange }: AddItemModalProps) => {
+export const AddItemModal = ({ open, onOpenChange, onItemAdded }: AddItemModalProps) => {
   const [formData, setFormData] = useState({
     name: '',
     category: '',
@@ -62,7 +62,7 @@ export const AddItemModal = ({ open, onOpenChange }: AddItemModalProps) => {
     setIsSubmitting(true);
 
     try {
-      await createItemMutation.mutateAsync({
+      const newItem = await createItemMutation.mutateAsync({
         name: formData.name.trim(),
         category: formData.category,
         quantity: parseInt(formData.quantity),
@@ -78,6 +78,11 @@ export const AddItemModal = ({ open, onOpenChange }: AddItemModalProps) => {
         title: "Success",
         description: `${formData.name} has been added to the inventory.`,
       });
+
+      // Call the onItemAdded callback if provided
+      if (onItemAdded) {
+        onItemAdded(newItem);
+      }
 
       resetForm();
       onOpenChange(false);
@@ -204,7 +209,7 @@ export const AddItemModal = ({ open, onOpenChange }: AddItemModalProps) => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="location" className="text-sm font-medium text-vip-black">Location</Label>
+              <Label htmlFor="location" className="text-sm font-medium text-vip-black">Storage Location</Label>
               <Input
                 id="location"
                 value={formData.location}
