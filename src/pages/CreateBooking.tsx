@@ -12,14 +12,19 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useBookingDocuments } from '@/hooks/useBookingDocuments';
+import { Database } from '@/integrations/supabase/types';
+
+type EventType = Database['public']['Enums']['event_type'];
+type ProtocolOfficersRange = Database['public']['Enums']['protocol_officers_range'];
+type RequestStatus = Database['public']['Enums']['request_status'];
 
 const CreateBooking = () => {
   const [clientName, setClientName] = useState('');
-  const [eventType, setEventType] = useState('');
+  const [eventType, setEventType] = useState<EventType | ''>('');
   const [eventDate, setEventDate] = useState('');
   const [eventLocation, setEventLocation] = useState('');
   const [vision, setVision] = useState('');
-  const [protocolOfficers, setProtocolOfficers] = useState('');
+  const [protocolOfficers, setProtocolOfficers] = useState<ProtocolOfficersRange | ''>('');
   const [contactEmail, setContactEmail] = useState('');
   const [contactPhone, setContactPhone] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -27,7 +32,7 @@ const CreateBooking = () => {
   const navigate = useNavigate();
   const { saveBookingDocument, isUploading } = useBookingDocuments();
 
-  const eventTypes = [
+  const eventTypes: EventType[] = [
     'corporate',
     'wedding', 
     'diplomatic',
@@ -36,7 +41,7 @@ const CreateBooking = () => {
     'other'
   ];
 
-  const protocolOfficersRanges = [
+  const protocolOfficersRanges: ProtocolOfficersRange[] = [
     '1-5',
     '5-10', 
     '10-20',
@@ -62,12 +67,12 @@ const CreateBooking = () => {
         full_name: clientName.trim(),
         email: contactEmail.trim(),
         phone: contactPhone.trim(),
-        event_type: eventType,
+        event_type: eventType as EventType,
         event_date: eventDate,
         location: eventLocation.trim() || null,
         vision: vision.trim() || null,
-        protocol_officers: protocolOfficers || null,
-        status: 'pending'
+        protocol_officers: protocolOfficers as ProtocolOfficersRange || null,
+        status: 'pending' as RequestStatus
       };
 
       const { data, error } = await supabase
@@ -181,7 +186,7 @@ const CreateBooking = () => {
                   <Label htmlFor="eventType" className="text-sm font-medium text-gray-700">
                     Event Type *
                   </Label>
-                  <Select value={eventType} onValueChange={setEventType} required disabled={isProcessing}>
+                  <Select value={eventType} onValueChange={(value: EventType) => setEventType(value)} required disabled={isProcessing}>
                     <SelectTrigger className="bg-white border-gray-300 focus:border-blue-500">
                       <SelectValue placeholder="Select event type" />
                     </SelectTrigger>
@@ -199,7 +204,7 @@ const CreateBooking = () => {
                   <Label htmlFor="protocolOfficers" className="text-sm font-medium text-gray-700">
                     Protocol Officers Range
                   </Label>
-                  <Select value={protocolOfficers} onValueChange={setProtocolOfficers} disabled={isProcessing}>
+                  <Select value={protocolOfficers} onValueChange={(value: ProtocolOfficersRange) => setProtocolOfficers(value)} disabled={isProcessing}>
                     <SelectTrigger className="bg-white border-gray-300 focus:border-blue-500">
                       <SelectValue placeholder="Select range" />
                     </SelectTrigger>
