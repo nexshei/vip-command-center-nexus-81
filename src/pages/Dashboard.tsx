@@ -70,15 +70,15 @@ const Dashboard = () => {
                 <p className="text-xs text-vip-gold/60">Connection</p>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-vip-gold">{stats?.meetingRequests || 0}</div>
+                <div className="text-2xl font-bold text-vip-gold">{stats?.totalMeetingRequests || 0}</div>
                 <p className="text-xs text-vip-gold/60">Meeting Requests</p>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-vip-gold">{stats?.contactSubmissions || 0}</div>
+                <div className="text-2xl font-bold text-vip-gold">{stats?.totalContactSubmissions || 0}</div>
                 <p className="text-xs text-vip-gold/60">Contact Messages</p>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-vip-gold">{stats?.applications || 0}</div>
+                <div className="text-2xl font-bold text-vip-gold">{stats?.totalApplications || 0}</div>
                 <p className="text-xs text-vip-gold/60">Applications</p>
               </div>
             </div>
@@ -99,19 +99,19 @@ const Dashboard = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div>
                 <span className="font-medium text-blue-300">Meeting Requests:</span>
-                <div className="text-blue-100">{stats?.meetingRequests || 0}</div>
+                <div className="text-blue-100">{stats?.totalMeetingRequests || 0}</div>
               </div>
               <div>
                 <span className="font-medium text-blue-300">Contact Messages:</span>
-                <div className="text-blue-100">{stats?.contactSubmissions || 0}</div>
+                <div className="text-blue-100">{stats?.totalContactSubmissions || 0}</div>
               </div>
               <div>
                 <span className="font-medium text-blue-300">Applications:</span>
-                <div className="text-blue-100">{stats?.applications || 0}</div>
+                <div className="text-blue-100">{stats?.totalApplications || 0}</div>
               </div>
               <div>
                 <span className="font-medium text-blue-300">Staff Members:</span>
-                <div className="text-blue-100">{stats?.staff || 0}</div>
+                <div className="text-blue-100">{stats?.totalStaff || 0}</div>
               </div>
             </div>
             <div className="mt-3 text-xs text-blue-400">
