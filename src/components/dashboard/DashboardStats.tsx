@@ -1,24 +1,27 @@
 
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Calendar, TrendingUp } from 'lucide-react';
+import { Users, Calendar, TrendingUp, Clock } from 'lucide-react';
 import { useClients } from '@/hooks/useClients';
 import { useMeetingRequests } from '@/hooks/useMeetingRequests';
 import { useApplications } from '@/hooks/useApplications';
+import { useContactSubmissions } from '@/hooks/useContactSubmissions';
 import { supabase } from '@/integrations/supabase/client';
 
 const DashboardStats = () => {
   const { data: clients = [] } = useClients();
   const { data: meetingRequests = [] } = useMeetingRequests();
   const { data: applications = [] } = useApplications();
+  const { data: contactSubmissions = [] } = useContactSubmissions();
+  
   const [realTimeStats, setRealTimeStats] = useState({
     todaysBookings: 0,
     thisWeeksBookings: 0,
-    totalClients: 0,
-    totalApplications: 0
+    pendingApplications: 0,
+    newMessagesToday: 0
   });
 
-  // Calculate real-time stats
+  // Calculate real-time stats from actual data
   useEffect(() => {
     const calculateStats = () => {
       // Calculate today's bookings
@@ -39,19 +42,32 @@ const DashboardStats = () => {
         return eventDate >= weekStart && eventDate <= weekEnd;
       }).length;
 
+      // Calculate pending applications
+      const pendingApplications = applications.filter(app => 
+        app.status === 'pending'
+      ).length;
+
+      // Calculate today's new messages
+      const newMessagesToday = contactSubmissions.filter(message => {
+        const messageDate = new Date(message.created_at).toISOString().split('T')[0];
+        return messageDate === today;
+      }).length;
+
       setRealTimeStats({
         todaysBookings,
         thisWeeksBookings,
-        totalClients: clients.length,
-        totalApplications: applications.length
+        pendingApplications,
+        newMessagesToday
       });
     };
 
     calculateStats();
-  }, [meetingRequests, clients, applications]);
+  }, [meetingRequests, applications, contactSubmissions]);
 
   // Set up real-time subscriptions for stats updates
   useEffect(() => {
+    console.log('Setting up dashboard stats real-time subscriptions...');
+    
     const channel = supabase
       .channel('dashboard-stats-updates')
       .on(
@@ -62,7 +78,7 @@ const DashboardStats = () => {
           table: 'meeting_requests'
         },
         () => {
-          console.log('Meeting requests updated - refreshing stats');
+          console.log('Meeting requests updated - refreshing dashboard stats');
         }
       )
       .on(
@@ -73,7 +89,7 @@ const DashboardStats = () => {
           table: 'clients'
         },
         () => {
-          console.log('Clients updated - refreshing stats');
+          console.log('Clients updated - refreshing dashboard stats');
         }
       )
       .on(
@@ -84,12 +100,24 @@ const DashboardStats = () => {
           table: 'career_applications'
         },
         () => {
-          console.log('Applications updated - refreshing stats');
+          console.log('Applications updated - refreshing dashboard stats');
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'contact_submissions'
+        },
+        () => {
+          console.log('Contact submissions updated - refreshing dashboard stats');
         }
       )
       .subscribe();
 
     return () => {
+      console.log('Cleaning up dashboard stats subscriptions...');
       supabase.removeChannel(channel);
     };
   }, []);
@@ -106,7 +134,7 @@ const DashboardStats = () => {
         <CardContent>
           <div className="text-2xl font-bold text-vip-gold">{realTimeStats.todaysBookings}</div>
           <p className="text-xs text-vip-gold/60">
-            {realTimeStats.todaysBookings === 0 ? 'No bookings today' : 'Active requests'}
+            {realTimeStats.todaysBookings === 0 ? 'No bookings today' : `${realTimeStats.todaysBookings} active request${realTimeStats.todaysBookings !== 1 ? 's' : ''}`}
           </p>
         </CardContent>
       </Card>
@@ -129,14 +157,14 @@ const DashboardStats = () => {
       <Card className="bg-black border-vip-gold/30 shadow-lg">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-vip-gold/80">
-            VVIP Clients
+            Pending Applications
           </CardTitle>
-          <Users className="h-4 w-4 text-vip-gold" />
+          <TrendingUp className="h-4 w-4 text-vip-gold" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-vip-gold">{realTimeStats.totalClients}</div>
+          <div className="text-2xl font-bold text-vip-gold">{realTimeStats.pendingApplications}</div>
           <p className="text-xs text-vip-gold/60">
-            {realTimeStats.totalClients === 0 ? 'No clients yet' : 'Total clients'}
+            {realTimeStats.pendingApplications === 0 ? 'All processed' : 'Awaiting review'}
           </p>
         </CardContent>
       </Card>
@@ -144,14 +172,14 @@ const DashboardStats = () => {
       <Card className="bg-black border-vip-gold/30 shadow-lg">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-vip-gold/80">
-            Applications
+            New Messages Today
           </CardTitle>
-          <TrendingUp className="h-4 w-4 text-vip-gold" />
+          <Clock className="h-4 w-4 text-vip-gold" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-vip-gold">{realTimeStats.totalApplications}</div>
+          <div className="text-2xl font-bold text-vip-gold">{realTimeStats.newMessagesToday}</div>
           <p className="text-xs text-vip-gold/60">
-            {realTimeStats.totalApplications === 0 ? 'No applications yet' : 'Career applications'}
+            {realTimeStats.newMessagesToday === 0 ? 'No new messages' : 'Today\'s inquiries'}
           </p>
         </CardContent>
       </Card>

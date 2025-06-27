@@ -11,7 +11,8 @@ import {
   MessageSquare, 
   FileText,
   Eye,
-  Clock
+  Clock,
+  Activity
 } from 'lucide-react';
 
 interface RecentActivity {
@@ -28,10 +29,13 @@ const RealtimeNotifications = () => {
     applications: []
   });
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch recent data from database only
+  // Fetch recent data from database
   const fetchRecentData = async () => {
     try {
+      console.log('Fetching recent activity data...');
+      
       // Fetch recent meeting requests (last 24 hours)
       const { data: bookings } = await supabase
         .from('meeting_requests')
@@ -62,8 +66,16 @@ const RealtimeNotifications = () => {
         applications: applications || []
       });
       setLastUpdate(new Date());
+      setIsLoading(false);
+      
+      console.log('Recent activity data fetched:', {
+        bookings: bookings?.length || 0,
+        contacts: contacts?.length || 0,
+        applications: applications?.length || 0
+      });
     } catch (error) {
       console.error('Error fetching recent data:', error);
+      setIsLoading(false);
     }
   };
 
@@ -72,6 +84,8 @@ const RealtimeNotifications = () => {
     fetchRecentData();
 
     // Set up real-time subscriptions
+    console.log('Setting up real-time activity subscriptions...');
+    
     const meetingChannel = supabase
       .channel('meeting-requests-changes')
       .on(
@@ -84,10 +98,12 @@ const RealtimeNotifications = () => {
         (payload) => {
           console.log('Meeting request change:', payload);
           fetchRecentData();
-          toast({
-            title: "New Meeting Request",
-            description: payload.eventType === 'INSERT' ? "A new meeting request has been submitted" : "Meeting request updated"
-          });
+          if (payload.eventType === 'INSERT') {
+            toast({
+              title: "New Meeting Request",
+              description: `New meeting request from ${payload.new?.full_name || 'Unknown'}`
+            });
+          }
         }
       )
       .subscribe();
@@ -104,10 +120,12 @@ const RealtimeNotifications = () => {
         (payload) => {
           console.log('Contact submission change:', payload);
           fetchRecentData();
-          toast({
-            title: "New Contact Message",
-            description: payload.eventType === 'INSERT' ? "A new message has been received" : "Contact updated"
-          });
+          if (payload.eventType === 'INSERT') {
+            toast({
+              title: "New Contact Message",
+              description: `New message from ${payload.new?.full_name || 'Unknown'}`
+            });
+          }
         }
       )
       .subscribe();
@@ -124,15 +142,18 @@ const RealtimeNotifications = () => {
         (payload) => {
           console.log('Career application change:', payload);
           fetchRecentData();
-          toast({
-            title: "New Application",
-            description: payload.eventType === 'INSERT' ? "A new career application has been submitted" : "Application updated"
-          });
+          if (payload.eventType === 'INSERT') {
+            toast({
+              title: "New Application",
+              description: `New application from ${payload.new?.full_name || 'Unknown'}`
+            });
+          }
         }
       )
       .subscribe();
 
     return () => {
+      console.log('Cleaning up real-time activity subscriptions...');
       supabase.removeChannel(meetingChannel);
       supabase.removeChannel(contactChannel);
       supabase.removeChannel(applicationChannel);
@@ -152,6 +173,39 @@ const RealtimeNotifications = () => {
     return date.toLocaleDateString();
   };
 
+  const getStatusColor = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'pending':
+        return 'bg-yellow-500 text-white';
+      case 'approved':
+      case 'completed':
+        return 'bg-green-500 text-white';
+      case 'reviewing':
+      case 'in_progress':
+        return 'bg-blue-500 text-white';
+      case 'cancelled':
+        return 'bg-red-500 text-white';
+      default:
+        return 'bg-gray-500 text-white';
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <Card className="bg-black border-vip-gold/30 shadow-lg">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg text-vip-gold flex items-center">
+            <Bell className="h-5 w-5 mr-2 text-vip-gold animate-pulse" />
+            Loading Activity...
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex items-center justify-center py-8">
+          <Activity className="h-6 w-6 text-vip-gold animate-spin" />
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="bg-black border-vip-gold/30 shadow-lg">
       <CardHeader className="pb-3">
@@ -160,7 +214,8 @@ const RealtimeNotifications = () => {
             <Bell className="h-5 w-5 mr-2 text-vip-gold" />
             Real-time Activity
           </div>
-          <Badge variant="outline" className="text-xs text-vip-gold border-vip-gold/30">
+          <Badge variant="outline" className="text-xs text-green-500 border-green-500/30 bg-green-500/10">
+            <Activity className="h-3 w-3 mr-1 animate-pulse" />
             Live
           </Badge>
         </CardTitle>
@@ -168,7 +223,7 @@ const RealtimeNotifications = () => {
           Last updated: {formatTime(lastUpdate.toISOString())}
         </p>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 max-h-96 overflow-y-auto">
         {/* Recent Bookings */}
         {recentActivity.bookings.length > 0 && (
           <div className="space-y-2">
@@ -177,14 +232,17 @@ const RealtimeNotifications = () => {
               Recent Meeting Requests ({recentActivity.bookings.length})
             </h4>
             {recentActivity.bookings.map((booking: any) => (
-              <div key={booking.id} className="flex items-center justify-between p-2 bg-green-900/20 rounded-lg border border-green-500/30">
+              <div key={booking.id} className="flex items-center justify-between p-3 bg-green-900/20 rounded-lg border border-green-500/30 hover:bg-green-900/30 transition-colors">
                 <div className="flex-1">
                   <p className="text-sm font-medium text-vip-gold">{booking.full_name}</p>
                   <p className="text-xs text-vip-gold/60">{booking.event_type || 'General Meeting'}</p>
+                  {booking.event_date && (
+                    <p className="text-xs text-vip-gold/50">Scheduled: {new Date(booking.event_date).toLocaleDateString()}</p>
+                  )}
                 </div>
                 <div className="text-right">
-                  <Badge className="bg-green-500 text-white text-xs">
-                    {booking.status}
+                  <Badge className={getStatusColor(booking.status)} size="sm">
+                    {booking.status?.toUpperCase() || 'PENDING'}
                   </Badge>
                   <p className="text-xs text-vip-gold/60 mt-1">{formatTime(booking.created_at)}</p>
                 </div>
@@ -201,13 +259,16 @@ const RealtimeNotifications = () => {
               Recent Messages ({recentActivity.contacts.length})
             </h4>
             {recentActivity.contacts.map((contact: any) => (
-              <div key={contact.id} className="flex items-center justify-between p-2 bg-blue-900/20 rounded-lg border border-blue-500/30">
+              <div key={contact.id} className="flex items-center justify-between p-3 bg-blue-900/20 rounded-lg border border-blue-500/30 hover:bg-blue-900/30 transition-colors">
                 <div className="flex-1">
                   <p className="text-sm font-medium text-vip-gold">{contact.full_name}</p>
                   <p className="text-xs text-vip-gold/60">{contact.subject || 'General Inquiry'}</p>
+                  <p className="text-xs text-vip-gold/50 truncate max-w-48">{contact.message?.substring(0, 50)}...</p>
                 </div>
                 <div className="text-right">
-                  <Badge className="bg-blue-500 text-white text-xs">{contact.status}</Badge>
+                  <Badge className={getStatusColor(contact.status)} size="sm">
+                    {contact.status?.toUpperCase() || 'PENDING'}
+                  </Badge>
                   <p className="text-xs text-vip-gold/60 mt-1">{formatTime(contact.created_at)}</p>
                 </div>
               </div>
@@ -223,14 +284,15 @@ const RealtimeNotifications = () => {
               Recent Applications ({recentActivity.applications.length})
             </h4>
             {recentActivity.applications.map((application: any) => (
-              <div key={application.id} className="flex items-center justify-between p-2 bg-yellow-900/20 rounded-lg border border-yellow-500/30">
+              <div key={application.id} className="flex items-center justify-between p-3 bg-yellow-900/20 rounded-lg border border-yellow-500/30 hover:bg-yellow-900/30 transition-colors">
                 <div className="flex-1">
                   <p className="text-sm font-medium text-vip-gold">{application.full_name}</p>
                   <p className="text-xs text-vip-gold/60">{application.position || 'Position Applied'}</p>
+                  <p className="text-xs text-vip-gold/50">{application.email}</p>
                 </div>
                 <div className="text-right">
-                  <Badge className="bg-yellow-500 text-white text-xs">
-                    {application.status}
+                  <Badge className={getStatusColor(application.status)} size="sm">
+                    {application.status?.toUpperCase() || 'PENDING'}
                   </Badge>
                   <p className="text-xs text-vip-gold/60 mt-1">{formatTime(application.created_at)}</p>
                 </div>
@@ -243,26 +305,28 @@ const RealtimeNotifications = () => {
         {recentActivity.bookings.length === 0 && 
          recentActivity.contacts.length === 0 && 
          recentActivity.applications.length === 0 && (
-          <div className="text-center py-4">
-            <Clock className="h-8 w-8 text-vip-gold/40 mx-auto mb-2" />
-            <p className="text-sm text-vip-gold/60">No recent activity in the last 24 hours</p>
-            <p className="text-xs text-vip-gold/40 mt-1">Real-time updates are active</p>
+          <div className="text-center py-8">
+            <Clock className="h-12 w-12 text-vip-gold/40 mx-auto mb-3" />
+            <p className="text-sm text-vip-gold/60 mb-1">No recent activity in the last 24 hours</p>
+            <p className="text-xs text-vip-gold/40">Real-time updates are active and monitoring</p>
           </div>
         )}
 
         {/* Refresh button */}
-        <div className="pt-2 border-t border-vip-gold/30">
+        <div className="pt-4 border-t border-vip-gold/30">
           <Button 
             variant="outline" 
             size="sm" 
             className="w-full text-vip-gold border-vip-gold/30 hover:bg-vip-gold/10"
             onClick={() => {
+              setIsLoading(true);
               fetchRecentData();
               toast({ title: "Refreshed", description: "Activity data has been refreshed" });
             }}
+            disabled={isLoading}
           >
             <Eye className="h-3 w-3 mr-1" />
-            Refresh Activity
+            {isLoading ? 'Refreshing...' : 'Refresh Activity'}
           </Button>
         </div>
       </CardContent>
