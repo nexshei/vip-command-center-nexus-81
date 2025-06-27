@@ -7,9 +7,8 @@ import DashboardStats from '@/components/dashboard/DashboardStats';
 import RealtimeNotifications from '@/components/dashboard/RealtimeNotifications';
 import QuickActions from '@/components/dashboard/QuickActions';
 import VipCalendar from '@/components/dashboard/VipCalendar';
-import SupabaseConnectionTest from '@/components/debug/SupabaseConnectionTest';
 import { useRealtimeData } from '@/hooks/useRealtimeData';
-import { Database, RefreshCw, Activity } from 'lucide-react';
+import { RefreshCw, Activity } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const Dashboard = () => {
@@ -49,9 +48,6 @@ const Dashboard = () => {
             </Button>
           </div>
         </div>
-
-        {/* Connection Test - Debug Panel */}
-        <SupabaseConnectionTest />
 
         {/* Main Dashboard Grid */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
