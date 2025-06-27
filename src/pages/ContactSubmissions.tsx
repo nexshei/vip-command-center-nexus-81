@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Mail, MessageSquare, Trash2, Eye, Reply } from "lucide-react";
+import { Search, Mail, MessageSquare, Trash2, Eye, Reply, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ViewMessageModal } from "@/components/modals/ViewMessageModal";
 import { useContactSubmissions, useUpdateContactSubmission } from "@/hooks/useContactSubmissions";
@@ -17,8 +17,17 @@ const ContactSubmissions = () => {
   const { toast } = useToast();
 
   // Fetch real-time contact submissions from database
-  const { data: submissions = [], isLoading, error } = useContactSubmissions();
+  const { data: submissions = [], isLoading, error, refetch } = useContactSubmissions();
   const updateSubmission = useUpdateContactSubmission();
+
+  // Debug logging
+  console.log('ContactSubmissions - Debug Info:', {
+    submissions,
+    submissionsLength: submissions?.length,
+    isLoading,
+    error,
+    hasData: submissions && submissions.length > 0
+  });
 
   const filteredSubmissions = submissions.filter((submission: any) =>
     submission.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -38,6 +47,7 @@ const ContactSubmissions = () => {
         description: "Contact submission has been marked as cancelled.",
       });
     } catch (error) {
+      console.error('Error updating submission:', error);
       toast({
         title: "Error",
         description: "Failed to update submission status.",
@@ -61,6 +71,14 @@ const ContactSubmissions = () => {
     });
   };
 
+  const handleRefresh = () => {
+    refetch();
+    toast({
+      title: "Refreshed",
+      description: "Contact submissions data has been refreshed.",
+    });
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending':
@@ -79,12 +97,17 @@ const ContactSubmissions = () => {
   };
 
   if (error) {
+    console.error('ContactSubmissions Error:', error);
     return (
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         <div className="text-center py-12">
           <MessageSquare className="h-12 w-12 text-red-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-vip-black mb-2">Error Loading Submissions</h3>
-          <p className="text-vip-gold/60">Failed to load contact submissions. Please try again.</p>
+          <p className="text-vip-gold/60 mb-4">Failed to load contact submissions. Please try again.</p>
+          <Button onClick={handleRefresh} variant="outline" className="border-vip-gold text-vip-gold hover:bg-vip-gold/10">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Retry
+          </Button>
         </div>
       </div>
     );
@@ -94,7 +117,8 @@ const ContactSubmissions = () => {
     return (
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         <div className="text-center py-12">
-          <div className="text-xl text-vip-gold">Loading contact submissions...</div>
+          <div className="text-xl text-vip-gold mb-4">Loading contact submissions...</div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-vip-gold mx-auto"></div>
         </div>
       </div>
     );
@@ -109,11 +133,47 @@ const ContactSubmissions = () => {
           <p className="text-vip-gold/80 mt-2">View and manage all contact form submissions from your website</p>
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            onClick={handleRefresh}
+            variant="outline"
+            size="sm"
+            className="border-vip-gold text-vip-gold hover:bg-vip-gold/10"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
           <Badge variant="outline" className="border-vip-gold text-vip-gold">
             {filteredSubmissions.length} Total Messages
           </Badge>
         </div>
       </div>
+
+      {/* Debug Info Card */}
+      <Card className="vip-glass border-blue-500/20 bg-blue-50/50">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm text-blue-800">Debug Information</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div>
+              <span className="font-medium text-blue-700">Total Records:</span>
+              <div className="text-blue-900">{submissions?.length || 0}</div>
+            </div>
+            <div>
+              <span className="font-medium text-blue-700">Loading:</span>
+              <div className="text-blue-900">{isLoading ? 'Yes' : 'No'}</div>
+            </div>
+            <div>
+              <span className="font-medium text-blue-700">Error:</span>
+              <div className="text-blue-900">{error ? 'Yes' : 'No'}</div>
+            </div>
+            <div>
+              <span className="font-medium text-blue-700">Connection:</span>
+              <div className="text-blue-900">Active</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 md:grid-cols-3">
         <Card className="vip-glass border-vip-gold/20">
@@ -278,7 +338,7 @@ const ContactSubmissions = () => {
               <div className="text-center py-12">
                 <MessageSquare className="h-12 w-12 text-vip-gold/30 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-vip-black mb-2">No Contact Submissions</h3>
-                <p className="text-vip-gold/60">
+                <p className="text-vip-gold/60 mb-4">
                   {searchTerm 
                     ? "No messages match your search criteria." 
                     : "No contact form submissions have been received yet."}
@@ -292,6 +352,11 @@ const ContactSubmissions = () => {
                     Clear Search
                   </Button>
                 )}
+                <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                  <p className="text-sm text-blue-700">
+                    💡 <strong>Tip:</strong> To test the system, you can add sample data through your contact form on the website.
+                  </p>
+                </div>
               </div>
             )}
           </div>
