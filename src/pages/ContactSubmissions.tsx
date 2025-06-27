@@ -1,11 +1,10 @@
-
 import React, { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Mail, MessageSquare, Trash2, Eye, Reply, RefreshCw } from "lucide-react";
+import { Search, Mail, MessageSquare, Trash2, Eye, Reply, RefreshCw, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ViewMessageModal } from "@/components/modals/ViewMessageModal";
 import { useContactSubmissions, useUpdateContactSubmission } from "@/hooks/useContactSubmissions";
@@ -21,12 +20,13 @@ const ContactSubmissions = () => {
   const updateSubmission = useUpdateContactSubmission();
 
   // Debug logging
-  console.log('ContactSubmissions - Debug Info:', {
+  console.log('🔍 ContactSubmissions Component - Debug Info:', {
     submissions,
     submissionsLength: submissions?.length,
     isLoading,
-    error,
-    hasData: submissions && submissions.length > 0
+    error: error?.message,
+    hasData: submissions && submissions.length > 0,
+    firstSubmission: submissions?.[0]
   });
 
   const filteredSubmissions = submissions.filter((submission: any) =>
@@ -101,12 +101,16 @@ const ContactSubmissions = () => {
     return (
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         <div className="text-center py-12">
-          <MessageSquare className="h-12 w-12 text-red-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-vip-black mb-2">Error Loading Submissions</h3>
-          <p className="text-vip-gold/60 mb-4">Failed to load contact submissions. Please try again.</p>
-          <Button onClick={handleRefresh} variant="outline" className="border-vip-gold text-vip-gold hover:bg-vip-gold/10">
+          <AlertCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-vip-black mb-2">Database Connection Error</h3>
+          <p className="text-vip-gold/60 mb-4">Failed to load contact submissions: {error.message}</p>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4 text-left">
+            <h4 className="font-medium text-red-800 mb-2">Error Details:</h4>
+            <pre className="text-sm text-red-600 whitespace-pre-wrap">{JSON.stringify(error, null, 2)}</pre>
+          </div>
+          <Button onClick={() => refetch()} variant="outline" className="border-vip-gold text-vip-gold hover:bg-vip-gold/10">
             <RefreshCw className="h-4 w-4 mr-2" />
-            Retry
+            Retry Connection
           </Button>
         </div>
       </div>
@@ -119,6 +123,7 @@ const ContactSubmissions = () => {
         <div className="text-center py-12">
           <div className="text-xl text-vip-gold mb-4">Loading contact submissions...</div>
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-vip-gold mx-auto"></div>
+          <p className="text-sm text-vip-gold/60 mt-4">Connecting to database...</p>
         </div>
       </div>
     );
@@ -134,7 +139,7 @@ const ContactSubmissions = () => {
         </div>
         <div className="flex items-center gap-2">
           <Button
-            onClick={handleRefresh}
+            onClick={() => refetch()}
             variant="outline"
             size="sm"
             className="border-vip-gold text-vip-gold hover:bg-vip-gold/10"
@@ -143,34 +148,49 @@ const ContactSubmissions = () => {
             Refresh
           </Button>
           <Badge variant="outline" className="border-vip-gold text-vip-gold">
-            {filteredSubmissions.length} Total Messages
+            {submissions.length} Total Messages
           </Badge>
         </div>
       </div>
 
-      {/* Debug Info Card */}
+      {/* Enhanced Debug Info Card */}
       <Card className="vip-glass border-blue-500/20 bg-blue-50/50">
         <CardHeader className="pb-3">
-          <CardTitle className="text-sm text-blue-800">Debug Information</CardTitle>
+          <CardTitle className="text-sm text-blue-800">🔍 Debug Information</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div>
               <span className="font-medium text-blue-700">Total Records:</span>
-              <div className="text-blue-900">{submissions?.length || 0}</div>
+              <div className="text-blue-900 font-bold">{submissions?.length || 0}</div>
             </div>
             <div>
-              <span className="font-medium text-blue-700">Loading:</span>
-              <div className="text-blue-900">{isLoading ? 'Yes' : 'No'}</div>
+              <span className="font-medium text-blue-700">Loading State:</span>
+              <div className="text-blue-900">{isLoading ? '🔄 Loading' : '✅ Loaded'}</div>
             </div>
             <div>
-              <span className="font-medium text-blue-700">Error:</span>
-              <div className="text-blue-900">{error ? 'Yes' : 'No'}</div>
+              <span className="font-medium text-blue-700">Error State:</span>
+              <div className="text-blue-900">{error ? '❌ Error' : '✅ No Errors'}</div>
             </div>
             <div>
               <span className="font-medium text-blue-700">Connection:</span>
-              <div className="text-blue-900">Active</div>
+              <div className="text-blue-900">🟢 Active</div>
             </div>
+          </div>
+          <div className="mt-3 p-3 bg-blue-100 rounded-lg">
+            <p className="text-xs text-blue-700">
+              <strong>Latest Check:</strong> {new Date().toLocaleTimeString()} | 
+              <strong> Data Type:</strong> {typeof submissions} | 
+              <strong> Is Array:</strong> {Array.isArray(submissions) ? 'Yes' : 'No'}
+            </p>
+            {submissions?.[0] && (
+              <details className="mt-2">
+                <summary className="text-xs font-medium text-blue-800 cursor-pointer">View Sample Record</summary>
+                <pre className="text-xs text-blue-600 mt-1 p-2 bg-white rounded border overflow-auto">
+                  {JSON.stringify(submissions[0], null, 2)}
+                </pre>
+              </details>
+            )}
           </div>
         </CardContent>
       </Card>

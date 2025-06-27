@@ -26,24 +26,56 @@ export const useContactSubmissions = () => {
   const query = useQuery({
     queryKey: ['contact-submissions'],
     queryFn: async (): Promise<ContactSubmission[]> => {
-      console.log('Fetching contact submissions...');
+      console.log('🔍 Starting contact submissions fetch...');
+      
+      // Test basic connection first
+      try {
+        const connectionTest = await supabase.from('contact_submissions').select('count', { count: 'exact', head: true });
+        console.log('📊 Connection test result:', connectionTest);
+        
+        if (connectionTest.error) {
+          console.error('❌ Connection test failed:', connectionTest.error);
+          throw connectionTest.error;
+        }
+        
+        console.log('✅ Connection successful. Total count:', connectionTest.count);
+      } catch (testError) {
+        console.error('💥 Connection test error:', testError);
+        throw testError;
+      }
+
+      // Now fetch actual data
+      console.log('📥 Fetching contact submissions data...');
       const { data, error } = await supabase
         .from('contact_submissions')
         .select('*')
         .order('created_at', { ascending: false });
       
+      console.log('📋 Raw Supabase response:', { data, error });
+      
       if (error) {
-        console.error('Error fetching contact submissions:', error);
+        console.error('❌ Error fetching contact submissions:', error);
+        console.error('Error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
         throw error;
       }
-      console.log('Contact submissions fetched:', data?.length || 0);
+      
+      console.log('✅ Contact submissions fetched successfully:', data?.length || 0, 'records');
+      console.log('📝 Sample data:', data?.[0]);
+      
       return data || [];
-    }
+    },
+    retry: 1,
+    retryDelay: 1000
   });
 
   // Set up real-time subscription
   useEffect(() => {
-    console.log('Setting up contact submissions real-time subscription...');
+    console.log('🔄 Setting up contact submissions real-time subscription...');
     
     const channel = supabase
       .channel('contact-submissions-realtime')
@@ -55,7 +87,7 @@ export const useContactSubmissions = () => {
           table: 'contact_submissions'
         },
         (payload) => {
-          console.log('Real-time update in contact_submissions:', payload);
+          console.log('⚡ Real-time update in contact_submissions:', payload);
           queryClient.invalidateQueries({ queryKey: ['contact-submissions'] });
           
           if (payload.eventType === 'INSERT') {
@@ -66,13 +98,26 @@ export const useContactSubmissions = () => {
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('📡 Subscription status:', status);
+      });
 
     return () => {
-      console.log('Cleaning up contact submissions subscription...');
+      console.log('🧹 Cleaning up contact submissions subscription...');
       supabase.removeChannel(channel);
     };
   }, [queryClient, toast]);
+
+  // Log query state changes
+  useEffect(() => {
+    console.log('📊 Query state update:', {
+      isLoading: query.isLoading,
+      isError: query.isError,
+      error: query.error,
+      dataLength: query.data?.length,
+      status: query.status
+    });
+  }, [query.isLoading, query.isError, query.error, query.data, query.status]);
 
   return query;
 };

@@ -31,17 +31,39 @@ export const useRealtimeData = () => {
 
   const fetchAllCounts = async () => {
     try {
-      console.log('Fetching real-time database counts...');
+      console.log('🔍 Fetching real-time database counts...');
+      
+      // Test connection to each table individually
+      const tableTests = [
+        'clients',
+        'meeting_requests',
+        'contact_submissions',
+        'career_applications',
+        'staff_members',
+        'inventory_items',
+        'job_postings',
+        'newsletter_subscriptions'
+      ];
+
+      console.log('📊 Testing individual table connections...');
+      for (const tableName of tableTests) {
+        try {
+          const testResult = await supabase.from(tableName).select('id', { count: 'exact', head: true });
+          console.log(`✅ ${tableName}: ${testResult.count} records, error: ${testResult.error?.message || 'none'}`);
+        } catch (err) {
+          console.error(`❌ ${tableName} test failed:`, err);
+        }
+      }
       
       const [
-        { count: clientsCount },
-        { count: meetingRequestsCount },
-        { count: contactSubmissionsCount },
-        { count: applicationsCount },
-        { count: staffCount },
-        { count: inventoryCount },
-        { count: jobsCount },
-        { count: subscribersCount }
+        { count: clientsCount, error: clientsError },
+        { count: meetingRequestsCount, error: meetingError },
+        { count: contactSubmissionsCount, error: contactError },
+        { count: applicationsCount, error: appsError },
+        { count: staffCount, error: staffError },
+        { count: inventoryCount, error: inventoryError },
+        { count: jobsCount, error: jobsError },
+        { count: subscribersCount, error: subsError }
       ] = await Promise.all([
         supabase.from('clients').select('*', { count: 'exact', head: true }),
         supabase.from('meeting_requests').select('*', { count: 'exact', head: true }),
@@ -52,6 +74,22 @@ export const useRealtimeData = () => {
         supabase.from('job_postings').select('*', { count: 'exact', head: true }),
         supabase.from('newsletter_subscriptions').select('*', { count: 'exact', head: true })
       ]);
+
+      // Log any errors
+      const errors = [
+        { table: 'clients', error: clientsError },
+        { table: 'meeting_requests', error: meetingError },
+        { table: 'contact_submissions', error: contactError },
+        { table: 'career_applications', error: appsError },
+        { table: 'staff_members', error: staffError },
+        { table: 'inventory_items', error: inventoryError },
+        { table: 'job_postings', error: jobsError },
+        { table: 'newsletter_subscriptions', error: subsError }
+      ].filter(item => item.error);
+
+      if (errors.length > 0) {
+        console.error('🚨 Errors found in table queries:', errors);
+      }
 
       const newStats = {
         totalClients: clientsCount || 0,
@@ -65,10 +103,10 @@ export const useRealtimeData = () => {
         lastUpdated: new Date()
       };
 
-      console.log('Database counts:', newStats);
+      console.log('📊 Database counts fetched:', newStats);
       setStats(newStats);
     } catch (error) {
-      console.error('Error fetching counts:', error);
+      console.error('💥 Error fetching counts:', error);
     }
   };
 
