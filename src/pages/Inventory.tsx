@@ -1,227 +1,306 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Plus, Search, Filter, Edit, Trash2, Package, MapPin, Calendar } from 'lucide-react';
+import { useInventory, useDeleteInventoryItem } from '@/hooks/useInventory';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Search, Package, Plus, Edit, Trash2 } from 'lucide-react';
-import { EditItemModal } from '@/components/modals/EditItemModal';
-import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
-import { AddItemModalTrigger } from '@/components/modals/AddItemModalTrigger';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import AddItemModal from '@/components/modals/AddItemModal';
+import DeleteConfirmationModal from '@/components/modals/DeleteConfirmationModal';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const Inventory = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [editingItem, setEditingItem] = useState(null);
-  const [deletingItem, setDeletingItem] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  
+  const { data: inventory = [], isLoading, error } = useInventory();
+  const deleteItemMutation = useDeleteInventoryItem();
   const { toast } = useToast();
 
-  // Fetch inventory items from database
-  const { data: items = [], isLoading } = useQuery({
-    queryKey: ['inventory'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('inventory_items')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data || [];
-    }
-  });
-
-  const filteredItems = items.filter(item =>
-    item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.category?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredInventory = inventory.filter(item =>
+    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.supplier?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.location?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const getStatusBadge = (condition: string) => {
-    switch (condition) {
-      case 'excellent':
-        return <Badge className="bg-green-500 text-white">Excellent</Badge>;
-      case 'good':
-        return <Badge className="bg-blue-500 text-white">Good</Badge>;
-      case 'fair':
-        return <Badge className="bg-yellow-500 text-white">Fair</Badge>;
-      case 'poor':
-        return <Badge className="bg-red-500 text-white">Poor</Badge>;
-      default:
-        return <Badge className="bg-gray-500 text-white">{condition}</Badge>;
+  const handleDeleteItem = async () => {
+    if (!selectedItemId) return;
+    
+    try {
+      await deleteItemMutation.mutateAsync(selectedItemId);
+      toast({
+        title: "Success",
+        description: "Inventory item deleted successfully",
+      });
+      setShowDeleteModal(false);
+      setSelectedItemId(null);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete inventory item",
+        variant: "destructive",
+      });
     }
   };
 
-  const handleItemUpdated = () => {
-    toast({
-      title: "Item Updated",
-      description: "Inventory item has been updated successfully.",
-    });
+  const getConditionColor = (condition: string) => {
+    switch (condition.toLowerCase()) {
+      case 'excellent':
+        return 'bg-green-100 text-green-800';
+      case 'good':
+        return 'bg-blue-100 text-blue-800';
+      case 'fair':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'poor':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
   };
 
-  const handleDeleteItem = (itemId: string) => {
-    // In real implementation, this would delete from database
-    setDeletingItem(null);
-    toast({
-      title: "Item Deleted",
-      description: "Inventory item has been removed.",
-    });
+  const getQuantityStatus = (quantity: number | null) => {
+    if (!quantity || quantity === 0) return 'text-red-600';
+    if (quantity < 10) return 'text-yellow-600';
+    return 'text-green-600';
   };
 
-  const handleItemAdded = (newItem: any) => {
-    toast({
-      title: "Item Added",
-      description: "New inventory item has been added successfully.",
-    });
+  const formatPrice = (price: number | null) => {
+    if (!price) return 'N/A';
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(price);
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-black text-white p-6 flex items-center justify-center">
-        <div className="text-xl text-vip-gold">Loading inventory...</div>
+      <div className="p-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-vip-gold"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <Card>
+          <CardContent className="p-6">
+            <p className="text-red-600">Error loading inventory: {error.message}</p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black text-white p-6">
-      <div className="max-w-7xl mx-auto space-y-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-serif font-bold text-white mb-2">
-              VVIP Inventory Management
-            </h1>
-            <p className="text-xl text-vip-gold">
-              Track and manage protocol equipment and supplies
-            </p>
-          </div>
-          <div className="flex items-center space-x-4">
-            <Package className="h-8 w-8 text-vip-gold" />
-            <span className="text-2xl font-bold text-white">{items.length}</span>
-            <span className="text-vip-gold">Total Items</span>
-          </div>
+    <div className="p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-serif font-bold text-vip-black">Inventory Management</h1>
+          <p className="text-vip-gold/60 mt-1">Track and manage your event inventory</p>
         </div>
+        <Button
+          onClick={() => setIsAddModalOpen(true)}
+          className="bg-vip-gold hover:bg-vip-gold/80 text-black"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Add Item
+        </Button>
+      </div>
 
-        {/* Stats Cards */}
-        <div className="grid gap-6 md:grid-cols-3">
-          <Card className="bg-white border border-vip-gold/20">
-            <CardContent className="p-6 text-center">
-              <div className="text-2xl font-bold text-vip-black mb-2">
-                {items.filter(item => item.condition === 'excellent').length}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <Package className="h-8 w-8 text-vip-gold" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Total Items</p>
+                <p className="text-2xl font-bold">{inventory.length}</p>
               </div>
-              <p className="text-vip-gold font-medium">Excellent Condition</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-white border border-vip-gold/20">
-            <CardContent className="p-6 text-center">
-              <div className="text-2xl font-bold text-vip-black mb-2">
-                {items.filter(item => item.quantity && item.quantity > 0).length}
-              </div>
-              <p className="text-vip-gold font-medium">Items In Stock</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-white border border-vip-gold/20">
-            <CardContent className="p-6 text-center">
-              <div className="text-2xl font-bold text-vip-black mb-2">
-                {items.reduce((sum, item) => sum + (item.quantity || 0), 0)}
-              </div>
-              <p className="text-vip-gold font-medium">Total Quantity</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Search and Add */}
-        <Card className="bg-white border border-vip-gold/20">
-          <CardContent className="p-6">
-            <div className="flex justify-between items-center gap-4">
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-vip-gold" />
-                <Input
-                  placeholder="Search inventory items..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 border-vip-gold/30 bg-white text-vip-black focus:border-vip-gold"
-                />
-              </div>
-              <AddItemModalTrigger onItemAdded={handleItemAdded} />
             </div>
           </CardContent>
         </Card>
-
-        {/* Inventory Items */}
-        <Card className="bg-white border border-vip-gold/20">
-          <CardHeader className="border-b border-vip-gold/10">
-            <CardTitle className="text-xl font-serif text-vip-black">Inventory Items</CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="space-y-4 p-6">
-              {filteredItems.map((item) => (
-                <div key={item.id} className="border border-vip-gold/20 rounded-lg p-4 hover:bg-vip-gold/5 transition-colors">
-                  <div className="flex justify-between items-start">
-                    <div className="space-y-2 flex-1">
-                      <div className="flex items-center space-x-3">
-                        <Package className="h-5 w-5 text-vip-gold" />
-                        <h3 className="font-semibold text-vip-black">{item.name}</h3>
-                        {getStatusBadge(item.condition)}
-                      </div>
-                      <p className="text-vip-black/70">{item.category}</p>
-                      <div className="flex space-x-4 text-sm text-vip-black/60">
-                        <span>Quantity: {item.quantity || 0}</span>
-                        <span>Location: {item.location || 'Not specified'}</span>
-                        {item.supplier && <span>Supplier: {item.supplier}</span>}
-                      </div>
-                      {item.notes && (
-                        <p className="text-sm text-vip-black/60">{item.notes}</p>
-                      )}
-                    </div>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setEditingItem(item)}
-                        className="border-vip-gold/30 text-vip-black hover:bg-vip-gold hover:text-black"
-                      >
-                        <Edit className="h-3 w-3 mr-1" />
-                        Edit
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setDeletingItem(item)}
-                        className="border-red-300 text-red-600 hover:bg-red-500 hover:text-white"
-                      >
-                        <Trash2 className="h-3 w-3 mr-1" />
-                        Delete
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              {filteredItems.length === 0 && (
-                <div className="text-center text-vip-black/60 py-8">
-                  {searchTerm ? 'No items match your search.' : 'No inventory items found. Add your first item to get started.'}
-                </div>
-              )}
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <Package className="h-8 w-8 text-green-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">In Stock</p>
+                <p className="text-2xl font-bold">
+                  {inventory.filter(item => (item.quantity || 0) > 0).length}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <Package className="h-8 w-8 text-red-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Out of Stock</p>
+                <p className="text-2xl font-bold">
+                  {inventory.filter(item => (item.quantity || 0) === 0).length}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <Package className="h-8 w-8 text-yellow-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Low Stock</p>
+                <p className="text-2xl font-bold">
+                  {inventory.filter(item => (item.quantity || 0) > 0 && (item.quantity || 0) < 10).length}
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Modals */}
-      <EditItemModal
-        open={!!editingItem}
-        onOpenChange={(open) => !open && setEditingItem(null)}
-        item={editingItem}
-        onItemUpdated={handleItemUpdated}
-        type="inventory"
+      <Card className="vip-glass border-vip-gold/20">
+        <CardHeader>
+          <div className="flex items-center space-x-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                placeholder="Search inventory..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Button variant="outline" size="sm">
+              <Filter className="w-4 h-4 mr-2" />
+              Filter
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {filteredInventory.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500">No inventory items found</p>
+              <Button
+                onClick={() => setIsAddModalOpen(true)}
+                className="mt-4 bg-vip-gold hover:bg-vip-gold/80 text-black"
+              >
+                Add Your First Item
+              </Button>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Item</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Quantity</TableHead>
+                  <TableHead>Unit Price</TableHead>
+                  <TableHead>Location</TableHead>
+                  <TableHead>Condition</TableHead>
+                  <TableHead>Last Checked</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredInventory.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell>
+                      <div>
+                        <p className="font-medium">{item.name}</p>
+                        {item.supplier && (
+                          <p className="text-sm text-gray-500">Supplier: {item.supplier}</p>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="capitalize">
+                        {item.category}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <span className={`font-medium ${getQuantityStatus(item.quantity)}`}>
+                        {item.quantity || 0}
+                      </span>
+                    </TableCell>
+                    <TableCell>{formatPrice(item.unit_price)}</TableCell>
+                    <TableCell>
+                      {item.location ? (
+                        <div className="flex items-center">
+                          <MapPin className="w-3 h-3 mr-1" />
+                          {item.location}
+                        </div>
+                      ) : (
+                        'N/A'
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={getConditionColor(item.condition || 'good')}>
+                        {item.condition || 'Good'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {item.last_checked ? (
+                        <div className="flex items-center">
+                          <Calendar className="w-3 h-3 mr-1" />
+                          {new Date(item.last_checked).toLocaleDateString()}
+                        </div>
+                      ) : (
+                        'Never'
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        <Button variant="ghost" size="sm">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedItemId(item.id);
+                            setShowDeleteModal(true);
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4 text-red-500" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      <AddItemModal 
+        isOpen={isAddModalOpen} 
+        onClose={() => setIsAddModalOpen(false)} 
       />
+
       <DeleteConfirmationModal
-        open={!!deletingItem}
-        onOpenChange={(open) => !open && setDeletingItem(null)}
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteItem}
         title="Delete Inventory Item"
-        description={`Are you sure you want to delete`}
-        itemName={deletingItem?.name || ''}
-        onConfirm={() => deletingItem && handleDeleteItem(deletingItem.id)}
+        description="Are you sure you want to delete this inventory item? This action cannot be undone."
       />
     </div>
   );

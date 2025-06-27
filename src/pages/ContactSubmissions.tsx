@@ -1,94 +1,78 @@
-import React, { useState } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Mail, MessageSquare, Trash2, Eye, Reply, RefreshCw, AlertCircle } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { ViewMessageModal } from "@/components/modals/ViewMessageModal";
-import { useContactSubmissions, useUpdateContactSubmission } from "@/hooks/useContactSubmissions";
+
+import React, { useState } from 'react';
+import { Search, Filter, Eye, Trash2, Mail, Calendar, User } from 'lucide-react';
+import { useContactSubmissions, useUpdateContactSubmission } from '@/hooks/useContactSubmissions';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const ContactSubmissions = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedMessage, setSelectedMessage] = useState<any>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  
+  const { data: submissions = [], isLoading, error } = useContactSubmissions();
+  const updateSubmissionMutation = useUpdateContactSubmission();
   const { toast } = useToast();
 
-  // Fetch real-time contact submissions from database
-  const { data: submissions = [], isLoading, error, refetch } = useContactSubmissions();
-  const updateSubmission = useUpdateContactSubmission();
-
-  // Debug logging
-  console.log('🔍 ContactSubmissions Component - Debug Info:', {
-    submissions,
-    submissionsLength: submissions?.length,
-    isLoading,
-    error: error?.message,
-    hasData: submissions && submissions.length > 0,
-    firstSubmission: submissions?.[0]
+  const filteredSubmissions = submissions.filter(submission => {
+    const matchesSearch = 
+      submission.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      submission.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      submission.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      submission.message.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesStatus = statusFilter === 'all' || submission.status === statusFilter;
+    
+    return matchesSearch && matchesStatus;
   });
 
-  const filteredSubmissions = submissions.filter((submission: any) =>
-    submission.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    submission.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    submission.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    submission.message?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const handleDeleteSubmission = async (id: string) => {
+  const handleStatusChange = async (id: string, newStatus: string) => {
     try {
-      await updateSubmission.mutateAsync({ 
-        id, 
-        status: 'cancelled' as const 
+      await updateSubmissionMutation.mutateAsync({
+        id,
+        status: newStatus as any
       });
       toast({
-        title: "Submission Updated",
-        description: "Contact submission has been marked as cancelled.",
+        title: "Success",
+        description: "Status updated successfully",
       });
     } catch (error) {
-      console.error('Error updating submission:', error);
       toast({
         title: "Error",
-        description: "Failed to update submission status.",
-        variant: "destructive"
+        description: "Failed to update status",
+        variant: "destructive",
       });
     }
   };
 
-  const handleViewDetails = (submission: any) => {
-    setSelectedMessage(submission);
-    setIsViewModalOpen(true);
-  };
-
-  const handleReply = (submission: any) => {
-    const mailtoLink = `mailto:${submission.email}?subject=Re: ${submission.subject || 'Your Contact Submission'}&body=Dear ${submission.full_name},%0D%0A%0D%0AThank you for contacting us.%0D%0A%0D%0ABest regards,%0D%0AVVIP Protocol Team`;
-    window.open(mailtoLink, '_blank');
-    
-    toast({
-      title: "Email Client Opened",
-      description: `Opening email client to reply to ${submission.full_name}.`,
-    });
-  };
-
-  const handleRefresh = () => {
-    refetch();
-    toast({
-      title: "Refreshed",
-      description: "Contact submissions data has been refreshed.",
-    });
-  };
-
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string | null) => {
     switch (status) {
       case 'pending':
         return 'bg-yellow-100 text-yellow-800';
       case 'reviewing':
         return 'bg-blue-100 text-blue-800';
-      case 'approved':
-        return 'bg-green-100 text-green-800';
       case 'completed':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-green-100 text-green-800';
       case 'cancelled':
         return 'bg-red-100 text-red-800';
       default:
@@ -96,256 +80,194 @@ const ContactSubmissions = () => {
     }
   };
 
-  if (error) {
-    console.error('ContactSubmissions Error:', error);
+  const handleViewMessage = (submission: any) => {
+    setSelectedMessage(submission);
+    setIsViewModalOpen(true);
+  };
+
+  if (isLoading) {
     return (
-      <div className="max-w-7xl mx-auto p-6 space-y-6">
-        <div className="text-center py-12">
-          <AlertCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-vip-black mb-2">Database Connection Error</h3>
-          <p className="text-vip-gold/60 mb-4">Failed to load contact submissions: {error.message}</p>
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4 text-left">
-            <h4 className="font-medium text-red-800 mb-2">Error Details:</h4>
-            <pre className="text-sm text-red-600 whitespace-pre-wrap">{JSON.stringify(error, null, 2)}</pre>
-          </div>
-          <Button onClick={() => refetch()} variant="outline" className="border-vip-gold text-vip-gold hover:bg-vip-gold/10">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Retry Connection
-          </Button>
+      <div className="p-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-vip-gold"></div>
         </div>
       </div>
     );
   }
 
-  if (isLoading) {
+  if (error) {
     return (
-      <div className="max-w-7xl mx-auto p-6 space-y-6">
-        <div className="text-center py-12">
-          <div className="text-xl text-vip-gold mb-4">Loading contact submissions...</div>
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-vip-gold mx-auto"></div>
-          <p className="text-sm text-vip-gold/60 mt-4">Connecting to database...</p>
-        </div>
+      <div className="p-6">
+        <Card>
+          <CardContent className="p-6">
+            <p className="text-red-600">Error loading contact submissions</p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="p-6 space-y-6">
+      <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-serif font-bold text-vip-black">Contact Submissions</h1>
-          <p className="text-vip-gold/80 mt-2">View and manage all contact form submissions from your website</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={() => refetch()}
-            variant="outline"
-            size="sm"
-            className="border-vip-gold text-vip-gold hover:bg-vip-gold/10"
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
-          </Button>
-          <Badge variant="outline" className="border-vip-gold text-vip-gold">
-            {submissions.length} Total Messages
-          </Badge>
+          <p className="text-vip-gold/60 mt-1">Manage incoming contact messages and inquiries</p>
         </div>
       </div>
 
-      {/* Enhanced Debug Info Card */}
-      <Card className="vip-glass border-blue-500/20 bg-blue-50/50">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm text-blue-800">🔍 Debug Information</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div>
-              <span className="font-medium text-blue-700">Total Records:</span>
-              <div className="text-blue-900 font-bold">{submissions?.length || 0}</div>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <Mail className="h-8 w-8 text-vip-gold" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Total Messages</p>
+                <p className="text-2xl font-bold">{submissions.length}</p>
+              </div>
             </div>
-            <div>
-              <span className="font-medium text-blue-700">Loading State:</span>
-              <div className="text-blue-900">{isLoading ? '🔄 Loading' : '✅ Loaded'}</div>
-            </div>
-            <div>
-              <span className="font-medium text-blue-700">Error State:</span>
-              <div className="text-blue-900">{error ? '❌ Error' : '✅ No Errors'}</div>
-            </div>
-            <div>
-              <span className="font-medium text-blue-700">Connection:</span>
-              <div className="text-blue-900">🟢 Active</div>
-            </div>
-          </div>
-          <div className="mt-3 p-3 bg-blue-100 rounded-lg">
-            <p className="text-xs text-blue-700">
-              <strong>Latest Check:</strong> {new Date().toLocaleTimeString()} | 
-              <strong> Data Type:</strong> {typeof submissions} | 
-              <strong> Is Array:</strong> {Array.isArray(submissions) ? 'Yes' : 'No'}
-            </p>
-            {submissions?.[0] && (
-              <details className="mt-2">
-                <summary className="text-xs font-medium text-blue-800 cursor-pointer">View Sample Record</summary>
-                <pre className="text-xs text-blue-600 mt-1 p-2 bg-white rounded border overflow-auto">
-                  {JSON.stringify(submissions[0], null, 2)}
-                </pre>
-              </details>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="grid gap-6 md:grid-cols-3">
-        <Card className="vip-glass border-vip-gold/20">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80 flex items-center">
-              <MessageSquare className="h-4 w-4 mr-2" />
-              Total Messages
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-vip-black">{submissions?.length || 0}</div>
-            <p className="text-xs text-vip-gold/60">All time submissions</p>
           </CardContent>
         </Card>
-        
-        <Card className="vip-glass border-vip-gold/20">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80 flex items-center">
-              <Mail className="h-4 w-4 mr-2" />
-              Recent Today
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-vip-black">
-              {submissions?.filter((s: any) => {
-                const today = new Date().toDateString();
-                return new Date(s.created_at).toDateString() === today;
-              }).length || 0}
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <Mail className="h-8 w-8 text-yellow-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Pending</p>
+                <p className="text-2xl font-bold">
+                  {submissions.filter(s => s.status === 'pending').length}
+                </p>
+              </div>
             </div>
-            <p className="text-xs text-vip-gold/60">Today's messages</p>
           </CardContent>
         </Card>
-
-        <Card className="vip-glass border-vip-gold/20">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">Pending Review</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-vip-black">
-              {submissions?.filter((s: any) => s.status === 'pending').length || 0}
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <Mail className="h-8 w-8 text-blue-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Reviewing</p>
+                <p className="text-2xl font-bold">
+                  {submissions.filter(s => s.status === 'reviewing').length}
+                </p>
+              </div>
             </div>
-            <p className="text-xs text-vip-gold/60">Awaiting response</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <Mail className="h-8 w-8 text-green-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Completed</p>
+                <p className="text-2xl font-bold">
+                  {submissions.filter(s => s.status === 'completed').length}
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
 
       <Card className="vip-glass border-vip-gold/20">
         <CardHeader>
-          <CardTitle className="text-vip-black">Search Messages</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-vip-gold/60" />
-            <Input
-              placeholder="Search by name, email, subject, or message content..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
-            />
+          <div className="flex items-center space-x-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                placeholder="Search messages..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="reviewing">Reviewing</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        </CardContent>
-      </Card>
-
-      <Card className="vip-glass border-vip-gold/20">
-        <CardHeader>
-          <CardTitle className="text-vip-gold flex items-center">
-            <Mail className="h-5 w-5 mr-2" />
-            All Contact Messages
-          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
+          {filteredSubmissions.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500">No contact submissions found</p>
+            </div>
+          ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>#</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
+                  <TableHead>Contact</TableHead>
                   <TableHead>Subject</TableHead>
-                  <TableHead>Status</TableHead>
                   <TableHead>Message Preview</TableHead>
-                  <TableHead>Date Received</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredSubmissions.map((submission: any, idx: number) => (
-                  <TableRow key={submission.id} className="hover:bg-vip-gold/5">
-                    <TableCell className="font-medium">{idx + 1}</TableCell>
-                    <TableCell className="font-medium">{submission.full_name}</TableCell>
+                {filteredSubmissions.map((submission) => (
+                  <TableRow key={submission.id}>
                     <TableCell>
-                      <a 
-                        href={`mailto:${submission.email}`} 
-                        className="text-vip-gold hover:underline"
+                      <div className="space-y-1">
+                        <p className="font-medium flex items-center">
+                          <User className="w-3 h-3 mr-1" />
+                          {submission.full_name}
+                        </p>
+                        <p className="text-sm text-gray-500 flex items-center">
+                          <Mail className="w-3 h-3 mr-1" />
+                          {submission.email}
+                        </p>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <p className="font-medium">{submission.subject || 'No Subject'}</p>
+                    </TableCell>
+                    <TableCell>
+                      <p className="text-sm text-gray-600 truncate max-w-xs">
+                        {submission.message.substring(0, 100)}
+                        {submission.message.length > 100 && '...'}
+                      </p>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center">
+                        <Calendar className="w-3 h-3 mr-1" />
+                        {new Date(submission.created_at || '').toLocaleDateString()}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Select
+                        value={submission.status || 'pending'}
+                        onValueChange={(value) => handleStatusChange(submission.id, value)}
                       >
-                        {submission.email}
-                      </a>
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      {submission.subject || "No Subject"}
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={getStatusColor(submission.status)}>
-                        {submission.status?.toUpperCase() || 'PENDING'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="max-w-xs">
-                      <div className="truncate text-sm text-gray-600">
-                        {submission.message?.substring(0, 80)}
-                        {submission.message?.length > 80 && "..."}
-                      </div>
+                        <SelectTrigger className="w-28">
+                          <Badge className={getStatusColor(submission.status)}>
+                            {submission.status || 'pending'}
+                          </Badge>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pending">Pending</SelectItem>
+                          <SelectItem value="reviewing">Reviewing</SelectItem>
+                          <SelectItem value="completed">Completed</SelectItem>
+                          <SelectItem value="cancelled">Cancelled</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                     <TableCell>
-                      <div className="text-sm">
-                        {submission.created_at
-                          ? new Date(submission.created_at).toLocaleDateString('en-US', {
-                              year: 'numeric',
-                              month: 'short',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })
-                          : "-"}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex space-x-2">
+                      <div className="flex items-center space-x-2">
                         <Button
-                          onClick={() => handleViewDetails(submission)}
-                          variant="outline"
+                          variant="ghost"
                           size="sm"
-                          title="View Details"
+                          onClick={() => handleViewMessage(submission)}
                         >
-                          <Eye className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          onClick={() => handleReply(submission)}
-                          variant="outline"
-                          size="sm"
-                          title="Reply via Email"
-                          className="border-green-300 text-green-600 hover:bg-green-50"
-                        >
-                          <Reply className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          onClick={() => handleDeleteSubmission(submission.id)}
-                          variant="outline"
-                          size="sm"
-                          title="Mark as Cancelled"
-                          className="border-red-300 text-red-600 hover:bg-red-50"
-                        >
-                          <Trash2 className="h-3 w-3" />
+                          <Eye className="w-4 h-4" />
                         </Button>
                       </div>
                     </TableCell>
@@ -353,42 +275,59 @@ const ContactSubmissions = () => {
                 ))}
               </TableBody>
             </Table>
-
-            {filteredSubmissions.length === 0 && (
-              <div className="text-center py-12">
-                <MessageSquare className="h-12 w-12 text-vip-gold/30 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-vip-black mb-2">No Contact Submissions</h3>
-                <p className="text-vip-gold/60 mb-4">
-                  {searchTerm 
-                    ? "No messages match your search criteria." 
-                    : "No contact form submissions have been received yet."}
-                </p>
-                {searchTerm && (
-                  <Button
-                    onClick={() => setSearchTerm('')}
-                    variant="outline"
-                    className="mt-4 border-vip-gold text-vip-gold hover:bg-vip-gold/10"
-                  >
-                    Clear Search
-                  </Button>
-                )}
-                <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                  <p className="text-sm text-blue-700">
-                    💡 <strong>Tip:</strong> To test the system, you can add sample data through your contact form on the website.
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
+          )}
         </CardContent>
       </Card>
 
-      {/* View Message Modal */}
-      <ViewMessageModal
-        open={isViewModalOpen}
-        onOpenChange={setIsViewModalOpen}
-        message={selectedMessage}
-      />
+      <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Contact Message Details</DialogTitle>
+          </DialogHeader>
+          {selectedMessage && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Name</label>
+                  <p className="text-sm">{selectedMessage.full_name}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Email</label>
+                  <p className="text-sm">{selectedMessage.email}</p>
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-600">Subject</label>
+                <p className="text-sm">{selectedMessage.subject || 'No Subject'}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-600">Message</label>
+                <div className="bg-gray-50 p-3 rounded-md">
+                  <p className="text-sm whitespace-pre-wrap">{selectedMessage.message}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Date Submitted</label>
+                  <p className="text-sm">{new Date(selectedMessage.created_at || '').toLocaleString()}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Status</label>
+                  <Badge className={getStatusColor(selectedMessage.status)}>
+                    {selectedMessage.status || 'pending'}
+                  </Badge>
+                </div>
+              </div>
+              {selectedMessage.admin_notes && (
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Admin Notes</label>
+                  <p className="text-sm">{selectedMessage.admin_notes}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

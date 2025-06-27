@@ -1,360 +1,355 @@
 
-import React, { useState, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Eye, Edit, Trash2, Briefcase, MapPin, Calendar, Users, Download } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { JobOpeningModalTrigger } from '@/components/modals/JobOpeningModal';
-import { EditJobModal } from '@/components/modals/EditJobModal';
-import { useJobs, useDeleteJob, useUpdateJob, type JobPosting } from '@/hooks/useJobs';
+import React, { useState } from 'react';
+import { Plus, Search, Filter, Eye, Edit, Trash2, User, Calendar, Briefcase } from 'lucide-react';
 import { useApplications } from '@/hooks/useApplications';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const Careers = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedDepartment, setSelectedDepartment] = useState('all');
-  const [selectedStatus, setSelectedStatus] = useState('all');
-  const [editingJob, setEditingJob] = useState<JobPosting | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [selectedApplication, setSelectedApplication] = useState<any>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  
+  const { data: applications = [], isLoading, error } = useApplications();
   const { toast } = useToast();
 
-  const { data: jobs = [], isLoading: jobsLoading, error: jobsError } = useJobs();
-  const { data: applications = [], isLoading: applicationsLoading } = useApplications();
-  const deleteJobMutation = useDeleteJob();
-  const updateJobMutation = useUpdateJob();
-
-  const filteredJobs = jobs.filter(job => {
-    const matchesSearch = job.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         job.department?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         job.location?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesDepartment = selectedDepartment === 'all' || job.department === selectedDepartment;
-    const matchesStatus = selectedStatus === 'all' || job.status === selectedStatus;
-    return matchesSearch && matchesDepartment && matchesStatus;
+  const filteredApplications = applications.filter(application => {
+    const matchesSearch = 
+      application.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      application.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      application.position?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesStatus = statusFilter === 'all' || application.status === statusFilter;
+    
+    return matchesSearch && matchesStatus;
   });
-
-  const departments = Array.from(new Set(jobs.map(job => job.department).filter(Boolean)));
-  const statuses = Array.from(new Set(jobs.map(job => job.status).filter(Boolean)));
-  const activeJobs = jobs.filter(job => job.status === 'active').length;
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-800';
-      case 'closed': return 'bg-red-100 text-red-800';
-      case 'draft': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'reviewing':
+        return 'bg-blue-100 text-blue-800';
+      case 'approved':
+        return 'bg-green-100 text-green-800';
+      case 'in_progress':
+        return 'bg-purple-100 text-purple-800';
+      case 'completed':
+        return 'bg-green-100 text-green-800';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const getApplicationStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'reviewed': return 'bg-blue-100 text-blue-800';
-      case 'accepted': return 'bg-green-100 text-green-800';
-      case 'rejected': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+  const handleViewApplication = (application: any) => {
+    setSelectedApplication(application);
+    setIsViewModalOpen(true);
   };
 
-  const handleEditJob = (job: JobPosting) => {
-    setEditingJob(job);
-  };
-
-  const handleJobUpdated = (updatedJob: JobPosting) => {
-    setEditingJob(null);
-  };
-
-  const handleDeleteJob = async (job: JobPosting) => {
-    try {
-      await deleteJobMutation.mutateAsync(job.id);
-      toast({
-        title: "Job Deleted",
-        description: `${job.title} has been deleted successfully.`,
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete job posting.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleViewApplications = (job: JobPosting) => {
-    const jobApplications = applications.filter(app => app.position === job.title);
-    toast({
-      title: "Applications",
-      description: `${jobApplications.length} applications found for ${job.title}.`,
-    });
-  };
-
-  const handleDownloadCV = (application: any) => {
-    if (application.cv_url) {
-      window.open(application.cv_url, '_blank');
-    } else {
-      toast({
-        title: "No CV Available",
-        description: `No CV uploaded for ${application.full_name}.`,
-      });
-    }
-  };
-
-  if (jobsLoading) {
+  if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-vip-gold">Loading career data...</div>
+      <div className="p-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-vip-gold"></div>
+        </div>
       </div>
     );
   }
 
-  if (jobsError) {
+  if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-red-600">Error loading career data. Please try again.</div>
+      <div className="p-6">
+        <Card>
+          <CardContent className="p-6">
+            <p className="text-red-600">Error loading career applications</p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 p-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="p-6 space-y-6">
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-vip-black">Career Portal Management</h1>
-          <p className="text-vip-gold/80 mt-2">Manage job postings and track applications</p>
+          <h1 className="text-3xl font-serif font-bold text-vip-black">Career Applications</h1>
+          <p className="text-vip-gold/60 mt-1">Manage job applications and candidates</p>
         </div>
-        <JobOpeningModalTrigger />
       </div>
 
-      {/* Summary Stats */}
-      <div className="grid gap-6 md:grid-cols-4">
-        <Card className="vip-glass border-vip-gold/20">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">Total Jobs</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-vip-black">{jobs.length}</div>
-            <p className="text-xs text-vip-gold/60">Job postings</p>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <Briefcase className="h-8 w-8 text-vip-gold" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Total Applications</p>
+                <p className="text-2xl font-bold">{applications.length}</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
-        
-        <Card className="vip-glass border-vip-gold/20">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">Active Jobs</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-vip-black">{activeJobs}</div>
-            <p className="text-xs text-green-600">Currently hiring</p>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <Briefcase className="h-8 w-8 text-yellow-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Pending</p>
+                <p className="text-2xl font-bold">
+                  {applications.filter(a => a.status === 'pending').length}
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
-
-        <Card className="vip-glass border-vip-gold/20">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">Applications</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-vip-black">{applications.length}</div>
-            <p className="text-xs text-blue-600">Total received</p>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <Briefcase className="h-8 w-8 text-blue-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Under Review</p>
+                <p className="text-2xl font-bold">
+                  {applications.filter(a => a.status === 'reviewing').length}
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
-
-        <Card className="vip-glass border-vip-gold/20">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">Departments</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-vip-black">{departments.length}</div>
-            <p className="text-xs text-purple-600">Hiring departments</p>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <Briefcase className="h-8 w-8 text-green-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Approved</p>
+                <p className="text-2xl font-bold">
+                  {applications.filter(a => a.status === 'approved').length}
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Filters */}
       <Card className="vip-glass border-vip-gold/20">
-        <CardContent className="p-4">
-          <div className="flex gap-4 items-center">
+        <CardHeader>
+          <div className="flex items-center space-x-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-vip-gold/50" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
-                placeholder="Search jobs..."
+                placeholder="Search applications..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 border-vip-gold/30"
+                className="pl-10"
               />
             </div>
-            <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
-              <SelectTrigger className="w-48 border-vip-gold/30">
-                <SelectValue placeholder="Filter by department" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Departments</SelectItem>
-                {departments.map(dept => (
-                  <SelectItem key={dept} value={dept}>
-                    {dept}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-              <SelectTrigger className="w-48 border-vip-gold/30">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-40">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                {statuses.map(status => (
-                  <SelectItem key={status} value={status}>
-                    {status}
-                  </SelectItem>
-                ))}
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="reviewing">Reviewing</SelectItem>
+                <SelectItem value="approved">Approved</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
               </SelectContent>
             </Select>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Jobs List */}
-      <Card className="vip-glass border-vip-gold/20">
-        <CardHeader>
-          <CardTitle className="flex items-center text-vip-black">
-            <Briefcase className="h-5 w-5 mr-2 text-vip-gold" />
-            Job Postings ({filteredJobs.length})
-          </CardTitle>
         </CardHeader>
         <CardContent>
-          {filteredJobs.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-vip-gold/60">No jobs found. Create your first job posting to get started.</p>
+          {filteredApplications.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500">No career applications found</p>
             </div>
           ) : (
-            <div className="space-y-4">
-              {filteredJobs.map((job) => (
-                <div key={job.id} className="p-4 border border-vip-gold/20 rounded-lg vip-glass-light hover:bg-vip-gold/5 transition-colors">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="font-semibold text-vip-black">{job.title}</h3>
-                        <Badge className={getStatusColor(job.status)}>
-                          {job.status}
-                        </Badge>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Candidate</TableHead>
+                  <TableHead>Position</TableHead>
+                  <TableHead>Contact</TableHead>
+                  <TableHead>Applied Date</TableHead>
+                  <TableHead>Interview Date</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredApplications.map((application) => (
+                  <TableRow key={application.id}>
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        <User className="w-4 h-4" />
+                        <p className="font-medium">{application.full_name}</p>
                       </div>
-                      <div className="space-y-1 text-sm text-vip-gold/80">
-                        {job.department && (
-                          <div className="flex items-center gap-1">
-                            <Briefcase className="h-3 w-3" />
-                            {job.department}
-                          </div>
-                        )}
-                        {job.location && (
-                          <div className="flex items-center gap-1">
-                            <MapPin className="h-3 w-3" />
-                            {job.location}
-                          </div>
-                        )}
-                        {job.application_deadline && (
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            Deadline: {new Date(job.application_deadline).toLocaleDateString()}
-                          </div>
-                        )}
-                        {job.salary_range && (
-                          <p>Salary: {job.salary_range}</p>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">
+                        {application.position || 'Not Specified'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-1">
+                        <p className="text-sm">{application.email}</p>
+                        {application.phone && (
+                          <p className="text-sm text-gray-500">{application.phone}</p>
                         )}
                       </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={() => handleViewApplications(job)}
-                        variant="outline"
-                        size="sm"
-                        className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
-                      >
-                        <Users className="h-4 w-4 mr-1" />
-                        {applications.filter(app => app.position === job.title).length}
-                      </Button>
-                      <Button
-                        onClick={() => handleEditJob(job)}
-                        variant="outline"
-                        size="sm"
-                        className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        onClick={() => handleDeleteJob(job)}
-                        variant="outline"
-                        size="sm"
-                        className="border-red-300 text-red-600 hover:bg-red-50"
-                        disabled={deleteJobMutation.isPending}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Recent Applications */}
-      <Card className="vip-glass border-vip-gold/20">
-        <CardHeader>
-          <CardTitle className="flex items-center text-vip-black">
-            <Users className="h-5 w-5 mr-2 text-vip-gold" />
-            Recent Applications ({applications.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {applicationsLoading ? (
-            <div className="text-center py-8">
-              <p className="text-vip-gold/60">Loading applications...</p>
-            </div>
-          ) : applications.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-vip-gold/60">No applications received yet.</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {applications.slice(0, 5).map((application) => (
-                <div key={application.id} className="p-3 border border-vip-gold/20 rounded-lg vip-glass-light">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-medium text-vip-black">{application.full_name}</h4>
-                      <p className="text-sm text-vip-gold/80">Applied for: {application.position || 'Unknown Position'}</p>
-                      <p className="text-xs text-vip-gold/60">
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center">
+                        <Calendar className="w-3 h-3 mr-1" />
                         {new Date(application.created_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge className={getApplicationStatusColor(application.status)}>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {application.interview_date ? (
+                        <div className="flex items-center">
+                          <Calendar className="w-3 h-3 mr-1" />
+                          {new Date(application.interview_date).toLocaleDateString()}
+                        </div>
+                      ) : (
+                        'Not Scheduled'
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={getStatusColor(application.status)}>
                         {application.status}
                       </Badge>
-                      <Button
-                        onClick={() => handleDownloadCV(application)}
-                        variant="outline"
-                        size="sm"
-                        className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
-                      >
-                        <Download className="h-3 w-3 mr-1" />
-                        CV
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleViewApplication(application)}
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
         </CardContent>
       </Card>
 
-      {/* Edit Job Modal */}
-      <EditJobModal
-        open={!!editingJob}
-        onOpenChange={(open) => !open && setEditingJob(null)}
-        job={editingJob}
-        onJobUpdated={handleJobUpdated}
-      />
+      <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Application Details</DialogTitle>
+          </DialogHeader>
+          {selectedApplication && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Full Name</label>
+                  <p className="text-sm">{selectedApplication.full_name}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Email</label>
+                  <p className="text-sm">{selectedApplication.email}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Phone</label>
+                  <p className="text-sm">{selectedApplication.phone || 'Not provided'}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Position Applied</label>
+                  <p className="text-sm">{selectedApplication.position || 'Not specified'}</p>
+                </div>
+              </div>
+              {selectedApplication.cover_letter && (
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Cover Letter</label>
+                  <div className="bg-gray-50 p-3 rounded-md mt-1">
+                    <p className="text-sm whitespace-pre-wrap">{selectedApplication.cover_letter}</p>
+                  </div>
+                </div>
+              )}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-600">CV/Resume</label>
+                  {selectedApplication.cv_url ? (
+                    <a href={selectedApplication.cv_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-sm">
+                      View CV/Resume
+                    </a>
+                  ) : (
+                    <p className="text-sm text-gray-500">Not provided</p>
+                  )}
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Professional Photo</label>
+                  {selectedApplication.professional_photo_url ? (
+                    <a href={selectedApplication.professional_photo_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-sm">
+                      View Photo
+                    </a>
+                  ) : (
+                    <p className="text-sm text-gray-500">Not provided</p>
+                  )}
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Status</label>
+                  <Badge className={getStatusColor(selectedApplication.status)}>
+                    {selectedApplication.status}
+                  </Badge>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Applied Date</label>
+                  <p className="text-sm">{new Date(selectedApplication.created_at).toLocaleDateString()}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Interview Date</label>
+                  <p className="text-sm">
+                    {selectedApplication.interview_date 
+                      ? new Date(selectedApplication.interview_date).toLocaleDateString() 
+                      : 'Not scheduled'
+                    }
+                  </p>
+                </div>
+              </div>
+              {selectedApplication.admin_notes && (
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Admin Notes</label>
+                  <div className="bg-gray-50 p-3 rounded-md mt-1">
+                    <p className="text-sm whitespace-pre-wrap">{selectedApplication.admin_notes}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

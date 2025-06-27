@@ -1,236 +1,227 @@
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { Plus, Search, Filter, Edit, Trash2, Phone, Mail, MapPin } from 'lucide-react';
+import { useClients, useDeleteClient } from '@/hooks/useClients';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Users, Plus, Search, Mail, Phone, Building, Edit, Trash2, User } from 'lucide-react';
-import { AddClientModal } from '@/components/modals/AddClientModal';
-import { EditItemModal } from '@/components/modals/EditItemModal';
-import { useClients, useDeleteClient, type Client } from '@/hooks/useClients';
-import { supabase } from '@/integrations/supabase/client';
+import AddClientModal from '@/components/modals/AddClientModal';
+import DeleteConfirmationModal from '@/components/modals/DeleteConfirmationModal';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const Clients = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
-  const { toast } = useToast();
-
+  
   const { data: clients = [], isLoading, error } = useClients();
   const deleteClientMutation = useDeleteClient();
+  const { toast } = useToast();
 
-  // Set up real-time subscription
-  useEffect(() => {
-    const channel = supabase
-      .channel('clients-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'clients'
-        },
-        (payload) => {
-          console.log('Clients table changed:', payload);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
-
-  const filteredClients = clients.filter((client) =>
-    client.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    client.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    client.company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    client.phone?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredClients = clients.filter(client =>
+    client.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    client.company?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleDeleteClient = async (client: Client) => {
+  const handleDeleteClient = async () => {
+    if (!selectedClientId) return;
+    
     try {
-      await deleteClientMutation.mutateAsync(client.id);
+      await deleteClientMutation.mutateAsync(selectedClientId);
       toast({
-        title: "Client Deleted",
-        description: `${client.full_name} has been removed from the client database.`,
+        title: "Success",
+        description: "Client deleted successfully",
       });
+      setShowDeleteModal(false);
+      setSelectedClientId(null);
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to delete client.",
-        variant: "destructive"
+        description: "Failed to delete client",
+        variant: "destructive",
       });
     }
   };
 
-  const handleEditClient = (client: Client) => {
-    setSelectedClient(client);
-    setIsEditModalOpen(true);
-  };
-
-  const handleClientUpdated = () => {
-    setSelectedClient(null);
-    setIsEditModalOpen(false);
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'active':
+        return 'bg-green-100 text-green-800';
+      case 'inactive':
+        return 'bg-red-100 text-red-800';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
   };
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-black">
-        <div className="text-vip-gold">Loading clients...</div>
+      <div className="p-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-vip-gold"></div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-black">
-        <div className="text-red-600">Error loading clients. Please try again.</div>
+      <div className="p-6">
+        <Card>
+          <CardContent className="p-6">
+            <p className="text-red-600">Error loading clients: {error.message}</p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto bg-black min-h-screen">
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-serif font-bold text-vip-gold">Client Management</h1>
-            <p className="text-vip-gold/70 mt-1">Manage your VVIP client database</p>
-          </div>
-          <Button 
-            onClick={() => setIsAddModalOpen(true)}
-            className="bg-vip-gold text-black hover:bg-vip-gold/90"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Client
-          </Button>
+    <div className="p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-serif font-bold text-vip-black">Clients</h1>
+          <p className="text-vip-gold/60 mt-1">Manage your VIP client relationships</p>
         </div>
-
-        <div className="flex items-center space-x-4 mb-6">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-vip-gold/60" />
-            <Input
-              placeholder="Search clients..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 border-vip-gold/30 bg-black text-vip-gold"
-            />
-          </div>
-          <Badge variant="outline" className="border-vip-gold/30 text-vip-gold">
-            {filteredClients.length} Clients
-          </Badge>
-        </div>
+        <Button
+          onClick={() => setIsAddModalOpen(true)}
+          className="bg-vip-gold hover:bg-vip-gold/80 text-black"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Add Client
+        </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {filteredClients.map((client) => (
-          <Card key={client.id} className="bg-black border-vip-gold/30 hover:border-vip-gold/50 transition-colors">
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="h-10 w-10 rounded-full bg-vip-gold/20 flex items-center justify-center">
-                    <User className="h-5 w-5 text-vip-gold" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg text-vip-gold">{client.full_name}</CardTitle>
-                    {client.company && (
-                      <div className="flex items-center space-x-1 mt-1">
-                        <Building className="h-3 w-3 text-vip-gold/60" />
-                        <span className="text-sm text-vip-gold/70">{client.company}</span>
+      <Card className="vip-glass border-vip-gold/20">
+        <CardHeader>
+          <div className="flex items-center space-x-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                placeholder="Search clients..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Button variant="outline" size="sm">
+              <Filter className="w-4 h-4 mr-2" />
+              Filter
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {filteredClients.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500">No clients found</p>
+              <Button
+                onClick={() => setIsAddModalOpen(true)}
+                className="mt-4 bg-vip-gold hover:bg-vip-gold/80 text-black"
+              >
+                Add Your First Client
+              </Button>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Contact</TableHead>
+                  <TableHead>Company</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredClients.map((client) => (
+                  <TableRow key={client.id}>
+                    <TableCell>
+                      <div>
+                        <p className="font-medium">{client.full_name}</p>
+                        {client.address && (
+                          <p className="text-sm text-gray-500 flex items-center mt-1">
+                            <MapPin className="w-3 h-3 mr-1" />
+                            {client.address}
+                          </p>
+                        )}
                       </div>
-                    )}
-                  </div>
-                </div>
-                <div className="flex space-x-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleEditClient(client)}
-                    className="text-vip-gold hover:text-vip-gold-light hover:bg-vip-gold/10"
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDeleteClient(client)}
-                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                    disabled={deleteClientMutation.isPending}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {client.email && (
-                <div className="flex items-center space-x-2">
-                  <Mail className="h-4 w-4 text-vip-gold/60" />
-                  <a 
-                    href={`mailto:${client.email}`}
-                    className="text-sm text-vip-gold/80 hover:text-vip-gold hover:underline"
-                  >
-                    {client.email}
-                  </a>
-                </div>
-              )}
-              {client.phone && (
-                <div className="flex items-center space-x-2">
-                  <Phone className="h-4 w-4 text-vip-gold/60" />
-                  <span className="text-sm text-vip-gold/80">{client.phone}</span>
-                </div>
-              )}
-              {client.notes && (
-                <p className="text-sm text-vip-gold/70 line-clamp-2">{client.notes}</p>
-              )}
-              <div className="text-xs text-vip-gold/50 pt-2 border-t border-vip-gold/20">
-                Added: {new Date(client.created_at).toLocaleDateString()}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-1">
+                        <p className="text-sm flex items-center">
+                          <Mail className="w-3 h-3 mr-1" />
+                          {client.email}
+                        </p>
+                        {client.phone && (
+                          <p className="text-sm flex items-center">
+                            <Phone className="w-3 h-3 mr-1" />
+                            {client.phone}
+                          </p>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>{client.company || 'N/A'}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="capitalize">
+                        {client.client_type || 'Individual'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={getStatusColor(client.status)}>
+                        {client.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        <Button variant="ghost" size="sm">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedClientId(client.id);
+                            setShowDeleteModal(true);
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4 text-red-500" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
 
-        {filteredClients.length === 0 && (
-          <div className="col-span-full">
-            <Card className="bg-black border-vip-gold/30">
-              <CardContent className="p-8 text-center">
-                <Users className="h-12 w-12 text-vip-gold/40 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-vip-gold mb-2">No Clients Found</h3>
-                <p className="text-vip-gold/70 mb-4">
-                  {searchTerm ? 'No clients match your search criteria.' : 'Start building your VVIP client database.'}
-                </p>
-                <Button 
-                  onClick={() => setIsAddModalOpen(true)}
-                  className="bg-vip-gold text-black hover:bg-vip-gold/90"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add First Client
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-      </div>
-
-      {/* Modals */}
       <AddClientModal 
-        open={isAddModalOpen}
-        onOpenChange={setIsAddModalOpen}
-        onClientAdded={() => {}}
+        isOpen={isAddModalOpen} 
+        onClose={() => setIsAddModalOpen(false)} 
       />
-      
-      {selectedClient && (
-        <EditItemModal
-          open={isEditModalOpen}
-          onOpenChange={setIsEditModalOpen}
-          item={selectedClient}
-          type="client"
-          onItemUpdated={handleClientUpdated}
-        />
-      )}
+
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteClient}
+        title="Delete Client"
+        description="Are you sure you want to delete this client? This action cannot be undone."
+      />
     </div>
   );
 };
