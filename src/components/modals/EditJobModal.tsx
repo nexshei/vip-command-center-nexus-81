@@ -7,27 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-
-interface Job {
-  id: string;
-  title: string;
-  department: string | null;
-  location: string | null;
-  description: string | null;
-  requirements: string[] | null;
-  employment_type: string | null;
-  salary_range: string | null;
-  application_deadline: string | null;
-  status: string;
-  created_at: string | null;
-  updated_at: string | null;
-}
+import { useUpdateJob, type JobPosting } from '@/hooks/useJobs';
 
 interface EditJobModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  job: Job | null;
-  onJobUpdated: (job: Job) => void;
+  job: JobPosting | null;
+  onJobUpdated: (job: JobPosting) => void;
 }
 
 interface FormData {
@@ -45,6 +31,7 @@ interface FormData {
 export const EditJobModal = ({ open, onOpenChange, job, onJobUpdated }: EditJobModalProps) => {
   const [formData, setFormData] = useState<FormData>({});
   const { toast } = useToast();
+  const updateJobMutation = useUpdateJob();
 
   useEffect(() => {
     if (job) {
@@ -62,7 +49,7 @@ export const EditJobModal = ({ open, onOpenChange, job, onJobUpdated }: EditJobM
     }
   }, [job]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!job) return;
 
@@ -70,8 +57,8 @@ export const EditJobModal = ({ open, onOpenChange, job, onJobUpdated }: EditJobM
       ? formData.requirements.split('\n').filter(req => req.trim()) 
       : [];
 
-    const updatedJob: Job = {
-      ...job,
+    const updateData = {
+      id: job.id,
       title: formData.title || job.title,
       department: formData.department !== undefined ? formData.department : job.department,
       location: formData.location !== undefined ? formData.location : job.location,
@@ -80,18 +67,26 @@ export const EditJobModal = ({ open, onOpenChange, job, onJobUpdated }: EditJobM
       employment_type: formData.employment_type !== undefined ? formData.employment_type : job.employment_type,
       salary_range: formData.salary_range !== undefined ? formData.salary_range : job.salary_range,
       application_deadline: formData.application_deadline !== undefined ? formData.application_deadline : job.application_deadline,
-      status: formData.status || job.status,
-      updated_at: new Date().toISOString()
+      status: formData.status || job.status
     };
 
-    onJobUpdated(updatedJob);
-    
-    toast({
-      title: "Job Updated",
-      description: `${updatedJob.title} has been updated successfully.`,
-    });
+    try {
+      const updatedJob = await updateJobMutation.mutateAsync(updateData);
+      onJobUpdated(updatedJob);
+      
+      toast({
+        title: "Job Updated",
+        description: `${updatedJob.title} has been updated successfully.`,
+      });
 
-    onOpenChange(false);
+      onOpenChange(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update job posting.",
+        variant: "destructive"
+      });
+    }
   };
 
   const resetFormAndClose = () => {
@@ -181,6 +176,17 @@ export const EditJobModal = ({ open, onOpenChange, job, onJobUpdated }: EditJobM
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="application_deadline" className="text-sm font-medium text-vip-black">Application Deadline</Label>
+            <Input
+              id="application_deadline"
+              type="date"
+              value={formData.application_deadline || ''}
+              onChange={(e) => setFormData(prev => ({ ...prev, application_deadline: e.target.value }))}
+              className="w-full border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black"
+            />
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="description" className="text-sm font-medium text-vip-black">Job Description</Label>
             <Textarea
               id="description"
@@ -204,11 +210,20 @@ export const EditJobModal = ({ open, onOpenChange, job, onJobUpdated }: EditJobM
           </div>
 
           <div className="flex justify-end gap-3 pt-6 border-t border-vip-gold/20">
-            <Button type="button" variant="outline" onClick={resetFormAndClose} className="px-6 border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={resetFormAndClose} 
+              className="px-6 border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+            >
               Cancel
             </Button>
-            <Button type="submit" className="px-6 bg-vip-gold text-white hover:bg-vip-gold-dark">
-              Update Job
+            <Button 
+              type="submit" 
+              className="px-6 bg-vip-gold text-white hover:bg-vip-gold-dark"
+              disabled={updateJobMutation.isPending}
+            >
+              {updateJobMutation.isPending ? 'Updating...' : 'Update Job'}
             </Button>
           </div>
         </form>

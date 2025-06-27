@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,100 +9,20 @@ import { Plus, Search, Eye, Edit, Trash2, Briefcase, MapPin, Calendar, Users, Do
 import { useToast } from '@/hooks/use-toast';
 import { JobOpeningModalTrigger } from '@/components/modals/JobOpeningModal';
 import { EditJobModal } from '@/components/modals/EditJobModal';
-
-interface Job {
-  id: string;
-  title: string;
-  department: string | null;
-  location: string | null;
-  description: string | null;
-  requirements: string[] | null;
-  employment_type: string | null;
-  salary_range: string | null;
-  application_deadline: string | null;
-  status: string;
-  created_at: string | null;
-  updated_at: string | null;
-}
-
-interface Application {
-  id: string;
-  job_id: string;
-  full_name: string;
-  email: string;
-  phone: string | null;
-  cover_letter: string | null;
-  resume_url: string | null;
-  status: string;
-  applied_at: string;
-}
-
-// Mock data for jobs
-const mockJobs: Job[] = [
-  {
-    id: '1',
-    title: 'Senior Protocol Officer',
-    department: 'Protocol Services',
-    location: 'Washington, DC',
-    description: 'Lead diplomatic protocol activities for high-level VIP events and state visits.',
-    requirements: ['Bachelor\'s degree in International Relations', '5+ years protocol experience', 'Fluent in multiple languages'],
-    employment_type: 'full-time',
-    salary_range: '$80,000 - $120,000',
-    application_deadline: '2024-02-15',
-    status: 'active',
-    created_at: '2024-01-15T10:00:00Z',
-    updated_at: '2024-01-15T10:00:00Z'
-  },
-  {
-    id: '2',
-    title: 'Event Coordinator',
-    department: 'Event Management',
-    location: 'New York, NY',
-    description: 'Coordinate luxury events and VIP experiences for high-profile clients.',
-    requirements: ['Event management experience', 'Strong organizational skills', 'Attention to detail'],
-    employment_type: 'full-time',
-    salary_range: '$60,000 - $80,000',
-    application_deadline: '2024-02-20',
-    status: 'active',
-    created_at: '2024-01-16T10:00:00Z',
-    updated_at: '2024-01-16T10:00:00Z'
-  }
-];
-
-// Mock data for applications
-const mockApplications: Application[] = [
-  {
-    id: '1',
-    job_id: '1',
-    full_name: 'Emily Rodriguez',
-    email: 'emily.rodriguez@email.com',
-    phone: '+1 (555) 123-4567',
-    cover_letter: 'I am very interested in the Protocol Officer position...',
-    resume_url: null,
-    status: 'pending',
-    applied_at: '2024-01-18T14:30:00Z'
-  },
-  {
-    id: '2',
-    job_id: '2',
-    full_name: 'Michael Thompson',
-    email: 'michael.thompson@email.com',
-    phone: '+1 (555) 234-5678',
-    cover_letter: 'With my extensive event management background...',
-    resume_url: null,
-    status: 'reviewed',
-    applied_at: '2024-01-19T09:15:00Z'
-  }
-];
+import { useJobs, useDeleteJob, useUpdateJob, type JobPosting } from '@/hooks/useJobs';
+import { useApplications } from '@/hooks/useApplications';
 
 const Careers = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
-  const [jobs, setJobs] = useState<Job[]>(mockJobs);
-  const [applications, setApplications] = useState<Application[]>(mockApplications);
-  const [editingJob, setEditingJob] = useState<Job | null>(null);
+  const [editingJob, setEditingJob] = useState<JobPosting | null>(null);
   const { toast } = useToast();
+
+  const { data: jobs = [], isLoading: jobsLoading, error: jobsError } = useJobs();
+  const { data: applications = [], isLoading: applicationsLoading } = useApplications();
+  const deleteJobMutation = useDeleteJob();
+  const updateJobMutation = useUpdateJob();
 
   const filteredJobs = jobs.filter(job => {
     const matchesSearch = job.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -135,52 +56,64 @@ const Careers = () => {
     }
   };
 
-  const handleAddJob = (newJob: any) => {
-    const jobWithId = {
-      ...newJob,
-      id: Date.now().toString(),
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      employment_type: 'full-time',
-      salary_range: null,
-      application_deadline: null,
-      requirements: newJob.requirements ? [newJob.requirements] : null
-    };
-    setJobs(prev => [...prev, jobWithId]);
-  };
-
-  const handleEditJob = (job: Job) => {
+  const handleEditJob = (job: JobPosting) => {
     setEditingJob(job);
   };
 
-  const handleJobUpdated = (updatedJob: Job) => {
-    setJobs(prev => prev.map(job => job.id === updatedJob.id ? updatedJob : job));
+  const handleJobUpdated = (updatedJob: JobPosting) => {
     setEditingJob(null);
   };
 
-  const handleDeleteJob = (job: Job) => {
-    setJobs(prev => prev.filter(j => j.id !== job.id));
-    setApplications(prev => prev.filter(a => a.job_id !== job.id));
-    toast({
-      title: "Job Deleted",
-      description: `${job.title} has been deleted successfully.`,
-    });
+  const handleDeleteJob = async (job: JobPosting) => {
+    try {
+      await deleteJobMutation.mutateAsync(job.id);
+      toast({
+        title: "Job Deleted",
+        description: `${job.title} has been deleted successfully.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete job posting.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleViewApplications = (job: Job) => {
-    const jobApplications = applications.filter(app => app.job_id === job.id);
+  const handleViewApplications = (job: JobPosting) => {
+    const jobApplications = applications.filter(app => app.position === job.title);
     toast({
       title: "Applications",
       description: `${jobApplications.length} applications found for ${job.title}.`,
     });
   };
 
-  const handleDownloadCV = (application: Application) => {
-    toast({
-      title: "Download CV",
-      description: `Downloading CV for ${application.full_name}...`,
-    });
+  const handleDownloadCV = (application: any) => {
+    if (application.cv_url) {
+      window.open(application.cv_url, '_blank');
+    } else {
+      toast({
+        title: "No CV Available",
+        description: `No CV uploaded for ${application.full_name}.`,
+      });
+    }
   };
+
+  if (jobsLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-vip-gold">Loading career data...</div>
+      </div>
+    );
+  }
+
+  if (jobsError) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-red-600">Error loading career data. Please try again.</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 p-6 max-w-7xl mx-auto">
@@ -190,7 +123,7 @@ const Careers = () => {
           <h1 className="text-3xl font-serif font-bold text-vip-black">Career Portal Management</h1>
           <p className="text-vip-gold/80 mt-2">Manage job postings and track applications</p>
         </div>
-        <JobOpeningModalTrigger onJobAdded={handleAddJob} />
+        <JobOpeningModalTrigger />
       </div>
 
       {/* Summary Stats */}
@@ -336,7 +269,7 @@ const Careers = () => {
                         className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
                       >
                         <Users className="h-4 w-4 mr-1" />
-                        {applications.filter(app => app.job_id === job.id).length}
+                        {applications.filter(app => app.position === job.title).length}
                       </Button>
                       <Button
                         onClick={() => handleEditJob(job)}
@@ -351,6 +284,7 @@ const Careers = () => {
                         variant="outline"
                         size="sm"
                         className="border-red-300 text-red-600 hover:bg-red-50"
+                        disabled={deleteJobMutation.isPending}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -372,42 +306,43 @@ const Careers = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {applications.length === 0 ? (
+          {applicationsLoading ? (
+            <div className="text-center py-8">
+              <p className="text-vip-gold/60">Loading applications...</p>
+            </div>
+          ) : applications.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-vip-gold/60">No applications received yet.</p>
             </div>
           ) : (
             <div className="space-y-3">
-              {applications.slice(0, 5).map((application) => {
-                const job = jobs.find(j => j.id === application.job_id);
-                return (
-                  <div key={application.id} className="p-3 border border-vip-gold/20 rounded-lg vip-glass-light">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium text-vip-black">{application.full_name}</h4>
-                        <p className="text-sm text-vip-gold/80">Applied for: {job?.title || 'Unknown Position'}</p>
-                        <p className="text-xs text-vip-gold/60">
-                          {new Date(application.applied_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge className={getApplicationStatusColor(application.status)}>
-                          {application.status}
-                        </Badge>
-                        <Button
-                          onClick={() => handleDownloadCV(application)}
-                          variant="outline"
-                          size="sm"
-                          className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
-                        >
-                          <Download className="h-3 w-3 mr-1" />
-                          CV
-                        </Button>
-                      </div>
+              {applications.slice(0, 5).map((application) => (
+                <div key={application.id} className="p-3 border border-vip-gold/20 rounded-lg vip-glass-light">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium text-vip-black">{application.full_name}</h4>
+                      <p className="text-sm text-vip-gold/80">Applied for: {application.position || 'Unknown Position'}</p>
+                      <p className="text-xs text-vip-gold/60">
+                        {new Date(application.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge className={getApplicationStatusColor(application.status)}>
+                        {application.status}
+                      </Badge>
+                      <Button
+                        onClick={() => handleDownloadCV(application)}
+                        variant="outline"
+                        size="sm"
+                        className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+                      >
+                        <Download className="h-3 w-3 mr-1" />
+                        CV
+                      </Button>
                     </div>
                   </div>
-                );
-              })}
+                </div>
+              ))}
             </div>
           )}
         </CardContent>
