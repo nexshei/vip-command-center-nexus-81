@@ -1,25 +1,24 @@
 
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Calendar, DollarSign, TrendingUp } from 'lucide-react';
+import { Users, Calendar, TrendingUp } from 'lucide-react';
 import { useClients } from '@/hooks/useClients';
 import { useMeetingRequests } from '@/hooks/useMeetingRequests';
-import { useSubscribers } from '@/hooks/useSubscribers';
 import { useApplications } from '@/hooks/useApplications';
 import { supabase } from '@/integrations/supabase/client';
 
 const DashboardStats = () => {
   const { data: clients = [] } = useClients();
   const { data: meetingRequests = [] } = useMeetingRequests();
-  const { data: subscribers = [] } = useSubscribers();
   const { data: applications = [] } = useApplications();
   const [realTimeStats, setRealTimeStats] = useState({
     todaysBookings: 0,
     thisWeeksBookings: 0,
-    activeSubscribers: 0
+    totalClients: 0,
+    totalApplications: 0
   });
 
-  // Calculate stats in real-time
+  // Calculate real-time stats
   useEffect(() => {
     const calculateStats = () => {
       // Calculate today's bookings
@@ -40,18 +39,16 @@ const DashboardStats = () => {
         return eventDate >= weekStart && eventDate <= weekEnd;
       }).length;
 
-      // Active subscribers
-      const activeSubscribers = subscribers.filter(sub => sub.is_active).length;
-
       setRealTimeStats({
         todaysBookings,
         thisWeeksBookings,
-        activeSubscribers
+        totalClients: clients.length,
+        totalApplications: applications.length
       });
     };
 
     calculateStats();
-  }, [meetingRequests, subscribers]);
+  }, [meetingRequests, clients, applications]);
 
   // Set up real-time subscriptions for stats updates
   useEffect(() => {
@@ -66,17 +63,6 @@ const DashboardStats = () => {
         },
         () => {
           console.log('Meeting requests updated - refreshing stats');
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'newsletter_subscriptions'
-        },
-        () => {
-          console.log('Subscriptions updated - refreshing stats');
         }
       )
       .on(
@@ -148,9 +134,9 @@ const DashboardStats = () => {
           <Users className="h-4 w-4 text-vip-gold" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-vip-gold">{clients.length}</div>
+          <div className="text-2xl font-bold text-vip-gold">{realTimeStats.totalClients}</div>
           <p className="text-xs text-vip-gold/60">
-            {clients.length === 0 ? 'No clients yet' : 'Total clients'}
+            {realTimeStats.totalClients === 0 ? 'No clients yet' : 'Total clients'}
           </p>
         </CardContent>
       </Card>
@@ -163,9 +149,9 @@ const DashboardStats = () => {
           <TrendingUp className="h-4 w-4 text-vip-gold" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-vip-gold">{applications.length}</div>
+          <div className="text-2xl font-bold text-vip-gold">{realTimeStats.totalApplications}</div>
           <p className="text-xs text-vip-gold/60">
-            {applications.length === 0 ? 'No applications yet' : 'Career applications'}
+            {realTimeStats.totalApplications === 0 ? 'No applications yet' : 'Career applications'}
           </p>
         </CardContent>
       </Card>

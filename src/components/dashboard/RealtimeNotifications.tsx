@@ -9,7 +9,6 @@ import {
   Bell, 
   Calendar, 
   MessageSquare, 
-  Users, 
   FileText,
   Eye,
   Clock
@@ -30,7 +29,7 @@ const RealtimeNotifications = () => {
   });
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
-  // Fetch initial data
+  // Fetch recent data from database only
   const fetchRecentData = async () => {
     try {
       // Fetch recent meeting requests (last 24 hours)
@@ -251,7 +250,7 @@ const RealtimeNotifications = () => {
           </div>
         )}
 
-        {/* Quick action to view all */}
+        {/* Refresh button */}
         <div className="pt-2 border-t border-vip-gold/30">
           <Button 
             variant="outline" 
