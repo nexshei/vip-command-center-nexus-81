@@ -5,19 +5,8 @@ import { Database } from '@/integrations/supabase/types';
 import { useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
-type RequestStatus = Database['public']['Enums']['request_status'];
-
-export interface ContactSubmission {
-  id: string;
-  full_name: string;
-  email: string;
-  subject: string | null;
-  message: string;
-  status: RequestStatus;
-  admin_notes: string | null;
-  created_at: string;
-  updated_at: string;
-}
+type ContactSubmission = Database['public']['Tables']['contact_submissions']['Row'];
+type ContactSubmissionUpdate = Database['public']['Tables']['contact_submissions']['Update'];
 
 export const useContactSubmissions = () => {
   const queryClient = useQueryClient();
@@ -28,24 +17,6 @@ export const useContactSubmissions = () => {
     queryFn: async (): Promise<ContactSubmission[]> => {
       console.log('🔍 Starting contact submissions fetch...');
       
-      // Test basic connection first
-      try {
-        const connectionTest = await supabase.from('contact_submissions').select('count', { count: 'exact', head: true });
-        console.log('📊 Connection test result:', connectionTest);
-        
-        if (connectionTest.error) {
-          console.error('❌ Connection test failed:', connectionTest.error);
-          throw connectionTest.error;
-        }
-        
-        console.log('✅ Connection successful. Total count:', connectionTest.count);
-      } catch (testError) {
-        console.error('💥 Connection test error:', testError);
-        throw testError;
-      }
-
-      // Now fetch actual data
-      console.log('📥 Fetching contact submissions data...');
       const { data, error } = await supabase
         .from('contact_submissions')
         .select('*')
@@ -55,18 +26,10 @@ export const useContactSubmissions = () => {
       
       if (error) {
         console.error('❌ Error fetching contact submissions:', error);
-        console.error('Error details:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        });
         throw error;
       }
       
       console.log('✅ Contact submissions fetched successfully:', data?.length || 0, 'records');
-      console.log('📝 Sample data:', data?.[0]);
-      
       return data || [];
     },
     retry: 1,
@@ -98,26 +61,13 @@ export const useContactSubmissions = () => {
           }
         }
       )
-      .subscribe((status) => {
-        console.log('📡 Subscription status:', status);
-      });
+      .subscribe();
 
     return () => {
       console.log('🧹 Cleaning up contact submissions subscription...');
       supabase.removeChannel(channel);
     };
   }, [queryClient, toast]);
-
-  // Log query state changes
-  useEffect(() => {
-    console.log('📊 Query state update:', {
-      isLoading: query.isLoading,
-      isError: query.isError,
-      error: query.error,
-      dataLength: query.data?.length,
-      status: query.status
-    });
-  }, [query.isLoading, query.isError, query.error, query.data, query.status]);
 
   return query;
 };
@@ -126,29 +76,12 @@ export const useUpdateContactSubmission = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ id, status, admin_notes, ...updates }: { 
-      id: string; 
-      status?: RequestStatus;
-      admin_notes?: string;
-      [key: string]: any;
-    }) => {
-      const updateData: any = { ...updates };
-      
-      // Ensure status is a valid enum value
-      if (status) {
-        const validStatuses: RequestStatus[] = ['pending', 'reviewing', 'approved', 'in_progress', 'completed', 'cancelled'];
-        updateData.status = validStatuses.includes(status) ? status : 'pending';
-      }
-      
-      if (admin_notes !== undefined) {
-        updateData.admin_notes = admin_notes;
-      }
-      
-      console.log('Updating contact submission:', id, updateData);
+    mutationFn: async ({ id, ...updates }: { id: string } & ContactSubmissionUpdate) => {
+      console.log('Updating contact submission:', id, updates);
       
       const { data, error } = await supabase
         .from('contact_submissions')
-        .update(updateData)
+        .update(updates)
         .eq('id', id)
         .select()
         .single();
