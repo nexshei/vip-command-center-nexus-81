@@ -97,7 +97,7 @@ export const useSupabaseOperations = <T extends TableName>(tableName: T) => {
       const { data, error } = await supabase
         .from(tableName)
         .update(updates)
-        .eq('id', id)
+        .eq('id' as any, id)
         .select()
         .single();
       
@@ -139,7 +139,7 @@ export const useSupabaseOperations = <T extends TableName>(tableName: T) => {
       const { error } = await supabase
         .from(tableName)
         .delete()
-        .eq('id', id);
+        .eq('id' as any, id);
       
       if (error) {
         console.error(`❌ Error deleting from ${tableName}:`, error);
