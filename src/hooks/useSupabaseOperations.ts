@@ -5,16 +5,13 @@ import { Database } from '@/integrations/supabase/types';
 import { useToast } from '@/hooks/use-toast';
 
 type TableName = keyof Database['public']['Tables'];
-type TableRow<T extends TableName> = Database['public']['Tables'][T]['Row'];
-type TableInsert<T extends TableName> = Database['public']['Tables'][T]['Insert'];
-type TableUpdate<T extends TableName> = Database['public']['Tables'][T]['Update'];
 
 export const useSupabaseOperations = <T extends TableName>(tableName: T) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const fetchAll = async (): Promise<TableRow<T>[]> => {
+  const fetchAll = async () => {
     setLoading(true);
     setError(null);
     
@@ -33,7 +30,7 @@ export const useSupabaseOperations = <T extends TableName>(tableName: T) => {
       }
       
       console.log(`✅ Successfully fetched ${data?.length || 0} records from ${tableName}`);
-      return (data || []) as TableRow<T>[];
+      return data || [];
       
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
@@ -49,7 +46,7 @@ export const useSupabaseOperations = <T extends TableName>(tableName: T) => {
     }
   };
 
-  const insertRecord = async (record: TableInsert<T>): Promise<TableRow<T> | null> => {
+  const insertRecord = async (record: any) => {
     setLoading(true);
     setError(null);
     
@@ -58,7 +55,7 @@ export const useSupabaseOperations = <T extends TableName>(tableName: T) => {
       
       const { data, error } = await supabase
         .from(tableName)
-        .insert(record as any)
+        .insert(record)
         .select()
         .single();
       
@@ -74,7 +71,7 @@ export const useSupabaseOperations = <T extends TableName>(tableName: T) => {
         description: `Record added to ${tableName} successfully`
       });
       
-      return data as TableRow<T>;
+      return data;
       
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
@@ -90,7 +87,7 @@ export const useSupabaseOperations = <T extends TableName>(tableName: T) => {
     }
   };
 
-  const updateRecord = async (id: string, updates: TableUpdate<T>): Promise<TableRow<T> | null> => {
+  const updateRecord = async (id: string, updates: any) => {
     setLoading(true);
     setError(null);
     
@@ -99,7 +96,7 @@ export const useSupabaseOperations = <T extends TableName>(tableName: T) => {
       
       const { data, error } = await supabase
         .from(tableName)
-        .update(updates as any)
+        .update(updates)
         .eq('id', id)
         .select()
         .single();
@@ -116,7 +113,7 @@ export const useSupabaseOperations = <T extends TableName>(tableName: T) => {
         description: `Record in ${tableName} updated successfully`
       });
       
-      return data as TableRow<T>;
+      return data;
       
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
@@ -132,7 +129,7 @@ export const useSupabaseOperations = <T extends TableName>(tableName: T) => {
     }
   };
 
-  const deleteRecord = async (id: string): Promise<boolean> => {
+  const deleteRecord = async (id: string) => {
     setLoading(true);
     setError(null);
     
@@ -172,7 +169,7 @@ export const useSupabaseOperations = <T extends TableName>(tableName: T) => {
     }
   };
 
-  const getCount = async (): Promise<number> => {
+  const getCount = async () => {
     try {
       console.log(`🔢 Getting count for ${tableName}...`);
       
