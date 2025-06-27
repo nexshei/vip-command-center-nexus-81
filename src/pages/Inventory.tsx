@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Plus, Search, Filter, Edit, Trash2, Package, MapPin, Calendar } from 'lucide-react';
 import { useInventory, useDeleteInventoryItem } from '@/hooks/useInventory';
@@ -7,8 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import AddItemModal from '@/components/modals/AddItemModal';
-import DeleteConfirmationModal from '@/components/modals/DeleteConfirmationModal';
+import { AddItemModal } from '@/components/modals/AddItemModal';
+import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
 import {
   Table,
   TableBody,
@@ -22,6 +21,7 @@ const Inventory = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const [selectedItemName, setSelectedItemName] = useState<string>('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   
   const { data: inventory = [], isLoading, error } = useInventory();
@@ -46,6 +46,7 @@ const Inventory = () => {
       });
       setShowDeleteModal(false);
       setSelectedItemId(null);
+      setSelectedItemName('');
     } catch (error) {
       toast({
         title: "Error",
@@ -53,6 +54,13 @@ const Inventory = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleItemAdded = (newItem: any) => {
+    toast({
+      title: "Item Added",
+      description: `${newItem.name} has been added to the inventory.`,
+    });
   };
 
   const getConditionColor = (condition: string) => {
@@ -275,6 +283,7 @@ const Inventory = () => {
                           size="sm"
                           onClick={() => {
                             setSelectedItemId(item.id);
+                            setSelectedItemName(item.name);
                             setShowDeleteModal(true);
                           }}
                         >
@@ -291,16 +300,18 @@ const Inventory = () => {
       </Card>
 
       <AddItemModal 
-        isOpen={isAddModalOpen} 
-        onClose={() => setIsAddModalOpen(false)} 
+        open={isAddModalOpen} 
+        onOpenChange={setIsAddModalOpen}
+        onItemAdded={handleItemAdded}
       />
 
       <DeleteConfirmationModal
-        isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
+        open={showDeleteModal}
+        onOpenChange={setShowDeleteModal}
         onConfirm={handleDeleteItem}
         title="Delete Inventory Item"
         description="Are you sure you want to delete this inventory item? This action cannot be undone."
+        itemName={selectedItemName}
       />
     </div>
   );

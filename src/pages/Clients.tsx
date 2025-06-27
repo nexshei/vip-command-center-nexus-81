@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Plus, Search, Filter, Edit, Trash2, Phone, Mail, MapPin } from 'lucide-react';
 import { useClients, useDeleteClient } from '@/hooks/useClients';
@@ -22,6 +21,7 @@ const Clients = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
+  const [selectedClientName, setSelectedClientName] = useState<string>('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   
   const { data: clients = [], isLoading, error } = useClients();
@@ -45,6 +45,7 @@ const Clients = () => {
       });
       setShowDeleteModal(false);
       setSelectedClientId(null);
+      setSelectedClientName('');
     } catch (error) {
       toast({
         title: "Error",
@@ -195,6 +196,7 @@ const Clients = () => {
                           size="sm"
                           onClick={() => {
                             setSelectedClientId(client.id);
+                            setSelectedClientName(client.full_name);
                             setShowDeleteModal(true);
                           }}
                         >
@@ -211,16 +213,17 @@ const Clients = () => {
       </Card>
 
       <AddClientModal 
-        isOpen={isAddModalOpen} 
-        onClose={() => setIsAddModalOpen(false)} 
+        open={isAddModalOpen} 
+        onOpenChange={setIsAddModalOpen} 
       />
 
       <DeleteConfirmationModal
-        isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
+        open={showDeleteModal}
+        onOpenChange={setShowDeleteModal}
         onConfirm={handleDeleteClient}
         title="Delete Client"
         description="Are you sure you want to delete this client? This action cannot be undone."
+        itemName={selectedClientName}
       />
     </div>
   );

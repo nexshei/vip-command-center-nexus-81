@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Plus, Search, Filter, Edit, Trash2, Phone, Mail, Calendar, DollarSign } from 'lucide-react';
 import { useStaff, useDeleteStaff } from '@/hooks/useStaff';
@@ -23,6 +22,7 @@ const Staff = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null);
+  const [selectedStaffName, setSelectedStaffName] = useState<string>('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   
   const { data: staff = [], isLoading, error } = useStaff();
@@ -47,6 +47,7 @@ const Staff = () => {
       });
       setShowDeleteModal(false);
       setSelectedStaffId(null);
+      setSelectedStaffName('');
     } catch (error) {
       toast({
         title: "Error",
@@ -54,6 +55,13 @@ const Staff = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleStaffAdded = (newStaff: any) => {
+    toast({
+      title: "Staff Member Added",
+      description: `${newStaff.name} has been added to the team.`,
+    });
   };
 
   const getStatusColor = (status: string) => {
@@ -224,6 +232,7 @@ const Staff = () => {
                           size="sm"
                           onClick={() => {
                             setSelectedStaffId(member.id);
+                            setSelectedStaffName(member.full_name);
                             setShowDeleteModal(true);
                           }}
                         >
@@ -240,16 +249,18 @@ const Staff = () => {
       </Card>
 
       <AddStaffModal 
-        isOpen={isAddModalOpen} 
-        onClose={() => setIsAddModalOpen(false)} 
+        open={isAddModalOpen} 
+        onOpenChange={setIsAddModalOpen}
+        onStaffAdded={handleStaffAdded}
       />
 
       <DeleteConfirmationModal
-        isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
+        open={showDeleteModal}
+        onOpenChange={setShowDeleteModal}
         onConfirm={handleDeleteStaff}
         title="Delete Staff Member"
         description="Are you sure you want to delete this staff member? This action cannot be undone."
+        itemName={selectedStaffName}
       />
     </div>
   );
