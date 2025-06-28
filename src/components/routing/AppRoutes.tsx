@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,7 +9,6 @@ import Bookings from '@/pages/Bookings';
 import ListBookings from '@/pages/ListBookings';
 import Clients from '@/pages/Clients';
 import Subscriptions from '@/pages/Subscriptions';
-import Subscribers from '@/pages/Subscribers';
 import Index from '@/pages/Index';
 import NotFound from '@/pages/NotFound';
 import Analytics from '@/pages/Analytics';
@@ -107,7 +107,9 @@ export const AppRoutes: React.FC = () => {
       } />
       <Route path="/subscribers" element={
         <ProtectedRoute requiredRoles={['super_admin', 'protocol_admin', 'admin']}>
-          <Subscribers />
+          <React.Suspense fallback={<div>Loading...</div>}>
+            <NewsletterSubscribers />
+          </React.Suspense>
         </ProtectedRoute>
       } />
       <Route path="/contact-submissions" element={
