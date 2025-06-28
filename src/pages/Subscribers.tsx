@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Search, Filter, Mail, Calendar, Trash2, UserPlus, Download } from 'lucide-react';
+import { Search, Filter, Mail, Calendar, Trash2, UserPlus, Download, RefreshCw } from 'lucide-react';
 import { useSubscribers } from '@/hooks/useSubscribers';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,13 +16,28 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+
+const ITEMS_PER_PAGE = 10;
 
 const Subscribers = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [currentPage, setCurrentPage] = useState(1);
   
-  const { data: subscribers = [], isLoading, error } = useSubscribers();
+  const { data: subscribers = [], isLoading, error, refetch } = useSubscribers();
   const { toast } = useToast();
+
+  console.log('📊 Subscribers data:', subscribers);
+  console.log('📊 Loading state:', isLoading);
+  console.log('📊 Error state:', error);
 
   const filteredSubscribers = subscribers.filter(subscriber => {
     const matchesSearch = subscriber.email.toLowerCase().includes(searchTerm.toLowerCase());
@@ -33,36 +48,85 @@ const Subscribers = () => {
     return matchesSearch && matchesStatus;
   });
 
-  const getStatusColor = (isActive: boolean) => {
-    return isActive 
-      ? 'bg-green-100 text-green-800' 
-      : 'bg-red-100 text-red-800';
+  // Pagination
+  const totalPages = Math.ceil(filteredSubscribers.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedSubscribers = filteredSubscribers.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  const getStatusColor = (isActive: boolean | null) => {
+    if (isActive === null || isActive === true) {
+      return 'bg-green-100 text-green-800';
+    }
+    return 'bg-red-100 text-red-800';
+  };
+
+  const getStatusText = (isActive: boolean | null) => {
+    if (isActive === null || isActive === true) {
+      return 'Active';
+    }
+    return 'Unsubscribed';
   };
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString();
+    try {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid Date';
+    }
   };
 
   const exportSubscribers = () => {
+    if (filteredSubscribers.length === 0) {
+      toast({
+        title: "No Data",
+        description: "No subscribers to export",
+        variant: "destructive"
+      });
+      return;
+    }
+
     const csvContent = [
       ['Email', 'Source', 'Status', 'Subscribed Date', 'Unsubscribed Date'].join(','),
       ...filteredSubscribers.map(subscriber => [
-        subscriber.email,
-        subscriber.source || 'website',
-        subscriber.is_active ? 'Active' : 'Unsubscribed',
-        formatDate(subscriber.subscribed_at),
-        formatDate(subscriber.unsubscribed_at)
+        `"${subscriber.email}"`,
+        `"${subscriber.source || 'website'}"`,
+        `"${getStatusText(subscriber.is_active)}"`,
+        `"${formatDate(subscriber.subscribed_at)}"`,
+        `"${formatDate(subscriber.unsubscribed_at)}"`
       ].join(','))
     ].join('\n');
 
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'newsletter-subscribers.csv';
+    a.download = `newsletter-subscribers-${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
+
+    toast({
+      title: "Export Successful",
+      description: `Exported ${filteredSubscribers.length} subscribers to CSV`
+    });
+  };
+
+  const handleRefresh = () => {
+    console.log('🔄 Refreshing subscribers data...');
+    refetch();
+    toast({
+      title: "Refreshing",
+      description: "Reloading subscriber data..."
+    });
   };
 
   if (isLoading) {
@@ -70,27 +134,50 @@ const Subscribers = () => {
       <div className="p-6">
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-vip-gold"></div>
+          <span className="ml-3 text-vip-gold">Loading subscribers...</span>
         </div>
       </div>
     );
   }
 
   if (error) {
+    console.error('📛 Subscribers error:', error);
     return (
       <div className="p-6">
         <Card>
           <CardContent className="p-6">
             <div className="text-center">
-              <p className="text-red-600 mb-4">Error loading subscribers: {error.message}</p>
-              <Button onClick={() => window.location.reload()}>
-                Retry
-              </Button>
+              <p className="text-red-600 mb-4">
+                Error loading subscribers: {error.message}
+              </p>
+              <div className="space-x-2">
+                <Button onClick={handleRefresh}>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Retry
+                </Button>
+                <Button onClick={() => window.location.reload()} variant="outline">
+                  Reload Page
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
     );
   }
+
+  const activeCount = subscribers.filter(s => s.is_active === true || s.is_active === null).length;
+  const inactiveCount = subscribers.filter(s => s.is_active === false).length;
+  const thisMonthCount = subscribers.filter(s => {
+    if (!s.subscribed_at) return false;
+    try {
+      const subDate = new Date(s.subscribed_at);
+      const now = new Date();
+      return subDate.getMonth() === now.getMonth() && subDate.getFullYear() === now.getFullYear();
+    } catch {
+      return false;
+    }
+  }).length;
 
   return (
     <div className="p-6 space-y-6">
@@ -100,6 +187,10 @@ const Subscribers = () => {
           <p className="text-vip-gold/60 mt-1">Manage your exclusive newsletter subscriber base</p>
         </div>
         <div className="flex gap-2">
+          <Button onClick={handleRefresh} variant="outline">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
           <Button onClick={exportSubscribers} variant="outline">
             <Download className="h-4 w-4 mr-2" />
             Export CSV
@@ -126,9 +217,7 @@ const Subscribers = () => {
               <UserPlus className="h-8 w-8 text-green-600" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Active Subscribers</p>
-                <p className="text-2xl font-bold">
-                  {subscribers.filter(s => s.is_active).length}
-                </p>
+                <p className="text-2xl font-bold">{activeCount}</p>
               </div>
             </div>
           </CardContent>
@@ -139,9 +228,7 @@ const Subscribers = () => {
               <Mail className="h-8 w-8 text-red-600" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Unsubscribed</p>
-                <p className="text-2xl font-bold">
-                  {subscribers.filter(s => !s.is_active).length}
-                </p>
+                <p className="text-2xl font-bold">{inactiveCount}</p>
               </div>
             </div>
           </CardContent>
@@ -152,14 +239,7 @@ const Subscribers = () => {
               <Calendar className="h-8 w-8 text-blue-600" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">This Month</p>
-                <p className="text-2xl font-bold">
-                  {subscribers.filter(s => {
-                    if (!s.subscribed_at) return false;
-                    const subDate = new Date(s.subscribed_at);
-                    const now = new Date();
-                    return subDate.getMonth() === now.getMonth() && subDate.getFullYear() === now.getFullYear();
-                  }).length}
-                </p>
+                <p className="text-2xl font-bold">{thisMonthCount}</p>
               </div>
             </div>
           </CardContent>
@@ -208,81 +288,101 @@ const Subscribers = () => {
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Email Address</TableHead>
-                    <TableHead>Source</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Subscribed Date</TableHead>
-                    <TableHead>Unsubscribed Date</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredSubscribers.map((subscriber) => (
-                    <TableRow key={subscriber.id} className="hover:bg-gray-50">
-                      <TableCell>
-                        <div className="flex items-center">
-                          <Mail className="w-4 h-4 mr-2 text-gray-400" />
-                          <div>
-                            <p className="font-medium">{subscriber.email}</p>
-                            <p className="text-xs text-gray-500">ID: {subscriber.id.slice(0, 8)}...</p>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="capitalize">
-                          {subscriber.source || 'website'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={getStatusColor(subscriber.is_active || false)}>
-                          {subscriber.is_active ? 'Active' : 'Unsubscribed'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {subscriber.subscribed_at ? (
-                          <div className="flex items-center">
-                            <Calendar className="w-3 h-3 mr-1 text-gray-400" />
-                            <span className="text-sm">{formatDate(subscriber.subscribed_at)}</span>
-                          </div>
-                        ) : (
-                          <span className="text-gray-400">N/A</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {subscriber.unsubscribed_at ? (
-                          <div className="flex items-center">
-                            <Calendar className="w-3 h-3 mr-1 text-gray-400" />
-                            <span className="text-sm">{formatDate(subscriber.unsubscribed_at)}</span>
-                          </div>
-                        ) : (
-                          <span className="text-gray-400">N/A</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center space-x-2">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => {
-                              toast({
-                                title: "Feature Coming Soon",
-                                description: "Subscriber management features will be available soon.",
-                              });
-                            }}
-                          >
-                            <Trash2 className="w-4 h-4 text-red-500" />
-                          </Button>
-                        </div>
-                      </TableCell>
+            <>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Email Address</TableHead>
+                      <TableHead>Source</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Subscribed Date</TableHead>
+                      <TableHead>Unsubscribed Date</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedSubscribers.map((subscriber) => (
+                      <TableRow key={subscriber.id} className="hover:bg-gray-50">
+                        <TableCell>
+                          <div className="flex items-center">
+                            <Mail className="w-4 h-4 mr-2 text-gray-400" />
+                            <div>
+                              <p className="font-medium">{subscriber.email}</p>
+                              <p className="text-xs text-gray-500">ID: {subscriber.id.slice(0, 8)}...</p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="capitalize">
+                            {subscriber.source || 'website'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={getStatusColor(subscriber.is_active)}>
+                            {getStatusText(subscriber.is_active)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {subscriber.subscribed_at ? (
+                            <div className="flex items-center">
+                              <Calendar className="w-3 h-3 mr-1 text-gray-400" />
+                              <span className="text-sm">{formatDate(subscriber.subscribed_at)}</span>
+                            </div>
+                          ) : (
+                            <span className="text-gray-400">N/A</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {subscriber.unsubscribed_at ? (
+                            <div className="flex items-center">
+                              <Calendar className="w-3 h-3 mr-1 text-gray-400" />
+                              <span className="text-sm">{formatDate(subscriber.unsubscribed_at)}</span>
+                            </div>
+                          ) : (
+                            <span className="text-gray-400">N/A</span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="mt-6 flex justify-center">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious 
+                          onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                          className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                        />
+                      </PaginationItem>
+                      
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                        <PaginationItem key={page}>
+                          <PaginationLink
+                            onClick={() => setCurrentPage(page)}
+                            isActive={currentPage === page}
+                            className="cursor-pointer"
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      ))}
+                      
+                      <PaginationItem>
+                        <PaginationNext 
+                          onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                          className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
+            </>
           )}
         </CardContent>
       </Card>

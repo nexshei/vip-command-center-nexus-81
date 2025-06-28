@@ -15,14 +15,23 @@ export const useSubscribers = () => {
   return useQuery({
     queryKey: ['subscribers'],
     queryFn: async (): Promise<Subscriber[]> => {
+      console.log('🔍 Fetching newsletter subscriptions...');
+      
       const { data, error } = await supabase
         .from('newsletter_subscriptions')
         .select('*')
         .order('subscribed_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error fetching newsletter subscriptions:', error);
+        throw error;
+      }
+      
+      console.log('✅ Successfully fetched newsletter subscriptions:', data);
       return data || [];
-    }
+    },
+    retry: 3,
+    retryDelay: 1000,
   });
 };
 
@@ -31,6 +40,8 @@ export const useUpdateSubscriber = () => {
   
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Subscriber> & { id: string }) => {
+      console.log('📝 Updating subscriber:', id, updates);
+      
       const { data, error } = await supabase
         .from('newsletter_subscriptions')
         .update(updates)
@@ -38,7 +49,12 @@ export const useUpdateSubscriber = () => {
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error updating subscriber:', error);
+        throw error;
+      }
+      
+      console.log('✅ Successfully updated subscriber:', data);
       return data;
     },
     onSuccess: () => {
