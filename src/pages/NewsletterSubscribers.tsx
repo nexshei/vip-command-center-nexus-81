@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
-import { Search, Mail, Calendar, Download, RefreshCw, UserPlus } from 'lucide-react';
-import { useNewsletterSubscriptions } from '@/hooks/useNewsletterSubscriptions';
+import { Search, Mail, Calendar, Download, RefreshCw, UserPlus, Plus } from 'lucide-react';
+import { useNewsletterSubscriptions, useAddTestSubscription } from '@/hooks/useNewsletterSubscriptions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -33,6 +33,7 @@ const NewsletterSubscribers = () => {
   const [currentPage, setCurrentPage] = useState(1);
   
   const { data: subscriptions = [], isLoading, error, refetch } = useNewsletterSubscriptions();
+  const addTestSubscription = useAddTestSubscription();
   const { toast } = useToast();
 
   console.log('📊 Newsletter subscriptions data:', subscriptions);
@@ -129,6 +130,23 @@ const NewsletterSubscribers = () => {
     });
   };
 
+  const handleAddTestSubscription = async () => {
+    try {
+      await addTestSubscription.mutateAsync();
+      toast({
+        title: "Test Subscription Added",
+        description: "A test subscription has been added to the database"
+      });
+    } catch (error) {
+      console.error('Error adding test subscription:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add test subscription",
+        variant: "destructive"
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="p-6">
@@ -187,6 +205,10 @@ const NewsletterSubscribers = () => {
           <p className="text-vip-gold/60 mt-1">Manage your newsletter subscriber base</p>
         </div>
         <div className="flex gap-2">
+          <Button onClick={handleAddTestSubscription} variant="outline" disabled={addTestSubscription.isPending}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Test Sub
+          </Button>
           <Button onClick={handleRefresh} variant="outline">
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
@@ -275,16 +297,24 @@ const NewsletterSubscribers = () => {
           </div>
         </CardHeader>
         <CardContent>
-          {filteredSubscriptions.length === 0 ? (
+          {subscriptions.length === 0 ? (
             <div className="text-center py-12">
               <Mail className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 text-lg mb-2">
-                {subscriptions.length === 0 ? 'No newsletter subscriptions found' : 'No subscriptions match your filters'}
+              <p className="text-gray-500 text-lg mb-2">No newsletter subscriptions found</p>
+              <p className="text-gray-400 text-sm mb-4">
+                Newsletter subscriptions will appear here when users sign up
               </p>
+              <Button onClick={handleAddTestSubscription} disabled={addTestSubscription.isPending}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Test Subscription
+              </Button>
+            </div>
+          ) : filteredSubscriptions.length === 0 ? (
+            <div className="text-center py-12">
+              <Mail className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500 text-lg mb-2">No subscriptions match your filters</p>
               <p className="text-gray-400 text-sm">
-                {subscriptions.length === 0 
-                  ? 'Newsletter subscriptions will appear here when users sign up' 
-                  : 'Try adjusting your search or filter criteria'}
+                Try adjusting your search or filter criteria
               </p>
             </div>
           ) : (
