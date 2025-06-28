@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -23,6 +22,7 @@ import CareerPortal from '@/pages/CareerPortal';
 import Email from '@/pages/Email';
 import ContactSubmissions from '@/pages/ContactSubmissions';
 import Settings from '@/pages/Settings';
+import NewsletterSubscribers from '@/pages/NewsletterSubscribers';
 
 export const AppRoutes: React.FC = () => {
   const { user } = useAuth();
@@ -114,6 +114,13 @@ export const AppRoutes: React.FC = () => {
         <ProtectedRoute requiredRoles={['super_admin', 'protocol_admin', 'admin']}>
           <React.Suspense fallback={<div>Loading...</div>}>
             <ContactSubmissions />
+          </React.Suspense>
+        </ProtectedRoute>
+      } />
+      <Route path="/newsletter-subscribers" element={
+        <ProtectedRoute requiredRoles={['super_admin', 'protocol_admin', 'admin']}>
+          <React.Suspense fallback={<div>Loading...</div>}>
+            <NewsletterSubscribers />
           </React.Suspense>
         </ProtectedRoute>
       } />
