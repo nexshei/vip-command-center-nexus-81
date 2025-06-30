@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,7 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Mail, Send, Inbox, Search, Calendar } from 'lucide-react';
+import { Mail, Send, Inbox, Search, Calendar, Users } from 'lucide-react';
+import { ClientEmailComposer } from '@/components/email/ClientEmailComposer';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface EmailRecord {
   id: string;
@@ -112,140 +113,142 @@ const Email = () => {
             <h1 className="text-3xl font-serif font-bold text-vip-gold">Email Management</h1>
             <p className="text-vip-gold/70 mt-1">Send and track VVIP communications</p>
           </div>
-          <Button 
-            onClick={() => setIsComposing(!isComposing)}
-            className="bg-vip-gold text-black hover:bg-vip-gold/90"
-          >
-            <Mail className="h-4 w-4 mr-2" />
-            {isComposing ? 'Cancel' : 'Compose Email'}
-          </Button>
         </div>
 
-        {isComposing && (
-          <Card className="bg-black border-vip-gold/30 mb-6">
-            <CardHeader>
-              <CardTitle className="text-vip-gold flex items-center">
-                <Send className="h-5 w-5 mr-2" />
-                Compose New Email
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSendEmail} className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-vip-gold">To</label>
-                  <Input
-                    type="email"
-                    placeholder="recipient@example.com"
-                    value={emailForm.to_email}
-                    onChange={(e) => setEmailForm({ ...emailForm, to_email: e.target.value })}
-                    className="border-vip-gold/30 bg-black text-vip-gold"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-vip-gold">Subject</label>
-                  <Input
-                    placeholder="Email subject"
-                    value={emailForm.subject}
-                    onChange={(e) => setEmailForm({ ...emailForm, subject: e.target.value })}
-                    className="border-vip-gold/30 bg-black text-vip-gold"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-vip-gold">Message</label>
-                  <Textarea
-                    placeholder="Compose your message..."
-                    value={emailForm.body}
-                    onChange={(e) => setEmailForm({ ...emailForm, body: e.target.value })}
-                    className="border-vip-gold/30 bg-black text-vip-gold min-h-[120px]"
-                    required
-                  />
-                </div>
-                <div className="flex space-x-3">
+        <Tabs defaultValue="compose" className="space-y-6">
+          <TabsList className="bg-black border-vip-gold/30">
+            <TabsTrigger value="compose" className="data-[state=active]:bg-vip-gold data-[state=active]:text-black">
+              <Mail className="h-4 w-4 mr-2" />
+              Compose Email
+            </TabsTrigger>
+            <TabsTrigger value="clients" className="data-[state=active]:bg-vip-gold data-[state=active]:text-black">
+              <Users className="h-4 w-4 mr-2" />
+              Email Clients
+            </TabsTrigger>
+            <TabsTrigger value="history" className="data-[state=active]:bg-vip-gold data-[state=active]:text-black">
+              <Inbox className="h-4 w-4 mr-2" />
+              Email History
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="compose">
+            <Card className="bg-black border-vip-gold/30">
+              <CardHeader>
+                <CardTitle className="text-vip-gold flex items-center">
+                  <Send className="h-5 w-5 mr-2" />
+                  Compose New Email
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSendEmail} className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-vip-gold">To</label>
+                    <Input
+                      type="email"
+                      placeholder="recipient@example.com"
+                      value={emailForm.to_email}
+                      onChange={(e) => setEmailForm({ ...emailForm, to_email: e.target.value })}
+                      className="border-vip-gold/30 bg-black text-vip-gold"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-vip-gold">Subject</label>
+                    <Input
+                      placeholder="Email subject"
+                      value={emailForm.subject}
+                      onChange={(e) => setEmailForm({ ...emailForm, subject: e.target.value })}
+                      className="border-vip-gold/30 bg-black text-vip-gold"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-vip-gold">Message</label>
+                    <Textarea
+                      placeholder="Compose your message..."
+                      value={emailForm.body}
+                      onChange={(e) => setEmailForm({ ...emailForm, body: e.target.value })}
+                      className="border-vip-gold/30 bg-black text-vip-gold min-h-[120px]"
+                      required
+                    />
+                  </div>
                   <Button type="submit" className="bg-vip-gold text-black hover:bg-vip-gold/90">
                     <Send className="h-4 w-4 mr-2" />
                     Send Email
                   </Button>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={() => setIsComposing(false)}
-                    className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        )}
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        <div className="flex items-center space-x-4 mb-6">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-vip-gold/60" />
-            <Input
-              placeholder="Search emails..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 border-vip-gold/30 bg-black text-vip-gold"
-            />
-          </div>
-          <Badge variant="outline" className="border-vip-gold/30 text-vip-gold">
-            <Inbox className="h-3 w-3 mr-1" />
-            {filteredEmails.length} Emails
-          </Badge>
-        </div>
-      </div>
+          <TabsContent value="clients">
+            <ClientEmailComposer onEmailSent={() => toast({
+              title: "Success",
+              description: "Email sent to client successfully"
+            })} />
+          </TabsContent>
 
-      <div className="space-y-4">
-        {filteredEmails.map((email) => (
-          <Card key={email.id} className="bg-black border-vip-gold/30 hover:border-vip-gold/50 transition-colors">
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-3 mb-2">
-                    <Mail className="h-4 w-4 text-vip-gold/60" />
-                    <span className="text-sm font-medium text-vip-gold">
-                      From: {email.from_email}
-                    </span>
-                    <span className="text-sm text-vip-gold/70">
-                      To: {email.to_email}
-                    </span>
-                    <Badge className={getStatusColor(email.status)}>
-                      {email.status}
-                    </Badge>
-                  </div>
-                  <h3 className="text-lg font-medium text-vip-gold mb-2">{email.subject}</h3>
-                  <p className="text-sm text-vip-gold/80 line-clamp-2">{email.body}</p>
+          <TabsContent value="history">
+            <div className="space-y-4">
+              <div className="flex items-center space-x-4">
+                <div className="relative flex-1 max-w-md">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-vip-gold/60" />
+                  <Input
+                    placeholder="Search emails..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 border-vip-gold/30 bg-black text-vip-gold"
+                  />
                 </div>
-                <div className="flex items-center text-xs text-vip-gold/50 ml-4">
-                  <Calendar className="h-3 w-3 mr-1" />
-                  {new Date(email.sent_at).toLocaleString()}
-                </div>
+                <Badge variant="outline" className="border-vip-gold/30 text-vip-gold">
+                  <Inbox className="h-3 w-3 mr-1" />
+                  {filteredEmails.length} Emails
+                </Badge>
               </div>
-            </CardContent>
-          </Card>
-        ))}
 
-        {filteredEmails.length === 0 && (
-          <Card className="bg-black border-vip-gold/30">
-            <CardContent className="p-8 text-center">
-              <Inbox className="h-12 w-12 text-vip-gold/40 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-vip-gold mb-2">No Emails Found</h3>
-              <p className="text-vip-gold/70 mb-4">
-                {searchTerm ? 'No emails match your search criteria.' : 'Start sending VVIP communications.'}
-              </p>
-              <Button 
-                onClick={() => setIsComposing(true)}
-                className="bg-vip-gold text-black hover:bg-vip-gold/90"
-              >
-                <Mail className="h-4 w-4 mr-2" />
-                Send First Email
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+              {filteredEmails.map((email) => (
+                <Card key={email.id} className="bg-black border-vip-gold/30 hover:border-vip-gold/50 transition-colors">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3 mb-2">
+                          <Mail className="h-4 w-4 text-vip-gold/60" />
+                          <span className="text-sm font-medium text-vip-gold">
+                            From: {email.from_email}
+                          </span>
+                          <span className="text-sm text-vip-gold/70">
+                            To: {email.to_email}
+                          </span>
+                          <Badge className={getStatusColor(email.status)}>
+                            {email.status}
+                          </Badge>
+                        </div>
+                        <h3 className="text-lg font-medium text-vip-gold mb-2">{email.subject}</h3>
+                        <p className="text-sm text-vip-gold/80 line-clamp-2">{email.body}</p>
+                      </div>
+                      <div className="flex items-center text-xs text-vip-gold/50 ml-4">
+                        <Calendar className="h-3 w-3 mr-1" />
+                        {new Date(email.sent_at).toLocaleString()}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+
+              {filteredEmails.length === 0 && (
+                <Card className="bg-black border-vip-gold/30">
+                  <CardContent className="p-8 text-center">
+                    <Inbox className="h-12 w-12 text-vip-gold/40 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-vip-gold mb-2">No Emails Found</h3>
+                    <p className="text-vip-gold/70 mb-4">
+                      {searchTerm ? 'No emails match your search criteria.' : 'Start sending VVIP communications.'}
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

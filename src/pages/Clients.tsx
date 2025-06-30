@@ -1,6 +1,7 @@
+
 import React, { useState } from 'react';
 import { Plus, Search, Filter, Edit, Trash2, Phone, Mail, MapPin } from 'lucide-react';
-import { useClients, useDeleteClient } from '@/hooks/useClients';
+import { useClients, useDeleteClient, Client } from '@/hooks/useClients';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,6 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { AddClientModal } from '@/components/modals/AddClientModal';
 import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
+import { ClientEmailComposer } from '@/components/email/ClientEmailComposer';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import {
   Table,
   TableBody,
@@ -23,6 +26,8 @@ const Clients = () => {
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [selectedClientName, setSelectedClientName] = useState<string>('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [clientToEmail, setClientToEmail] = useState<Client | null>(null);
   
   const { data: clients = [], isLoading, error } = useClients();
   const deleteClientMutation = useDeleteClient();
@@ -53,6 +58,11 @@ const Clients = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleEmailClient = (client: Client) => {
+    setClientToEmail(client);
+    setEmailDialogOpen(true);
   };
 
   const getStatusColor = (status: string) => {
@@ -188,6 +198,14 @@ const Clients = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleEmailClient(client)}
+                          className="text-vip-gold hover:text-vip-gold/80"
+                        >
+                          <Mail className="w-4 h-4" />
+                        </Button>
                         <Button variant="ghost" size="sm">
                           <Edit className="w-4 h-4" />
                         </Button>
@@ -225,6 +243,22 @@ const Clients = () => {
         description="Are you sure you want to delete this client? This action cannot be undone."
         itemName={selectedClientName}
       />
+
+      <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
+        <DialogContent className="max-w-2xl bg-black border-vip-gold/30">
+          <DialogHeader>
+            <DialogTitle className="text-vip-gold">
+              Send Email to {clientToEmail?.full_name}
+            </DialogTitle>
+          </DialogHeader>
+          {clientToEmail && (
+            <ClientEmailComposer
+              selectedClient={clientToEmail}
+              onEmailSent={() => setEmailDialogOpen(false)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
