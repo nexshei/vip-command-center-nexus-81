@@ -23,6 +23,7 @@ import Email from '@/pages/Email';
 import ContactSubmissions from '@/pages/ContactSubmissions';
 import Settings from '@/pages/Settings';
 import NewsletterSubscribers from '@/pages/NewsletterSubscribers';
+import Subscribers from '@/pages/Subscribers';
 
 export const AppRoutes: React.FC = () => {
   const { user } = useAuth();
@@ -83,6 +84,11 @@ export const AppRoutes: React.FC = () => {
       <Route path="/subscriptions" element={
         <ProtectedRoute requiredRoles={['super_admin', 'protocol_admin', 'admin']}>
           <Subscriptions />
+        </ProtectedRoute>
+      } />
+      <Route path="/subscribers" element={
+        <ProtectedRoute requiredRoles={['super_admin', 'protocol_admin', 'admin']}>
+          <Subscribers />
         </ProtectedRoute>
       } />
       <Route path="/email" element={

@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
-import { Search, Filter, Mail, Calendar, Trash2, UserPlus, Download, RefreshCw } from 'lucide-react';
-import { useSubscribers } from '@/hooks/useSubscribers';
+import { Search, Mail, Calendar, Download, RefreshCw, UserPlus, Plus } from 'lucide-react';
+import { useSubscribers, useUpdateSubscriber } from '@/hooks/useSubscribers';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -33,11 +33,10 @@ const Subscribers = () => {
   const [currentPage, setCurrentPage] = useState(1);
   
   const { data: subscribers = [], isLoading, error, refetch } = useSubscribers();
+  const updateSubscriber = useUpdateSubscriber();
   const { toast } = useToast();
 
   console.log('📊 Subscribers data:', subscribers);
-  console.log('📊 Loading state:', isLoading);
-  console.log('📊 Error state:', error);
 
   const filteredSubscribers = subscribers.filter(subscriber => {
     const matchesSearch = subscriber.email.toLowerCase().includes(searchTerm.toLowerCase());
@@ -108,7 +107,7 @@ const Subscribers = () => {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `newsletter-subscribers-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `subscribers-${new Date().toISOString().split('T')[0]}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -127,6 +126,29 @@ const Subscribers = () => {
       title: "Refreshing",
       description: "Reloading subscriber data..."
     });
+  };
+
+  const toggleSubscriberStatus = async (id: string, currentStatus: boolean | null) => {
+    try {
+      const newStatus = !currentStatus;
+      await updateSubscriber.mutateAsync({
+        id,
+        is_active: newStatus,
+        unsubscribed_at: newStatus ? null : new Date().toISOString()
+      });
+      
+      toast({
+        title: "Status Updated",
+        description: `Subscriber ${newStatus ? 'activated' : 'deactivated'} successfully`
+      });
+    } catch (error) {
+      console.error('Error updating subscriber status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update subscriber status",
+        variant: "destructive"
+      });
+    }
   };
 
   if (isLoading) {
@@ -183,8 +205,8 @@ const Subscribers = () => {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-vip-black">VVIP Newsletter Subscribers</h1>
-          <p className="text-vip-gold/60 mt-1">Manage your exclusive newsletter subscriber base</p>
+          <h1 className="text-3xl font-serif font-bold text-vip-black">Subscribers</h1>
+          <p className="text-vip-gold/60 mt-1">Manage your newsletter subscriber base</p>
         </div>
         <div className="flex gap-2">
           <Button onClick={handleRefresh} variant="outline">
@@ -255,7 +277,7 @@ const Subscribers = () => {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
-                  placeholder="Search subscribers by email..."
+                  placeholder="Search by email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 w-64"
@@ -275,16 +297,20 @@ const Subscribers = () => {
           </div>
         </CardHeader>
         <CardContent>
-          {filteredSubscribers.length === 0 ? (
+          {subscribers.length === 0 ? (
             <div className="text-center py-12">
               <Mail className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 text-lg mb-2">
-                {subscribers.length === 0 ? 'No subscribers found' : 'No subscribers match your filters'}
-              </p>
+              <p className="text-gray-500 text-lg mb-2">No subscribers found</p>
               <p className="text-gray-400 text-sm">
-                {subscribers.length === 0 
-                  ? 'Subscribers will appear here when they sign up for your newsletter' 
-                  : 'Try adjusting your search or filter criteria'}
+                Subscribers will appear here when users sign up for your newsletter
+              </p>
+            </div>
+          ) : filteredSubscribers.length === 0 ? (
+            <div className="text-center py-12">
+              <Mail className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500 text-lg mb-2">No subscribers match your filters</p>
+              <p className="text-gray-400 text-sm">
+                Try adjusting your search or filter criteria
               </p>
             </div>
           ) : (
@@ -298,6 +324,7 @@ const Subscribers = () => {
                       <TableHead>Status</TableHead>
                       <TableHead>Subscribed Date</TableHead>
                       <TableHead>Unsubscribed Date</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -341,6 +368,16 @@ const Subscribers = () => {
                           ) : (
                             <span className="text-gray-400">N/A</span>
                           )}
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => toggleSubscriberStatus(subscriber.id, subscriber.is_active)}
+                            disabled={updateSubscriber.isPending}
+                          >
+                            {subscriber.is_active ? 'Deactivate' : 'Activate'}
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}

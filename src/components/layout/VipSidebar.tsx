@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   Sidebar, 
@@ -10,7 +11,7 @@ import {
   SidebarMenuItem,
   SidebarHeader
 } from "@/components/ui/sidebar";
-import { Home, Calendar, FileText, Users, Plus, Package, Mail, MessageSquare, List, Briefcase } from "lucide-react";
+import { Home, Calendar, FileText, Users, Plus, Package, Mail, MessageSquare, List, Briefcase, UserCheck } from "lucide-react";
 import { useNavigate, useLocation } from 'react-router-dom';
 import { cn } from "@/lib/utils";
 import { useAuth } from '@/contexts/AuthContext';
@@ -68,6 +69,13 @@ export const VipSidebar = () => {
       icon: MessageSquare,
       path: '/contact-submissions',
       description: 'View contact form submissions',
+      allowedRoles: ['super_admin', 'protocol_admin', 'admin']
+    },
+    {
+      name: 'Subscribers',
+      icon: UserCheck,
+      path: '/subscribers',
+      description: 'Manage newsletter subscribers',
       allowedRoles: ['super_admin', 'protocol_admin', 'admin']
     },
     {
