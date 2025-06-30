@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,14 +7,15 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { useCreateStaff } from '@/hooks/useStaff';
+import { useCreateStaff, useUpdateStaff } from '@/hooks/useStaff';
 
 interface AddStaffModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  editingStaff?: any;
 }
 
-export const AddStaffModal = ({ open, onOpenChange }: AddStaffModalProps) => {
+export const AddStaffModal = ({ open, onOpenChange, editingStaff }: AddStaffModalProps) => {
   const [formData, setFormData] = useState({
     full_name: '',
     position: '',
@@ -30,6 +31,27 @@ export const AddStaffModal = ({ open, onOpenChange }: AddStaffModalProps) => {
   
   const { toast } = useToast();
   const createStaffMutation = useCreateStaff();
+  const updateStaffMutation = useUpdateStaff();
+
+  const isEditing = !!editingStaff;
+
+  useEffect(() => {
+    if (editingStaff) {
+      setFormData({
+        full_name: editingStaff.full_name || '',
+        position: editingStaff.position || '',
+        department: editingStaff.department || '',
+        email: editingStaff.email || '',
+        phone: editingStaff.phone || '',
+        salary: editingStaff.salary?.toString() || '',
+        hire_date: editingStaff.hire_date || '',
+        bio: editingStaff.bio || '',
+        status: editingStaff.status || 'active'
+      });
+    } else {
+      resetForm();
+    }
+  }, [editingStaff, open]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -64,7 +86,7 @@ export const AddStaffModal = ({ open, onOpenChange }: AddStaffModalProps) => {
     setIsSubmitting(true);
 
     try {
-      await createStaffMutation.mutateAsync({
+      const staffData = {
         full_name: formData.full_name.trim(),
         position: formData.position.trim(),
         department: formData.department.trim() || null,
@@ -75,19 +97,31 @@ export const AddStaffModal = ({ open, onOpenChange }: AddStaffModalProps) => {
         bio: formData.bio.trim() || null,
         status: formData.status,
         profile_image_url: null,
-      });
+      };
 
-      toast({
-        title: "Success",
-        description: `${formData.full_name} has been added to the team.`,
-      });
+      if (isEditing) {
+        await updateStaffMutation.mutateAsync({
+          id: editingStaff.id,
+          ...staffData
+        });
+        toast({
+          title: "Success",
+          description: `${formData.full_name} has been updated successfully.`,
+        });
+      } else {
+        await createStaffMutation.mutateAsync(staffData);
+        toast({
+          title: "Success",
+          description: `${formData.full_name} has been added to the team.`,
+        });
+      }
 
       resetForm();
       onOpenChange(false);
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "Failed to add staff member. Please try again.",
+        description: error.message || `Failed to ${isEditing ? 'update' : 'add'} staff member. Please try again.`,
         variant: "destructive",
       });
     } finally {
@@ -104,7 +138,9 @@ export const AddStaffModal = ({ open, onOpenChange }: AddStaffModalProps) => {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px] bg-white border border-vip-gold/20">
         <DialogHeader>
-          <DialogTitle className="text-xl font-serif text-vip-black">Add New Staff Member</DialogTitle>
+          <DialogTitle className="text-xl font-serif text-vip-black">
+            {isEditing ? 'Edit Staff Member' : 'Add New Staff Member'}
+          </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid gap-3">
@@ -180,18 +216,6 @@ export const AddStaffModal = ({ open, onOpenChange }: AddStaffModalProps) => {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-3">
-              <Label htmlFor="salary" className="text-vip-black">Salary</Label>
-              <Input
-                id="salary"
-                type="number"
-                value={formData.salary}
-                onChange={(e) => handleInputChange('salary', e.target.value)}
-                className="border-vip-gold/30 focus:border-vip-gold"
-                placeholder="50000"
-                disabled={isSubmitting}
-              />
-            </div>
-            <div className="grid gap-3">
               <Label htmlFor="hire_date" className="text-vip-black">Hire Date</Label>
               <Input
                 id="hire_date"
@@ -201,6 +225,23 @@ export const AddStaffModal = ({ open, onOpenChange }: AddStaffModalProps) => {
                 className="border-vip-gold/30 focus:border-vip-gold"
                 disabled={isSubmitting}
               />
+            </div>
+            <div className="grid gap-3">
+              <Label htmlFor="status" className="text-vip-black">Status</Label>
+              <Select 
+                value={formData.status} 
+                onValueChange={(value) => handleInputChange('status', value)}
+                disabled={isSubmitting}
+              >
+                <SelectTrigger className="border-vip-gold/30 focus:border-vip-gold">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-vip-gold/20">
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                  <SelectItem value="on_leave">On Leave</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -232,7 +273,7 @@ export const AddStaffModal = ({ open, onOpenChange }: AddStaffModalProps) => {
               className="bg-vip-gold text-black hover:bg-vip-gold-light"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Adding...' : 'Add Staff Member'}
+              {isSubmitting ? (isEditing ? 'Updating...' : 'Adding...') : (isEditing ? 'Update Staff Member' : 'Add Staff Member')}
             </Button>
           </div>
         </form>

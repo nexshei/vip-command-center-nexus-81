@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { Plus, Search, Filter, Edit, Trash2, Phone, Mail, Calendar, DollarSign } from 'lucide-react';
+import { Plus, Search, Filter, Edit, Trash2, Phone, Mail, Calendar } from 'lucide-react';
 import { useStaff, useDeleteStaff } from '@/hooks/useStaff';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,6 +25,7 @@ const Staff = () => {
   const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null);
   const [selectedStaffName, setSelectedStaffName] = useState<string>('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingStaff, setEditingStaff] = useState<any>(null);
   
   const { data: staff = [], isLoading, error } = useStaff();
   const deleteStaffMutation = useDeleteStaff();
@@ -57,6 +59,11 @@ const Staff = () => {
     }
   };
 
+  const handleEditStaff = (member: any) => {
+    setEditingStaff(member);
+    setIsAddModalOpen(true);
+  };
+
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'active':
@@ -68,14 +75,6 @@ const Staff = () => {
       default:
         return 'bg-gray-100 text-gray-800';
     }
-  };
-
-  const formatSalary = (salary: number | null) => {
-    if (!salary) return 'N/A';
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(salary);
   };
 
   if (isLoading) {
@@ -108,7 +107,10 @@ const Staff = () => {
           <p className="text-vip-gold/60 mt-1">Manage your team and personnel</p>
         </div>
         <Button
-          onClick={() => setIsAddModalOpen(true)}
+          onClick={() => {
+            setEditingStaff(null);
+            setIsAddModalOpen(true);
+          }}
           className="bg-vip-gold hover:bg-vip-gold/80 text-black"
         >
           <Plus className="w-4 h-4 mr-2" />
@@ -139,7 +141,10 @@ const Staff = () => {
             <div className="text-center py-12">
               <p className="text-gray-500">No staff members found</p>
               <Button
-                onClick={() => setIsAddModalOpen(true)}
+                onClick={() => {
+                  setEditingStaff(null);
+                  setIsAddModalOpen(true);
+                }}
                 className="mt-4 bg-vip-gold hover:bg-vip-gold/80 text-black"
               >
                 Add Your First Staff Member
@@ -154,7 +159,6 @@ const Staff = () => {
                   <TableHead>Contact</TableHead>
                   <TableHead>Department</TableHead>
                   <TableHead>Hire Date</TableHead>
-                  <TableHead>Salary</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
@@ -205,19 +209,17 @@ const Staff = () => {
                       )}
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center">
-                        <DollarSign className="w-3 h-3 mr-1" />
-                        {formatSalary(member.salary)}
-                      </div>
-                    </TableCell>
-                    <TableCell>
                       <Badge className={getStatusColor(member.status || 'active')}>
                         {member.status || 'Active'}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2">
-                        <Button variant="ghost" size="sm">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleEditStaff(member)}
+                        >
                           <Edit className="w-4 h-4" />
                         </Button>
                         <Button
@@ -243,7 +245,11 @@ const Staff = () => {
 
       <AddStaffModal 
         open={isAddModalOpen} 
-        onOpenChange={setIsAddModalOpen}
+        onOpenChange={(open) => {
+          setIsAddModalOpen(open);
+          if (!open) setEditingStaff(null);
+        }}
+        editingStaff={editingStaff}
       />
 
       <DeleteConfirmationModal

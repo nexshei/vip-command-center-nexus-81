@@ -66,7 +66,7 @@ export const AppRoutes: React.FC = () => {
           <Inventory />
         </ProtectedRoute>
       } />
-      <Route path="/carriers" element={
+      <Route path="/careers" element={
         <ProtectedRoute requiredRoles={['super_admin', 'protocol_admin', 'admin']}>
           <Careers />
         </ProtectedRoute>
