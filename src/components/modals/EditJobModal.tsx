@@ -23,7 +23,6 @@ interface FormData {
   description?: string | null;
   requirements?: string;
   employment_type?: string | null;
-  salary_range?: string | null;
   application_deadline?: string | null;
   status?: string;
 }
@@ -42,7 +41,6 @@ export const EditJobModal = ({ open, onOpenChange, job, onJobUpdated }: EditJobM
         description: job.description,
         requirements: Array.isArray(job.requirements) ? job.requirements.join('\n') : '',
         employment_type: job.employment_type,
-        salary_range: job.salary_range,
         application_deadline: job.application_deadline,
         status: job.status
       });
@@ -65,7 +63,6 @@ export const EditJobModal = ({ open, onOpenChange, job, onJobUpdated }: EditJobM
       description: formData.description !== undefined ? formData.description : job.description,
       requirements: requirementsArray.length > 0 ? requirementsArray : null,
       employment_type: formData.employment_type !== undefined ? formData.employment_type : job.employment_type,
-      salary_range: formData.salary_range !== undefined ? formData.salary_range : job.salary_range,
       application_deadline: formData.application_deadline !== undefined ? formData.application_deadline : job.application_deadline,
       status: formData.status || job.status
     };
@@ -147,6 +144,24 @@ export const EditJobModal = ({ open, onOpenChange, job, onJobUpdated }: EditJobM
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
+              <Label htmlFor="employment_type" className="text-sm font-medium text-vip-black">Employment Type</Label>
+              <Select 
+                value={formData.employment_type || ''} 
+                onValueChange={(value) => setFormData(prev => ({ ...prev, employment_type: value }))}
+              >
+                <SelectTrigger className="w-full border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="full-time">Full-time</SelectItem>
+                  <SelectItem value="part-time">Part-time</SelectItem>
+                  <SelectItem value="contract">Contract</SelectItem>
+                  <SelectItem value="internship">Internship</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="status" className="text-sm font-medium text-vip-black">Status</Label>
               <Select 
                 value={formData.status || ''} 
@@ -161,17 +176,6 @@ export const EditJobModal = ({ open, onOpenChange, job, onJobUpdated }: EditJobM
                   <SelectItem value="draft">Draft</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="salary_range" className="text-sm font-medium text-vip-black">Salary Range</Label>
-              <Input
-                id="salary_range"
-                value={formData.salary_range || ''}
-                onChange={(e) => setFormData(prev => ({ ...prev, salary_range: e.target.value }))}
-                placeholder="e.g. $50,000 - $70,000"
-                className="w-full border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black"
-              />
             </div>
           </div>
 
