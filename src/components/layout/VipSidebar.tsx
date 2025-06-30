@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Sidebar, 
@@ -11,7 +10,7 @@ import {
   SidebarMenuItem,
   SidebarHeader
 } from "@/components/ui/sidebar";
-import { Home, Calendar, FileText, Users, Plus, Package, Mail, UserCheck, MessageSquare, List, Briefcase } from "lucide-react";
+import { Home, Calendar, FileText, Users, Plus, Package, Mail, MessageSquare, List, Briefcase } from "lucide-react";
 import { useNavigate, useLocation } from 'react-router-dom';
 import { cn } from "@/lib/utils";
 import { useAuth } from '@/contexts/AuthContext';
@@ -90,21 +89,14 @@ export const VipSidebar = () => {
       icon: Users,
       path: '/staff',
       description: 'View staff members',
-      allowedRoles: ['super_admin', 'admin'] // Removed protocol_admin access
+      allowedRoles: ['super_admin', 'admin']
     },
     {
       name: 'Email',
       icon: Mail,
       path: '/email',
       description: 'Send communications',
-      allowedRoles: ['super_admin', 'admin'] // Removed protocol_admin access
-    },
-    {
-      name: 'VVIP Subscribers',
-      icon: UserCheck,
-      path: '/subscribers',
-      description: 'Manage subscription members',
-      allowedRoles: ['super_admin', 'protocol_admin', 'admin']
+      allowedRoles: ['super_admin', 'admin']
     }
   ];
 

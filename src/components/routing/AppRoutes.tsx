@@ -65,7 +65,7 @@ export const AppRoutes: React.FC = () => {
           <Inventory />
         </ProtectedRoute>
       } />
-      <Route path="/careers" element={
+      <Route path="/carriers" element={
         <ProtectedRoute requiredRoles={['super_admin', 'protocol_admin', 'admin']}>
           <Careers />
         </ProtectedRoute>
@@ -103,13 +103,6 @@ export const AppRoutes: React.FC = () => {
       <Route path="/settings" element={
         <ProtectedRoute requiredRoles={['super_admin']}>
           <Settings />
-        </ProtectedRoute>
-      } />
-      <Route path="/subscribers" element={
-        <ProtectedRoute requiredRoles={['super_admin', 'protocol_admin', 'admin']}>
-          <React.Suspense fallback={<div>Loading...</div>}>
-            <NewsletterSubscribers />
-          </React.Suspense>
         </ProtectedRoute>
       } />
       <Route path="/contact-submissions" element={
