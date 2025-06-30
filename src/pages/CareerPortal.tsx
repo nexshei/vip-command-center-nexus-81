@@ -1,191 +1,119 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Plus, Briefcase, Users, Calendar, ArrowRight, Eye, Edit, Trash2 } from 'lucide-react';
+import { Search, Plus, Briefcase, Users, Calendar, Eye, Edit, Trash2, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { JobOpeningModalTrigger } from '@/components/modals/JobOpeningModal';
-
-interface JobOpening {
-  id: string;
-  title: string;
-  department: string;
-  status: 'open' | 'closed' | 'on-hold';
-  applicants: number;
-  datePosted: string;
-  location: string;
-}
-
-interface Applicant {
-  id: string;
-  name: string;
-  position: string;
-  stage: 'new' | 'screening' | 'interviewing' | 'offer-sent' | 'hired' | 'rejected';
-  appliedDate: string;
-  email: string;
-}
+import { EditJobModal } from '@/components/modals/EditJobModal';
+import { useJobs, useDeleteJob, type JobPosting } from '@/hooks/useJobs';
+import { useApplications } from '@/hooks/useApplications';
 
 const CareerPortal = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [jobOpenings, setJobOpenings] = useState<JobOpening[]>([
-    {
-      id: '1',
-      title: 'Senior Protocol Officer',
-      department: 'Protocol',
-      status: 'open',
-      applicants: 12,
-      datePosted: '2024-01-15',
-      location: 'Nairobi'
-    },
-    {
-      id: '2',
-      title: 'VVIP Security Specialist',
-      department: 'Security',
-      status: 'open',
-      applicants: 8,
-      datePosted: '2024-01-10',
-      location: 'Nairobi'
-    },
-    {
-      id: '3',
-      title: 'Event Coordinator',
-      department: 'Events',
-      status: 'on-hold',
-      applicants: 15,
-      datePosted: '2024-01-05',
-      location: 'Nairobi'
-    },
-    {
-      id: '4',
-      title: 'Executive Driver',
-      department: 'Logistics',
-      status: 'open',
-      applicants: 6,
-      datePosted: '2024-01-20',
-      location: 'Nairobi'
-    },
-  ]);
+  const [editingJob, setEditingJob] = useState<JobPosting | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
+  const { data: jobs = [], isLoading: jobsLoading, refetch: refetchJobs } = useJobs();
+  const { data: applications = [] } = useApplications();
+  const deleteJobMutation = useDeleteJob();
   const { toast } = useToast();
 
-  const applicants: Applicant[] = [
-    { id: '1', name: 'Alice Wanjiru', position: 'Senior Protocol Officer', stage: 'new', appliedDate: '2024-01-22', email: 'alice@email.com' },
-    { id: '2', name: 'John Mwangi', position: 'Senior Protocol Officer', stage: 'screening', appliedDate: '2024-01-21', email: 'john@email.com' },
-    { id: '3', name: 'Grace Achieng', position: 'VVIP Security Specialist', stage: 'interviewing', appliedDate: '2024-01-20', email: 'grace@email.com' },
-    { id: '4', name: 'Peter Kiprotich', position: 'Senior Protocol Officer', stage: 'offer-sent', appliedDate: '2024-01-18', email: 'peter@email.com' },
-    { id: '5', name: 'Mary Nyokabi', position: 'Event Coordinator', stage: 'hired', appliedDate: '2024-01-15', email: 'mary@email.com' },
-    { id: '6', name: 'David Omondi', position: 'Executive Driver', stage: 'rejected', appliedDate: '2024-01-12', email: 'david@email.com' },
-  ];
+  // Calculate statistics
+  const totalJobs = jobs.length;
+  const activeJobs = jobs.filter(job => job.status === 'active').length;
+  const totalApplications = applications.length;
+  const hiredApplicants = applications.filter(app => app.status === 'approved').length;
 
-  const totalJobs = jobOpenings.length;
-  const openJobs = jobOpenings.filter(job => job.status === 'open').length;
-  const totalApplicants = applicants.length;
-  const newApplicants = applicants.filter(app => app.stage === 'new').length;
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'open': return 'bg-ios-green text-white';
-      case 'closed': return 'bg-gray-500 text-white';
-      case 'on-hold': return 'bg-ios-orange text-white';
-      default: return 'bg-gray-500 text-white';
-    }
+  // Get application counts per job
+  const getApplicationCount = (jobTitle: string) => {
+    return applications.filter(app => 
+      app.position?.toLowerCase().includes(jobTitle.toLowerCase())
+    ).length;
   };
 
-  const getStageColor = (stage: string) => {
-    switch (stage) {
-      case 'new': return 'bg-blue-500 text-white';
-      case 'screening': return 'bg-ios-orange text-white';
-      case 'interviewing': return 'bg-purple-500 text-white';
-      case 'offer-sent': return 'bg-ios-purple text-white';
-      case 'hired': return 'bg-ios-green text-white';
-      case 'rejected': return 'bg-ios-red text-white';
-      default: return 'bg-gray-500 text-white';
-    }
+  const getHiredCount = (jobTitle: string) => {
+    return applications.filter(app => 
+      app.position?.toLowerCase().includes(jobTitle.toLowerCase()) && 
+      app.status === 'approved'
+    ).length;
   };
 
-  const kanbanStages = [
-    { id: 'new', title: 'New Applicants', color: 'border-blue-500' },
-    { id: 'screening', title: 'Screening', color: 'border-ios-orange' },
-    { id: 'interviewing', title: 'Interviewing', color: 'border-purple-500' },
-    { id: 'offer-sent', title: 'Offer Sent', color: 'border-ios-purple' },
-    { id: 'hired', title: 'Hired', color: 'border-ios-green' },
-    { id: 'rejected', title: 'Rejected', color: 'border-ios-red' },
-  ];
-
-  const filteredJobs = jobOpenings.filter(job => {
+  const filteredJobs = jobs.filter(job => {
     const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         job.department.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesDepartment = departmentFilter === 'all' || job.department.toLowerCase() === departmentFilter;
+                         (job.department?.toLowerCase() || '').includes(searchTerm.toLowerCase());
+    const matchesDepartment = departmentFilter === 'all' || 
+                             job.department?.toLowerCase() === departmentFilter.toLowerCase();
     const matchesStatus = statusFilter === 'all' || job.status === statusFilter;
     return matchesSearch && matchesDepartment && matchesStatus;
   });
 
-  const handleJobAdded = (newJob: any) => {
-    const jobOpening: JobOpening = {
-      id: newJob.id,
-      title: newJob.title,
-      department: newJob.department,
-      status: newJob.status as 'open' | 'closed' | 'on-hold',
-      applicants: 0,
-      datePosted: new Date().toISOString().split('T')[0],
-      location: newJob.location
-    };
-    setJobOpenings([...jobOpenings, jobOpening]);
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active': return 'bg-ios-green text-white';
+      case 'closed': return 'bg-gray-500 text-white';
+      case 'draft': return 'bg-ios-orange text-white';
+      default: return 'bg-gray-500 text-white';
+    }
   };
 
-  const handleCreateJob = () => {
-    console.log('Creating new job opening');
+  const handleJobAdded = () => {
+    refetchJobs();
     toast({
-      title: "Create New Job Opening",
-      description: "Opening form to create new job posting...",
+      title: "Job Posted Successfully",
+      description: "The job posting is now live and accepting applications.",
     });
   };
 
-  const handleViewApplicants = (jobId: string) => {
-    console.log('Viewing applicants for job:', jobId);
+  const handleJobUpdated = (updatedJob: JobPosting) => {
+    refetchJobs();
+    setEditingJob(null);
+    setIsEditModalOpen(false);
+  };
+
+  const handleEditJob = (job: JobPosting) => {
+    setEditingJob(job);
+    setIsEditModalOpen(true);
+  };
+
+  const handleDeleteJob = async (jobId: string) => {
+    try {
+      await deleteJobMutation.mutateAsync(jobId);
+      toast({
+        title: "Job Deleted",
+        description: "The job posting has been removed successfully.",
+        variant: "destructive"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete job posting.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleViewApplicants = (job: JobPosting) => {
     toast({
       title: "View Applicants",
-      description: "Loading applicants for this position...",
+      description: `Showing applicants for ${job.title}. Check the Careers page for detailed application management.`,
     });
   };
 
-  const handleEditJob = (jobId: string) => {
-    console.log('Editing job:', jobId);
-    toast({
-      title: "Edit Job Opening",
-      description: "Opening edit form...",
-    });
-  };
-
-  const handleDeleteJob = (jobId: string) => {
-    console.log('Deleting job:', jobId);
-    setJobOpenings(jobOpenings.filter(job => job.id !== jobId));
-    toast({
-      title: "Delete Job Opening",
-      description: "Job opening has been deleted.",
-      variant: "destructive"
-    });
-  };
-
-  const handleApplicantClick = (applicant: Applicant) => {
-    console.log('Opening applicant profile:', applicant);
-    toast({
-      title: "Opening Applicant Profile",
-      description: `Loading profile for ${applicant.name}`,
-    });
-  };
-
-  const handleStatsCardClick = (cardType: string) => {
-    console.log('Stats card clicked:', cardType);
-    toast({
-      title: "Loading Details",
-      description: `Opening ${cardType} details...`,
-    });
-  };
+  if (jobsLoading) {
+    return (
+      <div className="space-y-6 p-6 max-w-7xl mx-auto">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-vip-gold"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 p-6 max-w-7xl mx-auto">
@@ -200,66 +128,54 @@ const CareerPortal = () => {
 
       {/* Summary Stats */}
       <div className="grid gap-6 md:grid-cols-4">
-        <Card 
-          className="vip-glass border-vip-gold/20 cursor-pointer hover:bg-vip-gold/5 transition-colors"
-          onClick={() => handleStatsCardClick("Total Job Openings")}
-        >
+        <Card className="vip-glass border-vip-gold/20">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">Total Job Openings</CardTitle>
+            <CardTitle className="text-sm font-medium text-vip-gold/80">Total Job Postings</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-vip-black">{totalJobs}</div>
-            <p className="text-xs text-vip-gold/60">Active positions</p>
+            <p className="text-xs text-vip-gold/60">All positions</p>
           </CardContent>
         </Card>
         
-        <Card 
-          className="vip-glass border-vip-gold/20 cursor-pointer hover:bg-vip-gold/5 transition-colors"
-          onClick={() => handleStatsCardClick("Open Positions")}
-        >
+        <Card className="vip-glass border-vip-gold/20">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">Open Positions</CardTitle>
+            <CardTitle className="text-sm font-medium text-vip-gold/80">Active Positions</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-black">{openJobs}</div>
+            <div className="text-2xl font-bold text-vip-black">{activeJobs}</div>
             <p className="text-xs text-ios-green">Accepting applications</p>
           </CardContent>
         </Card>
 
-        <Card 
-          className="vip-glass border-vip-gold/20 cursor-pointer hover:bg-vip-gold/5 transition-colors"
-          onClick={() => handleStatsCardClick("Total Applicants")}
-        >
+        <Card className="vip-glass border-vip-gold/20">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">Total Applicants</CardTitle>
+            <CardTitle className="text-sm font-medium text-vip-gold/80">Total Applications</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-black">{totalApplicants}</div>
-            <p className="text-xs text-vip-gold/60">All applications</p>
+            <div className="text-2xl font-bold text-vip-black">{totalApplications}</div>
+            <p className="text-xs text-vip-gold/60">Received applications</p>
           </CardContent>
         </Card>
 
-        <Card 
-          className="vip-glass border-vip-gold/20 cursor-pointer hover:bg-vip-gold/5 transition-colors"
-          onClick={() => handleStatsCardClick("New Applicants")}
-        >
+        <Card className="vip-glass border-vip-gold/20">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">New Applicants</CardTitle>
+            <CardTitle className="text-sm font-medium text-vip-gold/80">Successful Hires</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-black">{newApplicants}</div>
-            <p className="text-xs text-ios-orange">Needs review</p>
+            <div className="text-2xl font-bold text-vip-black">{hiredApplicants}</div>
+            <p className="text-xs text-ios-green">Positions filled</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Job Openings */}
+      {/* Job Postings */}
       <Card className="vip-glass border-vip-gold/20">
         <CardHeader>
           <CardTitle className="flex items-center justify-between text-vip-black">
             <div className="flex items-center">
               <Briefcase className="h-5 w-5 mr-2 text-vip-gold" />
-              Job Openings ({filteredJobs.length})
+              Job Postings ({filteredJobs.length})
             </div>
             <div className="flex space-x-3">
               <div className="relative">
@@ -277,10 +193,22 @@ const CareerPortal = () => {
                 </SelectTrigger>
                 <SelectContent className="bg-white border-vip-gold/30 z-50">
                   <SelectItem value="all">All Departments</SelectItem>
-                  <SelectItem value="protocol">Protocol</SelectItem>
+                  <SelectItem value="protocol services">Protocol Services</SelectItem>
+                  <SelectItem value="event management">Event Management</SelectItem>
                   <SelectItem value="security">Security</SelectItem>
-                  <SelectItem value="events">Events</SelectItem>
-                  <SelectItem value="logistics">Logistics</SelectItem>
+                  <SelectItem value="transport">Transport</SelectItem>
+                  <SelectItem value="administration">Administration</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-32 border-vip-gold/30 focus:border-vip-gold bg-white text-vip-black">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-vip-gold/30 z-50">
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="closed">Closed</SelectItem>
+                  <SelectItem value="draft">Draft</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -288,110 +216,137 @@ const CareerPortal = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {filteredJobs.map((job) => (
-              <div key={job.id} className="flex items-center justify-between p-4 border border-vip-gold/20 rounded-lg vip-glass-light hover:bg-vip-gold/5 transition-colors">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-3">
-                    <h3 className="font-semibold text-vip-black">{job.title}</h3>
-                    <Badge className={getStatusColor(job.status)}>
-                      {job.status === 'open' ? 'Open' : 
-                       job.status === 'closed' ? 'Closed' : 'On Hold'}
-                    </Badge>
+            {filteredJobs.map((job) => {
+              const applicationCount = getApplicationCount(job.title);
+              const hiredCount = getHiredCount(job.title);
+              const isFullyStaffed = hiredCount > 0;
+              
+              return (
+                <div key={job.id} className="flex items-center justify-between p-4 border border-vip-gold/20 rounded-lg vip-glass-light hover:bg-vip-gold/5 transition-colors">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-3">
+                      <h3 className="font-semibold text-vip-black">{job.title}</h3>
+                      <Badge className={getStatusColor(job.status)}>
+                        {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
+                      </Badge>
+                      {isFullyStaffed && (
+                        <Badge className="bg-ios-green text-white">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Filled
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center space-x-4 mt-2 text-sm text-vip-gold/80">
+                      <span>{job.department || 'No Department'}</span>
+                      <span>•</span>
+                      <span>{job.location || 'Location TBD'}</span>
+                      <span>•</span>
+                      <span className="flex items-center">
+                        <Calendar className="h-3 w-3 mr-1" />
+                        Posted {new Date(job.created_at).toLocaleDateString()}
+                      </span>
+                      <span>•</span>
+                      <span className="flex items-center">
+                        <Users className="h-3 w-3 mr-1" />
+                        {applicationCount} applications
+                      </span>
+                      {hiredCount > 0 && (
+                        <>
+                          <span>•</span>
+                          <span className="flex items-center text-ios-green">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            {hiredCount} hired
+                          </span>
+                        </>
+                      )}
+                    </div>
+                    {job.salary_range && (
+                      <div className="mt-1 text-sm text-vip-gold/70">
+                        Salary: {job.salary_range}
+                      </div>
+                    )}
                   </div>
-                  <div className="flex items-center space-x-4 mt-2 text-sm text-vip-gold/80">
-                    <span>{job.department}</span>
-                    <span>•</span>
-                    <span>{job.location}</span>
-                    <span>•</span>
-                    <span className="flex items-center">
-                      <Calendar className="h-3 w-3 mr-1" />
-                      Posted {new Date(job.datePosted).toLocaleDateString()}
-                    </span>
-                    <span>•</span>
-                    <span className="flex items-center">
-                      <Users className="h-3 w-3 mr-1" />
-                      {job.applicants} applicants
-                    </span>
+                  <div className="flex space-x-2">
+                    <Button 
+                      onClick={() => handleViewApplicants(job)}
+                      variant="outline" 
+                      size="sm" 
+                      className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+                    >
+                      <Eye className="h-3 w-3 mr-1" />
+                      View ({applicationCount})
+                    </Button>
+                    <Button 
+                      onClick={() => handleEditJob(job)}
+                      variant="outline" 
+                      size="sm" 
+                      className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+                    >
+                      <Edit className="h-3 w-3" />
+                    </Button>
+                    <Button 
+                      onClick={() => handleDeleteJob(job.id)}
+                      variant="outline" 
+                      size="sm" 
+                      className="border-red-300 text-red-600 hover:bg-red-50"
+                      disabled={deleteJobMutation.isPending}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
                   </div>
                 </div>
-                <div className="flex space-x-2">
-                  <Button 
-                    onClick={() => handleViewApplicants(job.id)}
-                    variant="outline" 
-                    size="sm" 
-                    className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
-                  >
-                    <Eye className="h-3 w-3 mr-1" />
-                    View
-                  </Button>
-                  <Button 
-                    onClick={() => handleEditJob(job.id)}
-                    variant="outline" 
-                    size="sm" 
-                    className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
-                  >
-                    <Edit className="h-3 w-3" />
-                  </Button>
-                  <Button 
-                    onClick={() => handleDeleteJob(job.id)}
-                    variant="outline" 
-                    size="sm" 
-                    className="border-red-300 text-red-600 hover:bg-red-50"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
             
             {filteredJobs.length === 0 && (
               <div className="text-center py-8">
-                <p className="text-vip-gold/60">No job openings found matching your criteria.</p>
+                <Briefcase className="h-12 w-12 text-vip-gold/40 mx-auto mb-4" />
+                <p className="text-vip-gold/60">No job postings found matching your criteria.</p>
+                <p className="text-sm text-vip-gold/50 mt-1">Create your first job posting to get started.</p>
               </div>
             )}
           </div>
         </CardContent>
       </Card>
 
-      {/* Applicant Tracking Kanban Board */}
-      <Card className="vip-glass border-vip-gold/20">
-        <CardHeader>
-          <CardTitle className="flex items-center text-vip-black">
-            <Users className="h-5 w-5 mr-2 text-vip-gold" />
-            Applicant Tracking Pipeline
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-6 gap-4">
-            {kanbanStages.map((stage) => {
-              const stageApplicants = applicants.filter(app => app.stage === stage.id);
-              return (
-                <div key={stage.id} className={`border-t-4 ${stage.color} bg-white rounded-lg p-4 min-h-[300px]`}>
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold text-sm text-vip-black">{stage.title}</h3>
-                    <Badge variant="outline" className="text-xs">
-                      {stageApplicants.length}
-                    </Badge>
+      {/* Hiring Success Stories */}
+      {hiredApplicants > 0 && (
+        <Card className="vip-glass border-vip-gold/20">
+          <CardHeader>
+            <CardTitle className="flex items-center text-vip-black">
+              <CheckCircle className="h-5 w-5 mr-2 text-ios-green" />
+              Recent Successful Hires
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {applications
+                .filter(app => app.status === 'approved')
+                .slice(0, 6)
+                .map((hire) => (
+                  <div key={hire.id} className="p-4 border border-ios-green/30 rounded-lg bg-ios-green/5">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-vip-black">{hire.full_name}</h4>
+                      <Badge className="bg-ios-green text-white text-xs">Hired</Badge>
+                    </div>
+                    <p className="text-sm text-vip-gold/80">{hire.position}</p>
+                    <p className="text-xs text-vip-gold/60 mt-1">
+                      Hired on {new Date(hire.created_at).toLocaleDateString()}
+                    </p>
                   </div>
-                  <div className="space-y-3">
-                    {stageApplicants.map((applicant) => (
-                      <div 
-                        key={applicant.id} 
-                        className="p-3 bg-gray-50 rounded-lg border border-gray-200 hover:shadow-sm transition-shadow cursor-pointer"
-                        onClick={() => handleApplicantClick(applicant)}
-                      >
-                        <h4 className="font-medium text-sm text-vip-black">{applicant.name}</h4>
-                        <p className="text-xs text-vip-gold/80 mt-1">{applicant.position}</p>
-                        <p className="text-xs text-vip-gold/60 mt-1">Applied {new Date(applicant.appliedDate).toLocaleDateString()}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
+                ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Edit Job Modal */}
+      <EditJobModal
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        job={editingJob}
+        onJobUpdated={handleJobUpdated}
+      />
     </div>
   );
 };
