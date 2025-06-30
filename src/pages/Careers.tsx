@@ -1,13 +1,14 @@
-
 import React, { useState } from 'react';
 import { Plus, Search, Filter, Eye, Edit, Trash2, User, Calendar, Briefcase } from 'lucide-react';
 import { useApplications } from '@/hooks/useApplications';
+import { useJobs } from '@/hooks/useJobs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { JobOpeningModalTrigger } from '@/components/modals/JobOpeningModal';
 import {
   Table,
   TableBody,
@@ -29,8 +30,18 @@ const Careers = () => {
   const [selectedApplication, setSelectedApplication] = useState<any>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   
-  const { data: applications = [], isLoading, error } = useApplications();
+  const { data: applications = [], isLoading, error, refetch: refetchApplications } = useApplications();
+  const { data: jobs = [], refetch: refetchJobs } = useJobs();
   const { toast } = useToast();
+
+  const handleJobAdded = () => {
+    refetchJobs();
+    refetchApplications();
+    toast({
+      title: "Job Posted Successfully",
+      description: "The job posting is now live and accepting applications.",
+    });
+  };
 
   const filteredApplications = applications.filter(application => {
     const matchesSearch = 
@@ -96,9 +107,22 @@ const Careers = () => {
           <h1 className="text-3xl font-serif font-bold text-vip-black">Career Applications</h1>
           <p className="text-vip-gold/60 mt-1">Manage job applications and candidates</p>
         </div>
+        <JobOpeningModalTrigger onJobAdded={handleJobAdded} />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      {/* Job Statistics */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <Briefcase className="h-8 w-8 text-vip-gold" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Active Jobs</p>
+                <p className="text-2xl font-bold">{jobs.filter(j => j.status === 'active').length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center">
@@ -141,7 +165,7 @@ const Careers = () => {
             <div className="flex items-center">
               <Briefcase className="h-8 w-8 text-green-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Approved</p>
+                <p className="text-sm font-medium text-gray-600">Hired</p>
                 <p className="text-2xl font-bold">
                   {applications.filter(a => a.status === 'approved').length}
                 </p>
