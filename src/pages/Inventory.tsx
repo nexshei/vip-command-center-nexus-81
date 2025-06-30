@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { AddItemModal } from '@/components/modals/AddItemModal';
+import { EditItemModal } from '@/components/modals/EditItemModal';
 import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
 import {
   Table,
@@ -23,8 +24,10 @@ const Inventory = () => {
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [selectedItemName, setSelectedItemName] = useState<string>('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<any>(null);
   
-  const { data: inventory = [], isLoading, error } = useInventory();
+  const { data: inventory = [], isLoading, error, refetch } = useInventory();
   const deleteItemMutation = useDeleteInventoryItem();
   const { toast } = useToast();
 
@@ -54,6 +57,19 @@ const Inventory = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleEditItem = (item: any) => {
+    setSelectedItem(item);
+    setIsEditModalOpen(true);
+  };
+
+  const handleItemUpdated = () => {
+    refetch();
+    toast({
+      title: "Success",
+      description: "Inventory item updated successfully",
+    });
   };
 
   const handleItemAdded = (newItem: any) => {
@@ -86,9 +102,9 @@ const Inventory = () => {
 
   const formatPrice = (price: number | null) => {
     if (!price) return 'N/A';
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-KE', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'KES',
     }).format(price);
   };
 
@@ -275,7 +291,11 @@ const Inventory = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2">
-                        <Button variant="ghost" size="sm">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleEditItem(item)}
+                        >
                           <Edit className="w-4 h-4" />
                         </Button>
                         <Button
@@ -302,6 +322,14 @@ const Inventory = () => {
       <AddItemModal 
         open={isAddModalOpen} 
         onOpenChange={setIsAddModalOpen}
+      />
+
+      <EditItemModal
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        item={selectedItem}
+        onSuccess={handleItemUpdated}
+        type="inventory"
       />
 
       <DeleteConfirmationModal
