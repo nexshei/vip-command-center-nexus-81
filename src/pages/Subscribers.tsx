@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { Search, Mail, Calendar, Download, RefreshCw, UserPlus, Plus } from 'lucide-react';
-import { useSubscribers, useUpdateSubscriber } from '@/hooks/useSubscribers';
+import { useNewsletterSubscriptions, useUpdateNewsletterSubscription } from '@/hooks/useNewsletterSubscriptions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -32,8 +31,8 @@ const Subscribers = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
   
-  const { data: subscribers = [], isLoading, error, refetch } = useSubscribers();
-  const updateSubscriber = useUpdateSubscriber();
+  const { data: subscribers = [], isLoading, error, refetch } = useNewsletterSubscriptions();
+  const updateSubscriber = useUpdateNewsletterSubscription();
   const { toast } = useToast();
 
   console.log('📊 Subscribers data:', subscribers);
