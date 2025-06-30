@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Search, Mail, Calendar, Download, RefreshCw, UserPlus, Plus } from 'lucide-react';
 import { useNewsletterSubscriptions, useUpdateNewsletterSubscription } from '@/hooks/useNewsletterSubscriptions';
@@ -36,12 +37,15 @@ const Subscribers = () => {
   const { toast } = useToast();
 
   console.log('📊 Subscribers data:', subscribers);
+  console.log('📊 Loading state:', isLoading);
+  console.log('📊 Error state:', error);
 
+  // Filter subscribers based on search and status
   const filteredSubscribers = subscribers.filter(subscriber => {
     const matchesSearch = subscriber.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || 
-      (statusFilter === 'active' && subscriber.is_active) ||
-      (statusFilter === 'inactive' && !subscriber.is_active);
+      (statusFilter === 'active' && (subscriber.is_active === true || subscriber.is_active === null)) ||
+      (statusFilter === 'inactive' && subscriber.is_active === false);
     
     return matchesSearch && matchesStatus;
   });
@@ -187,6 +191,7 @@ const Subscribers = () => {
     );
   }
 
+  // Calculate stats
   const activeCount = subscribers.filter(s => s.is_active === true || s.is_active === null).length;
   const inactiveCount = subscribers.filter(s => s.is_active === false).length;
   const thisMonthCount = subscribers.filter(s => {
@@ -375,7 +380,7 @@ const Subscribers = () => {
                             onClick={() => toggleSubscriberStatus(subscriber.id, subscriber.is_active)}
                             disabled={updateSubscriber.isPending}
                           >
-                            {subscriber.is_active ? 'Deactivate' : 'Activate'}
+                            {subscriber.is_active === false ? 'Activate' : 'Deactivate'}
                           </Button>
                         </TableCell>
                       </TableRow>
