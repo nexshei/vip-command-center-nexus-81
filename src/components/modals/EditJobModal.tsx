@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -64,7 +63,8 @@ export const EditJobModal = ({ open, onOpenChange, job, onJobUpdated }: EditJobM
       requirements: requirementsArray.length > 0 ? requirementsArray : null,
       employment_type: formData.employment_type !== undefined ? formData.employment_type : job.employment_type,
       application_deadline: formData.application_deadline !== undefined ? formData.application_deadline : job.application_deadline,
-      status: formData.status || job.status
+      status: formData.status || job.status,
+      salary_range: job.salary_range // Keep existing salary_range
     };
 
     try {

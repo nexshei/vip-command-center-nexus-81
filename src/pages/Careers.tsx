@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Plus, Search, Filter, Eye, Edit, Trash2, User, Calendar, Briefcase, Clock, TrendingUp, Award, MapPin, Users } from 'lucide-react';
 import { useApplications } from '@/hooks/useApplications';
@@ -10,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { JobOpeningModalTrigger } from '@/components/modals/JobOpeningModal';
+import { EditJobModal } from '@/components/modals/EditJobModal';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
@@ -32,6 +32,8 @@ const Careers = () => {
   const [selectedApplication, setSelectedApplication] = useState<any>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('applications');
+  const [editingJob, setEditingJob] = useState<any>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
   const { data: applications = [], isLoading, error, refetch: refetchApplications } = useApplications();
   const { data: jobs = [], refetch: refetchJobs } = useJobs();
@@ -43,6 +45,19 @@ const Careers = () => {
     toast({
       title: "Job Posted Successfully",
       description: "The job posting is now live and accepting applications.",
+    });
+  };
+
+  const handleEditJob = (job: any) => {
+    setEditingJob(job);
+    setIsEditModalOpen(true);
+  };
+
+  const handleJobUpdated = (updatedJob: any) => {
+    refetchJobs();
+    toast({
+      title: "Job Updated Successfully",
+      description: `${updatedJob.title} has been updated.`,
     });
   };
 
@@ -416,7 +431,11 @@ const Careers = () => {
                             <Eye className="w-4 h-4 mr-1" />
                             View
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => handleEditJob(job)}
+                          >
                             <Edit className="w-4 h-4 mr-1" />
                             Edit
                           </Button>
@@ -441,6 +460,14 @@ const Careers = () => {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Edit Job Modal */}
+      <EditJobModal
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        job={editingJob}
+        onJobUpdated={handleJobUpdated}
+      />
 
       <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
         <DialogContent className="max-w-3xl">

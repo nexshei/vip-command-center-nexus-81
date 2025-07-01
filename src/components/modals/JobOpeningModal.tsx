@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -56,7 +55,8 @@ export const JobOpeningModalTrigger = ({ onJobAdded }: JobOpeningModalProps) => 
       requirements: requirementsArray.length > 0 ? requirementsArray : null,
       employment_type: formData.employment_type || null,
       application_deadline: formData.application_deadline || null,
-      status: formData.status
+      status: formData.status,
+      salary_range: null // Add the missing field
     };
 
     try {
