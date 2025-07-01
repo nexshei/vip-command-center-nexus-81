@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { JobOpeningModalTrigger } from '@/components/modals/JobOpeningModal';
 import { EditJobModal } from '@/components/modals/EditJobModal';
+import { EditApplicationModal } from '@/components/modals/EditApplicationModal';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
@@ -34,6 +35,8 @@ const Careers = () => {
   const [activeTab, setActiveTab] = useState('applications');
   const [editingJob, setEditingJob] = useState<any>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingApplication, setEditingApplication] = useState<any>(null);
+  const [isEditApplicationModalOpen, setIsEditApplicationModalOpen] = useState(false);
   
   const { data: applications = [], isLoading, error, refetch: refetchApplications } = useApplications();
   const { data: jobs = [], refetch: refetchJobs } = useJobs();
@@ -59,6 +62,15 @@ const Careers = () => {
       title: "Job Updated Successfully",
       description: `${updatedJob.title} has been updated.`,
     });
+  };
+
+  const handleEditApplication = (application: any) => {
+    setEditingApplication(application);
+    setIsEditApplicationModalOpen(true);
+  };
+
+  const handleApplicationUpdated = () => {
+    refetchApplications();
   };
 
   const filteredApplications = applications.filter(application => {
@@ -327,7 +339,11 @@ const Careers = () => {
                             >
                               <Eye className="w-4 h-4" />
                             </Button>
-                            <Button variant="ghost" size="sm">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleEditApplication(application)}
+                            >
                               <Edit className="w-4 h-4" />
                             </Button>
                           </div>
@@ -469,6 +485,15 @@ const Careers = () => {
         onJobUpdated={handleJobUpdated}
       />
 
+      {/* Edit Application Modal */}
+      <EditApplicationModal
+        open={isEditApplicationModalOpen}
+        onOpenChange={setIsEditApplicationModalOpen}
+        application={editingApplication}
+        onApplicationUpdated={handleApplicationUpdated}
+      />
+
+      {/* View Application Dialog */}
       <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
