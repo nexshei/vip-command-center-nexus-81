@@ -9,6 +9,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import type { Application } from '@/hooks/useApplications';
+import type { Database } from '@/integrations/supabase/types';
+
+type ApplicationStatus = Database['public']['Enums']['request_status'];
 
 interface EditApplicationModalProps {
   open: boolean;
@@ -18,7 +21,7 @@ interface EditApplicationModalProps {
 }
 
 interface FormData {
-  status?: string;
+  status?: ApplicationStatus;
   interview_date?: string;
   admin_notes?: string;
 }
@@ -31,7 +34,7 @@ export const EditApplicationModal = ({ open, onOpenChange, application, onApplic
   useEffect(() => {
     if (application) {
       setFormData({
-        status: application.status,
+        status: application.status as ApplicationStatus,
         interview_date: application.interview_date ? new Date(application.interview_date).toISOString().split('T')[0] : '',
         admin_notes: application.admin_notes || ''
       });
@@ -45,8 +48,13 @@ export const EditApplicationModal = ({ open, onOpenChange, application, onApplic
     setIsLoading(true);
 
     try {
-      const updateData = {
-        status: formData.status || application.status,
+      const updateData: {
+        status?: ApplicationStatus;
+        interview_date?: string | null;
+        admin_notes?: string | null;
+        updated_at: string;
+      } = {
+        status: formData.status || (application.status as ApplicationStatus),
         interview_date: formData.interview_date ? `${formData.interview_date}T00:00:00Z` : null,
         admin_notes: formData.admin_notes || null,
         updated_at: new Date().toISOString()
@@ -109,7 +117,7 @@ export const EditApplicationModal = ({ open, onOpenChange, application, onApplic
             <Label htmlFor="status" className="text-sm font-medium text-vip-black">Application Status</Label>
             <Select 
               value={formData.status || ''} 
-              onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}
+              onValueChange={(value: ApplicationStatus) => setFormData(prev => ({ ...prev, status: value }))}
             >
               <SelectTrigger className="w-full border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black">
                 <SelectValue />
