@@ -246,6 +246,81 @@ export type Database = {
         }
         Relationships: []
       }
+      item_bookings: {
+        Row: {
+          additional_notes: string | null
+          chairs: number | null
+          created_at: string
+          cups: number | null
+          decoration_items: number | null
+          email: string | null
+          event_date: string
+          extension_cables: number | null
+          forks_spoons: number | null
+          full_name: string
+          id: string
+          lighting_equipment: number | null
+          phone: string | null
+          plates: number | null
+          sound_system: number | null
+          status: string | null
+          tablecloths: number | null
+          tables: number | null
+          tents: number | null
+          terms_agreed: boolean | null
+          updated_at: string
+          water_dispensers: number | null
+        }
+        Insert: {
+          additional_notes?: string | null
+          chairs?: number | null
+          created_at?: string
+          cups?: number | null
+          decoration_items?: number | null
+          email?: string | null
+          event_date: string
+          extension_cables?: number | null
+          forks_spoons?: number | null
+          full_name: string
+          id?: string
+          lighting_equipment?: number | null
+          phone?: string | null
+          plates?: number | null
+          sound_system?: number | null
+          status?: string | null
+          tablecloths?: number | null
+          tables?: number | null
+          tents?: number | null
+          terms_agreed?: boolean | null
+          updated_at?: string
+          water_dispensers?: number | null
+        }
+        Update: {
+          additional_notes?: string | null
+          chairs?: number | null
+          created_at?: string
+          cups?: number | null
+          decoration_items?: number | null
+          email?: string | null
+          event_date?: string
+          extension_cables?: number | null
+          forks_spoons?: number | null
+          full_name?: string
+          id?: string
+          lighting_equipment?: number | null
+          phone?: string | null
+          plates?: number | null
+          sound_system?: number | null
+          status?: string | null
+          tablecloths?: number | null
+          tables?: number | null
+          tents?: number | null
+          terms_agreed?: boolean | null
+          updated_at?: string
+          water_dispensers?: number | null
+        }
+        Relationships: []
+      }
       job_postings: {
         Row: {
           application_deadline: string | null
