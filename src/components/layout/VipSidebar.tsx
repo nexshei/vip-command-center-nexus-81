@@ -92,8 +92,9 @@ const menuItems = [
 ];
 
 export function VipSidebar() {
-  const { collapsed } = useSidebar();
+  const { state } = useSidebar();
   const location = useLocation();
+  const collapsed = state === 'collapsed';
 
   const isActive = (path: string) => location.pathname === path;
 
