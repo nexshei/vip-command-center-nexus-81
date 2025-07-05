@@ -105,18 +105,18 @@ export function VipSidebar() {
           <SidebarGroupLabel className="text-vip-gold font-serif text-lg px-4 py-6">
             VVIP Dashboard
           </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
+          <SidebarGroupContent className="bg-white mx-2 rounded-lg p-2">
+            <SidebarMenu className="space-y-1">
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink
                       to={item.url}
                       className={({ isActive }) =>
-                        `flex items-center space-x-3 px-4 py-3 mx-2 rounded-lg transition-all duration-200 ${
+                        `flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                           isActive
-                            ? 'bg-white text-black font-semibold shadow-lg border border-vip-gold/30'
-                            : 'bg-white/90 text-black hover:bg-white hover:shadow-md border border-transparent hover:border-vip-gold/20'
+                            ? 'bg-vip-gold text-black font-semibold shadow-lg border-2 border-vip-gold'
+                            : 'text-blue-900 hover:bg-vip-gold/10 hover:text-vip-gold font-medium border border-transparent'
                         }`
                       }
                     >
