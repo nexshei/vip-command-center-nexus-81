@@ -237,15 +237,15 @@ const ItemBookings = () => {
                 />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-48 bg-gray-800/50 border-gray-600 text-white">
-                  <Filter className="h-4 w-4 mr-2 text-gray-400" />
+                <SelectTrigger className="w-48 bg-vip-gold/20 border-vip-gold/50 text-vip-gold hover:bg-vip-gold/30 focus:ring-2 focus:ring-vip-gold/50">
+                  <Filter className="h-4 w-4 mr-2 text-vip-gold" />
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-600">
-                  <SelectItem value="all" className="text-white hover:bg-gray-700">All Statuses</SelectItem>
-                  <SelectItem value="pending" className="text-white hover:bg-gray-700">Pending</SelectItem>
-                  <SelectItem value="approved" className="text-white hover:bg-gray-700">Approved</SelectItem>
-                  <SelectItem value="rejected" className="text-white hover:bg-gray-700">Rejected</SelectItem>
+                <SelectContent className="bg-gray-800 border-vip-gold/30 backdrop-blur-sm">
+                  <SelectItem value="all" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">All Statuses</SelectItem>
+                  <SelectItem value="pending" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">Pending</SelectItem>
+                  <SelectItem value="approved" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">Approved</SelectItem>
+                  <SelectItem value="rejected" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">Rejected</SelectItem>
                 </SelectContent>
               </Select>
             </div>
