@@ -120,8 +120,8 @@ export function VipSidebar() {
                         }`
                       }
                     >
-                      <item.icon className={`h-5 w-5 ${collapsed ? 'mx-auto' : ''}`} />
-                      {!collapsed && <span className="font-medium">{item.title}</span>}
+                      <item.icon className="h-5 w-5" />
+                      <span className="font-medium">{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

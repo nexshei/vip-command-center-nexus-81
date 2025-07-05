@@ -221,7 +221,7 @@ const ItemBookings = () => {
         </div>
 
         {/* Filters */}
-        <Card className="bg-gray-900 border-gray-700">
+        <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
           <CardHeader className="pb-4">
             <CardTitle className="text-lg text-gray-300">Filters & Search</CardTitle>
           </CardHeader>
@@ -233,19 +233,19 @@ const ItemBookings = () => {
                   placeholder="Search by name, email, or phone..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-gray-800 border-gray-600 text-white"
+                  className="pl-10 bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400"
                 />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-48 bg-gray-800 border-gray-600 text-white">
-                  <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue />
+                <SelectTrigger className="w-48 bg-gray-800/50 border-gray-600 text-white">
+                  <Filter className="h-4 w-4 mr-2 text-gray-400" />
+                  <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="approved">Approved</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
+                <SelectContent className="bg-gray-800 border-gray-600">
+                  <SelectItem value="all" className="text-white hover:bg-gray-700">All Statuses</SelectItem>
+                  <SelectItem value="pending" className="text-white hover:bg-gray-700">Pending</SelectItem>
+                  <SelectItem value="approved" className="text-white hover:bg-gray-700">Approved</SelectItem>
+                  <SelectItem value="rejected" className="text-white hover:bg-gray-700">Rejected</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -253,7 +253,7 @@ const ItemBookings = () => {
         </Card>
 
         {/* Bookings Table */}
-        <Card className="bg-gray-900 border-gray-700">
+        <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
           <CardHeader>
             <CardTitle className="text-xl text-gray-300">Item Booking Requests</CardTitle>
           </CardHeader>
