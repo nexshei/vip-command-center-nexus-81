@@ -113,10 +113,10 @@ export function VipSidebar() {
                     <NavLink
                       to={item.url}
                       className={({ isActive }) =>
-                        `flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                        `flex items-center space-x-3 px-4 py-3 mx-2 rounded-lg transition-all duration-200 ${
                           isActive
-                            ? 'bg-vip-gold text-black font-semibold shadow-lg'
-                            : 'text-vip-gold/80 hover:text-vip-gold hover:bg-vip-gold/10'
+                            ? 'bg-white text-black font-semibold shadow-lg border border-vip-gold/30'
+                            : 'bg-white/90 text-black hover:bg-white hover:shadow-md border border-transparent hover:border-vip-gold/20'
                         }`
                       }
                     >
