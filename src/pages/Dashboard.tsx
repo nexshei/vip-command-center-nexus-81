@@ -29,8 +29,8 @@ const Dashboard = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-serif font-bold text-vip-gold">VVIP Protocol Dashboard</h1>
-            <p className="text-vip-gold/60 mt-2">Real-time overview of your business operations</p>
+            <h1 className="text-3xl font-serif font-bold text-white">VVIP Protocol Dashboard</h1>
+            <p className="text-white/80 mt-2">Real-time overview of your business operations</p>
           </div>
           <div className="flex items-center gap-4">
             <Badge variant="outline" className="text-green-500 border-green-500/30 bg-green-500/10">
@@ -41,7 +41,7 @@ const Dashboard = () => {
               onClick={handleRefreshData}
               variant="outline"
               size="sm"
-              className="text-vip-gold border-vip-gold/30 hover:bg-vip-gold/10"
+              className="text-white border-white/30 hover:bg-white/10"
             >
               <RefreshCw className="h-4 w-4 mr-2" />
               Refresh
@@ -72,27 +72,27 @@ const Dashboard = () => {
         </div>
 
         {/* System Status */}
-        <Card className="bg-gray-900 border-gray-700">
+        <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm text-gray-400">System Status</CardTitle>
+            <CardTitle className="text-sm text-white">System Status</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-gray-500">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-white">
               <div>
-                <div className="font-medium text-gray-400">Database</div>
+                <div className="font-medium text-white/90">Database</div>
                 <div className="text-green-400">✅ Connected</div>
               </div>
               <div>
-                <div className="font-medium text-gray-400">Real-time</div>
+                <div className="font-medium text-white/90">Real-time</div>
                 <div className="text-green-400">✅ Active</div>
               </div>
               <div>
-                <div className="font-medium text-gray-400">Last Update</div>
-                <div>{new Date().toLocaleTimeString()}</div>
+                <div className="font-medium text-white/90">Last Update</div>
+                <div className="text-white/80">{new Date().toLocaleTimeString()}</div>
               </div>
               <div>
-                <div className="font-medium text-gray-400">Records</div>
-                <div>{(stats?.totalClients || 0) + (stats?.totalContactSubmissions || 0) + (stats?.totalMeetingRequests || 0) + (stats?.totalApplications || 0)}</div>
+                <div className="font-medium text-white/90">Records</div>
+                <div className="text-white/80">{(stats?.totalClients || 0) + (stats?.totalContactSubmissions || 0) + (stats?.totalMeetingRequests || 0) + (stats?.totalApplications || 0)}</div>
               </div>
             </div>
           </CardContent>

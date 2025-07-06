@@ -165,7 +165,7 @@ export function VipSidebar() {
           <div className="mt-auto px-6 py-4 border-t border-vip-gold/20 bg-gradient-to-r from-transparent to-vip-gold/5">
             <div className="text-center">
               <p className="text-xs text-vip-gold/60 font-medium">Sir Dennis Olele</p>
-              <p className="text-xs text-vip-gold/40">© 2024 VVIP Protocol</p>
+              <p className="text-xs text-vip-gold/40">© 2025 VVIP Protocol</p>
             </div>
           </div>
         </SidebarGroup>
