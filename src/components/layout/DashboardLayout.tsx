@@ -1,16 +1,50 @@
 
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { VipSidebar } from './VipSidebar';
 import { UserMenu } from './UserMenu';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { useGlobalSearch } from '@/hooks/useGlobalSearch';
+import { GlobalSearchDropdown } from '@/components/search/GlobalSearchDropdown';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+  
+  const { searchResults } = useGlobalSearch(searchTerm);
+
+  // Handle clicking outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Show dropdown when there are results and search term exists
+  useEffect(() => {
+    setShowDropdown(searchTerm.trim().length > 0 && searchResults.length > 0);
+  }, [searchTerm, searchResults]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handleResultClick = () => {
+    setShowDropdown(false);
+    setSearchTerm('');
+  };
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-black">
@@ -35,12 +69,20 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                   </div>
                 </div>
                 
-                {/* Professional Search */}
-                <div className="relative max-w-md">
+                {/* Functional Search */}
+                <div className="relative max-w-md" ref={searchRef}>
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-vip-gold/60" />
                   <Input
                     placeholder="Search clients, bookings, or protocols..."
+                    value={searchTerm}
+                    onChange={handleSearchChange}
                     className="pl-10 w-64 border-vip-gold/30 focus:border-vip-gold text-vip-gold bg-black"
+                  />
+                  
+                  <GlobalSearchDropdown
+                    searchResults={searchResults}
+                    isVisible={showDropdown}
+                    onResultClick={handleResultClick}
                   />
                 </div>
               </div>
