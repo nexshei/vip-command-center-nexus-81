@@ -99,35 +99,75 @@ export function VipSidebar() {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <Sidebar className="border-r border-vip-gold/30 bg-black/95 backdrop-blur-md">
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-vip-gold font-serif text-lg px-4 py-6">
-            VVIP Dashboard
-          </SidebarGroupLabel>
-          <SidebarGroupContent className="bg-white mx-2 rounded-lg p-2">
-            <SidebarMenu className="space-y-1">
-              {menuItems.map((item) => (
+    <Sidebar className="border-r-0 bg-gradient-to-b from-black via-gray-900 to-black backdrop-blur-md shadow-2xl">
+      <SidebarContent className="p-0">
+        <SidebarGroup className="p-0">
+          {/* Professional Header with Logo */}
+          <div className="px-6 py-8 border-b border-vip-gold/20 bg-gradient-to-r from-vip-gold/5 to-transparent">
+            <div className="flex items-center space-x-3 mb-2">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-vip-gold to-vip-gold-dark flex items-center justify-center shadow-lg">
+                <img 
+                  src="/lovable-uploads/af24075c-d7ee-41bc-a3d3-d50d1b766753.png" 
+                  alt="VVIP" 
+                  className="w-6 h-6 object-contain"
+                />
+              </div>
+              <div>
+                <SidebarGroupLabel className="text-vip-gold font-serif text-lg font-bold mb-0 p-0">
+                  VVIP Dashboard
+                </SidebarGroupLabel>
+                <p className="text-vip-gold/60 text-xs font-medium">Protocol Management</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Navigation Menu */}
+          <SidebarGroupContent className="px-4 py-6">
+            <SidebarMenu className="space-y-2">
+              {menuItems.map((item, index) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink
                       to={item.url}
                       className={({ isActive }) =>
-                        `flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                        `group flex items-center space-x-4 px-4 py-3.5 rounded-xl transition-all duration-300 ease-in-out relative overflow-hidden ${
                           isActive
-                            ? 'bg-vip-gold text-black font-semibold shadow-lg border-2 border-vip-gold'
-                            : 'text-blue-900 hover:bg-vip-gold/10 hover:text-vip-gold font-medium border border-transparent'
+                            ? 'bg-gradient-to-r from-vip-gold via-vip-gold-light to-vip-gold text-black font-semibold shadow-lg shadow-vip-gold/20 border border-vip-gold/30'
+                            : 'text-gray-300 hover:text-white hover:bg-gradient-to-r hover:from-gray-800/50 hover:to-gray-700/50 font-medium border border-transparent hover:border-gray-600/30 hover:shadow-lg'
                         }`
                       }
                     >
-                      <item.icon className="h-5 w-5" />
-                      <span className="font-medium">{item.title}</span>
+                      {/* Background Gradient Effect */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      
+                      {/* Icon with Enhanced Styling */}
+                      <div className={`relative z-10 flex items-center justify-center w-5 h-5 ${isActive(item.url) ? 'text-black' : 'text-vip-gold group-hover:text-vip-gold-light'} transition-colors duration-300`}>
+                        <item.icon className="w-5 h-5" />
+                      </div>
+                      
+                      {/* Text with Better Typography */}
+                      <span className={`relative z-10 font-medium text-sm tracking-wide ${isActive(item.url) ? 'text-black' : 'group-hover:text-white'} transition-colors duration-300`}>
+                        {item.title}
+                      </span>
+                      
+                      {/* Active Indicator */}
+                      {isActive(item.url) && (
+                        <div className="absolute right-2 w-1 h-6 bg-black rounded-full shadow-sm" />
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
+
+          {/* Professional Footer */}
+          <div className="mt-auto px-6 py-4 border-t border-vip-gold/20 bg-gradient-to-r from-transparent to-vip-gold/5">
+            <div className="text-center">
+              <p className="text-xs text-vip-gold/60 font-medium">Sir Dennis Olele</p>
+              <p className="text-xs text-vip-gold/40">© 2024 VVIP Protocol</p>
+            </div>
+          </div>
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
