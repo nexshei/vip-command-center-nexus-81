@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Plus, Search, Filter, Eye, Edit, Trash2, User, Calendar, Briefcase, Clock, TrendingUp, Award, MapPin, Users } from 'lucide-react';
 import { useApplications } from '@/hooks/useApplications';
+import { supabase } from '@/integrations/supabase/client';
+import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
 import { useJobs } from '@/hooks/useJobs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,6 +39,9 @@ const Careers = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingApplication, setEditingApplication] = useState<any>(null);
   const [isEditApplicationModalOpen, setIsEditApplicationModalOpen] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
+  const [selectedApplicationName, setSelectedApplicationName] = useState<string>('');
   
   const { data: applications = [], isLoading, error, refetch: refetchApplications } = useApplications();
   const { data: jobs = [], refetch: refetchJobs } = useJobs();
@@ -71,6 +76,35 @@ const Careers = () => {
 
   const handleApplicationUpdated = () => {
     refetchApplications();
+  };
+
+  const handleDeleteApplication = async () => {
+    if (!selectedApplicationId) return;
+    
+    try {
+      const { error } = await supabase
+        .from('career_applications')
+        .delete()
+        .eq('id', selectedApplicationId);
+
+      if (error) throw error;
+
+      refetchApplications();
+      toast({
+        title: "Application Deleted",
+        description: "The career application has been removed successfully.",
+        variant: "destructive"
+      });
+      setShowDeleteModal(false);
+      setSelectedApplicationId(null);
+      setSelectedApplicationName('');
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete application.",
+        variant: "destructive"
+      });
+    }
   };
 
   const filteredApplications = applications.filter(application => {
@@ -346,6 +380,18 @@ const Careers = () => {
                             >
                               <Edit className="w-4 h-4" />
                             </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => {
+                                setSelectedApplicationId(application.id);
+                                setSelectedApplicationName(application.full_name);
+                                setShowDeleteModal(true);
+                              }}
+                              className="text-red-600 hover:bg-red-50"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -584,6 +630,16 @@ const Careers = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        open={showDeleteModal}
+        onOpenChange={setShowDeleteModal}
+        onConfirm={handleDeleteApplication}
+        title="Delete Career Application"
+        description="Are you sure you want to delete this career application? This action cannot be undone."
+        itemName={selectedApplicationName}
+      />
     </div>
   );
 };
