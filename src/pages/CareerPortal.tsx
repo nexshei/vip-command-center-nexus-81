@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,8 +8,10 @@ import { Search, Plus, Briefcase, Users, Calendar, Eye, Edit, Trash2, CheckCircl
 import { useToast } from '@/hooks/use-toast';
 import { JobOpeningModalTrigger } from '@/components/modals/JobOpeningModal';
 import { EditJobModal } from '@/components/modals/EditJobModal';
+import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
 import { useJobs, useDeleteJob, type JobPosting } from '@/hooks/useJobs';
 import { useApplications } from '@/hooks/useApplications';
+import { supabase } from '@/integrations/supabase/client';
 
 const CareerPortal = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -18,9 +19,12 @@ const CareerPortal = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [editingJob, setEditingJob] = useState<JobPosting | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
+  const [selectedApplicationName, setSelectedApplicationName] = useState<string>('');
 
   const { data: jobs = [], isLoading: jobsLoading, refetch: refetchJobs } = useJobs();
-  const { data: applications = [] } = useApplications();
+  const { data: applications = [], refetch: refetchApplications } = useApplications();
   const deleteJobMutation = useDeleteJob();
   const { toast } = useToast();
 
@@ -98,6 +102,35 @@ const CareerPortal = () => {
     }
   };
 
+  const handleDeleteApplication = async () => {
+    if (!selectedApplicationId) return;
+    
+    try {
+      const { error } = await supabase
+        .from('career_applications')
+        .delete()
+        .eq('id', selectedApplicationId);
+
+      if (error) throw error;
+
+      refetchApplications();
+      toast({
+        title: "Application Deleted",
+        description: "The career application has been removed successfully.",
+        variant: "destructive"
+      });
+      setShowDeleteModal(false);
+      setSelectedApplicationId(null);
+      setSelectedApplicationName('');
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete application.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleViewApplicants = (job: JobPosting) => {
     toast({
       title: "View Applicants",
@@ -168,6 +201,82 @@ const CareerPortal = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Applications Table */}
+      <Card className="vip-glass border-vip-gold/20">
+        <CardHeader>
+          <CardTitle className="flex items-center text-vip-black">
+            <Users className="h-5 w-5 mr-2 text-vip-gold" />
+            Career Applications ({applications.length})
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {applications.map((application) => (
+              <div key={application.id} className="flex items-center justify-between p-4 border border-vip-gold/20 rounded-lg vip-glass-light hover:bg-vip-gold/5 transition-colors">
+                <div className="flex-1">
+                  <div className="flex items-center space-x-3">
+                    <h3 className="font-semibold text-vip-black">{application.full_name}</h3>
+                    <Badge className={`${
+                      application.status === 'approved' ? 'bg-ios-green text-white' :
+                      application.status === 'pending' ? 'bg-ios-orange text-white' :
+                      'bg-gray-500 text-white'
+                    }`}>
+                      {application.status?.charAt(0).toUpperCase() + application.status?.slice(1)}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center space-x-4 mt-2 text-sm text-vip-gold/80">
+                    <span>{application.email}</span>
+                    <span>•</span>
+                    <span>{application.position || 'Position not specified'}</span>
+                    <span>•</span>
+                    <span className="flex items-center">
+                      <Calendar className="h-3 w-3 mr-1" />
+                      Applied {new Date(application.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex space-x-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+                  >
+                    <Eye className="h-3 w-3 mr-1" />
+                    View
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+                  >
+                    <Edit className="h-3 w-3" />
+                  </Button>
+                  <Button 
+                    onClick={() => {
+                      setSelectedApplicationId(application.id);
+                      setSelectedApplicationName(application.full_name);
+                      setShowDeleteModal(true);
+                    }}
+                    variant="outline" 
+                    size="sm" 
+                    className="border-red-300 text-red-600 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+            
+            {applications.length === 0 && (
+              <div className="text-center py-8">
+                <Users className="h-12 w-12 text-vip-gold/40 mx-auto mb-4" />
+                <p className="text-vip-gold/60">No applications found.</p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Job Postings */}
       <Card className="vip-glass border-vip-gold/20">
@@ -346,6 +455,16 @@ const CareerPortal = () => {
         onOpenChange={setIsEditModalOpen}
         job={editingJob}
         onJobUpdated={handleJobUpdated}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        open={showDeleteModal}
+        onOpenChange={setShowDeleteModal}
+        onConfirm={handleDeleteApplication}
+        title="Delete Career Application"
+        description="Are you sure you want to delete this career application? This action cannot be undone."
+        itemName={selectedApplicationName}
       />
     </div>
   );

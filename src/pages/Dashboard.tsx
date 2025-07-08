@@ -41,10 +41,10 @@ const Dashboard = () => {
               onClick={handleRefreshData}
               variant="outline"
               size="sm"
-              className="text-white border-white/30 hover:bg-white/10 hover:text-white"
+              className="bg-white text-black border-white/30 hover:bg-gray-100 hover:text-black"
             >
               <RefreshCw className="h-4 w-4 mr-2" />
-              <span className="text-white font-medium">Refresh</span>
+              <span className="text-black font-medium">Refresh</span>
             </Button>
           </div>
         </div>
