@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { Search, Filter, Eye, Trash2, Mail, Calendar, User } from 'lucide-react';
 import { useContactSubmissions, useUpdateContactSubmission } from '@/hooks/useContactSubmissions';
+import { supabase } from '@/integrations/supabase/client';
+import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,6 +31,9 @@ const ContactSubmissions = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedMessage, setSelectedMessage] = useState<any>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedSubmissionId, setSelectedSubmissionId] = useState<string | null>(null);
+  const [selectedSubmissionName, setSelectedSubmissionName] = useState<string>('');
   
   const { data: submissions = [], isLoading, error } = useContactSubmissions();
   const updateSubmissionMutation = useUpdateContactSubmission();
@@ -83,6 +88,37 @@ const ContactSubmissions = () => {
   const handleViewMessage = (submission: any) => {
     setSelectedMessage(submission);
     setIsViewModalOpen(true);
+  };
+
+  const handleDeleteSubmission = async () => {
+    if (!selectedSubmissionId) return;
+    
+    try {
+      const { error } = await supabase
+        .from('contact_submissions')
+        .delete()
+        .eq('id', selectedSubmissionId);
+
+      if (error) throw error;
+
+      // Manually refetch since we don't have a refetch function from the hook
+      window.location.reload();
+      
+      toast({
+        title: "Submission Deleted",
+        description: "The contact submission has been removed successfully.",
+        variant: "destructive"
+      });
+      setShowDeleteModal(false);
+      setSelectedSubmissionId(null);
+      setSelectedSubmissionName('');
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete submission.",
+        variant: "destructive"
+      });
+    }
   };
 
   if (isLoading) {
@@ -269,6 +305,18 @@ const ContactSubmissions = () => {
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => {
+                            setSelectedSubmissionId(submission.id);
+                            setSelectedSubmissionName(submission.full_name);
+                            setShowDeleteModal(true);
+                          }}
+                          className="text-red-600 hover:bg-red-50"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -328,6 +376,16 @@ const ContactSubmissions = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        open={showDeleteModal}
+        onOpenChange={setShowDeleteModal}
+        onConfirm={handleDeleteSubmission}
+        title="Delete Contact Submission"
+        description="Are you sure you want to delete this contact submission? This action cannot be undone."
+        itemName={selectedSubmissionName}
+      />
     </div>
   );
 };

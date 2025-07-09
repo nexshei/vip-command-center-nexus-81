@@ -8,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Search, Filter, Download, Eye, Calendar, User, Phone, Mail } from 'lucide-react';
+import { Search, Filter, Download, Eye, Calendar, User, Phone, Mail, Trash2 } from 'lucide-react';
+import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
 import { format } from 'date-fns';
 import { ViewBookingDetailsModal } from '@/components/modals/ViewBookingDetailsModal';
 import { UpdateBookingStatusModal } from '@/components/modals/UpdateBookingStatusModal';
@@ -47,6 +48,9 @@ const ItemBookings = () => {
   const [selectedBooking, setSelectedBooking] = useState<ItemBooking | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+  const [selectedBookingName, setSelectedBookingName] = useState<string>('');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -194,6 +198,35 @@ const ItemBookings = () => {
     setIsStatusModalOpen(true);
   };
 
+  const handleDeleteBooking = async () => {
+    if (!selectedBookingId) return;
+    
+    try {
+      const { error } = await supabase
+        .from('item_bookings')
+        .delete()
+        .eq('id', selectedBookingId);
+
+      if (error) throw error;
+
+      fetchBookings();
+      toast({
+        title: "Booking Deleted",
+        description: "The item booking has been removed successfully.",
+        variant: "destructive"
+      });
+      setShowDeleteModal(false);
+      setSelectedBookingId(null);
+      setSelectedBookingName('');
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete booking.",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white p-6">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -327,14 +360,28 @@ const ItemBookings = () => {
                           {format(new Date(booking.created_at), 'MMM dd, yyyy HH:mm')}
                         </TableCell>
                         <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleViewDetails(booking)}
-                            className="text-vip-gold hover:bg-vip-gold/10"
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
+                          <div className="flex items-center space-x-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleViewDetails(booking)}
+                              className="text-vip-gold hover:bg-vip-gold/10"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => {
+                                setSelectedBookingId(booking.id);
+                                setSelectedBookingName(booking.full_name);
+                                setShowDeleteModal(true);
+                              }}
+                              className="text-red-600 hover:bg-red-50"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -364,6 +411,16 @@ const ItemBookings = () => {
         onOpenChange={setIsStatusModalOpen}
         booking={selectedBooking}
         onStatusUpdated={fetchBookings}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        open={showDeleteModal}
+        onOpenChange={setShowDeleteModal}
+        onConfirm={handleDeleteBooking}
+        title="Delete Item Booking"
+        description="Are you sure you want to delete this item booking? This action cannot be undone."
+        itemName={selectedBookingName}
       />
     </div>
   );

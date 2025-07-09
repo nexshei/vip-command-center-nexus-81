@@ -10,11 +10,17 @@ import { Search, Calendar, Eye, Edit, Trash2, Plus, Filter, RefreshCw } from 'lu
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useAllBookings } from '@/hooks/useAllBookings';
+import { supabase } from '@/integrations/supabase/client';
+import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
 
 const AllBookings = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sourceFilter, setSourceFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+  const [selectedBookingName, setSelectedBookingName] = useState<string>('');
+  const [selectedBookingSource, setSelectedBookingSource] = useState<string>('');
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -74,11 +80,35 @@ const AllBookings = () => {
     });
   };
 
-  const handleDeleteBooking = (id: string) => {
-    toast({
-      title: "Delete Booking",
-      description: "Delete functionality would be implemented here.",
-    });
+  const handleDeleteBooking = async () => {
+    if (!selectedBookingId || !selectedBookingSource) return;
+    
+    try {
+      const table = selectedBookingSource === 'meeting_request' ? 'meeting_requests' : 'vvip_service_requests';
+      const { error } = await supabase
+        .from(table)
+        .delete()
+        .eq('id', selectedBookingId);
+
+      if (error) throw error;
+
+      refetch();
+      toast({
+        title: "Booking Deleted",
+        description: "The booking has been removed successfully.",
+        variant: "destructive"
+      });
+      setShowDeleteModal(false);
+      setSelectedBookingId(null);
+      setSelectedBookingName('');
+      setSelectedBookingSource('');
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete booking.",
+        variant: "destructive"
+      });
+    }
   };
 
   // Calculate stats
@@ -306,7 +336,12 @@ const AllBookings = () => {
                             <Edit className="h-3 w-3" />
                           </Button>
                           <Button 
-                            onClick={() => handleDeleteBooking(booking.id)}
+                            onClick={() => {
+                              setSelectedBookingId(booking.id);
+                              setSelectedBookingName(booking.full_name);
+                              setSelectedBookingSource(booking.source);
+                              setShowDeleteModal(true);
+                            }}
                             variant="outline" 
                             size="sm"
                             className="border-red-300 text-red-600 hover:bg-red-50"
@@ -334,6 +369,16 @@ const AllBookings = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        open={showDeleteModal}
+        onOpenChange={setShowDeleteModal}
+        onConfirm={handleDeleteBooking}
+        title="Delete Booking"
+        description="Are you sure you want to delete this booking? This action cannot be undone."
+        itemName={selectedBookingName}
+      />
     </div>
   );
 };

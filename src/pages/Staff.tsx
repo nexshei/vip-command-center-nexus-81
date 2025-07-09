@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Plus, Search, Filter, Edit, Trash2, Phone, Mail, Calendar } from 'lucide-react';
+import { Plus, Search, Filter, Edit, Trash2, Phone, Mail, Calendar, Eye } from 'lucide-react';
 import { useStaff, useDeleteStaff } from '@/hooks/useStaff';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -103,8 +103,8 @@ const Staff = () => {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-vip-black">Staff Members</h1>
-          <p className="text-vip-gold/60 mt-1">Manage your team and personnel</p>
+          <h1 className="text-3xl font-serif font-bold text-black">Staff Members</h1>
+          <p className="text-black/60 mt-1">Manage your team and personnel</p>
         </div>
         <Button
           onClick={() => {
@@ -213,28 +213,44 @@ const Staff = () => {
                         {member.status || 'Active'}
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => handleEditStaff(member)}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedStaffId(member.id);
-                            setSelectedStaffName(member.full_name);
-                            setShowDeleteModal(true);
-                          }}
-                        >
-                          <Trash2 className="w-4 h-4 text-red-500" />
-                        </Button>
-                      </div>
-                    </TableCell>
+                        <TableCell>
+                          <div className="flex items-center space-x-2">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => {
+                                window.open(`mailto:${member.email}`, '_blank');
+                              }}
+                            >
+                              <Mail className="w-4 h-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleEditStaff(member)}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleEditStaff(member)}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedStaffId(member.id);
+                                setSelectedStaffName(member.full_name);
+                                setShowDeleteModal(true);
+                              }}
+                            >
+                              <Trash2 className="w-4 h-4 text-red-500" />
+                            </Button>
+                          </div>
+                        </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
