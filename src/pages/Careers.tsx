@@ -3,7 +3,7 @@ import { Plus, Search, Filter, Eye, Edit, Trash2, User, Calendar, Briefcase, Clo
 import { useApplications } from '@/hooks/useApplications';
 import { supabase } from '@/integrations/supabase/client';
 import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
-import { useJobs } from '@/hooks/useJobs';
+import { useJobs, useDeleteJob } from '@/hooks/useJobs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -40,11 +40,15 @@ const Careers = () => {
   const [editingApplication, setEditingApplication] = useState<any>(null);
   const [isEditApplicationModalOpen, setIsEditApplicationModalOpen] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showJobDeleteModal, setShowJobDeleteModal] = useState(false);
   const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
   const [selectedApplicationName, setSelectedApplicationName] = useState<string>('');
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [selectedJobTitle, setSelectedJobTitle] = useState<string>('');
   
   const { data: applications = [], isLoading, error, refetch: refetchApplications } = useApplications();
   const { data: jobs = [], refetch: refetchJobs } = useJobs();
+  const deleteJobMutation = useDeleteJob();
   const { toast } = useToast();
 
   const handleJobAdded = () => {
@@ -102,6 +106,29 @@ const Careers = () => {
       toast({
         title: "Error",
         description: "Failed to delete application.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeleteJob = async () => {
+    if (!selectedJobId) return;
+    
+    try {
+      await deleteJobMutation.mutateAsync(selectedJobId);
+      refetchJobs();
+      toast({
+        title: "Job Deleted",
+        description: "The job posting has been removed successfully.",
+        variant: "destructive"
+      });
+      setShowJobDeleteModal(false);
+      setSelectedJobId(null);
+      setSelectedJobTitle('');
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete job posting.",
         variant: "destructive"
       });
     }
@@ -266,11 +293,11 @@ const Careers = () => {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="applications" className="flex items-center gap-2">
+          <TabsTrigger value="applications" className="flex items-center gap-2 text-base font-medium">
             <User className="w-4 h-4" />
             Applications
           </TabsTrigger>
-          <TabsTrigger value="history" className="flex items-center gap-2">
+          <TabsTrigger value="history" className="flex items-center gap-2 text-base font-medium">
             <Briefcase className="w-4 h-4" />
             Job History
           </TabsTrigger>
@@ -501,6 +528,19 @@ const Careers = () => {
                             <Edit className="w-4 h-4 mr-1" />
                             Edit
                           </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => {
+                              setSelectedJobId(job.id);
+                              setSelectedJobTitle(job.title);
+                              setShowJobDeleteModal(true);
+                            }}
+                            className="border-red-300 text-red-600 hover:bg-red-50"
+                          >
+                            <Trash2 className="w-4 h-4 mr-1" />
+                            Delete
+                          </Button>
                         </div>
                       </div>
                     </CardContent>
@@ -639,6 +679,16 @@ const Careers = () => {
         title="Delete Career Application"
         description="Are you sure you want to delete this career application? This action cannot be undone."
         itemName={selectedApplicationName}
+      />
+
+      {/* Job Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        open={showJobDeleteModal}
+        onOpenChange={setShowJobDeleteModal}
+        onConfirm={handleDeleteJob}
+        title="Delete Job Posting"
+        description="Are you sure you want to delete this job posting? This action cannot be undone and will remove it from the website."
+        itemName={selectedJobTitle}
       />
     </div>
   );
