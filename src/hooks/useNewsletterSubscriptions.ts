@@ -64,6 +64,32 @@ export const useUpdateNewsletterSubscription = () => {
   });
 };
 
+export const useDeleteNewsletterSubscription = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (id: string) => {
+      console.log('🗑️ Deleting newsletter subscription:', id);
+      
+      const { error } = await supabase
+        .from('newsletter_subscriptions')
+        .delete()
+        .eq('id', id);
+      
+      if (error) {
+        console.error('❌ Error deleting subscription:', error);
+        throw error;
+      }
+      
+      console.log('✅ Successfully deleted subscription:', id);
+      return id;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['newsletter_subscriptions'] });
+    }
+  });
+};
+
 export const useAddTestSubscription = () => {
   const queryClient = useQueryClient();
   

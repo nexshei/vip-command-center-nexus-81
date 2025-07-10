@@ -1,7 +1,8 @@
 
 import React, { useState } from 'react';
-import { Search, Mail, Calendar, Download, RefreshCw, UserPlus, Plus } from 'lucide-react';
-import { useNewsletterSubscriptions, useUpdateNewsletterSubscription } from '@/hooks/useNewsletterSubscriptions';
+import { Search, Mail, Calendar, Download, RefreshCw, UserPlus, Plus, Trash2 } from 'lucide-react';
+import { useNewsletterSubscriptions, useUpdateNewsletterSubscription, useDeleteNewsletterSubscription } from '@/hooks/useNewsletterSubscriptions';
+import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,9 +32,13 @@ const Subscribers = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedSubscriberId, setSelectedSubscriberId] = useState<string | null>(null);
+  const [selectedSubscriberEmail, setSelectedSubscriberEmail] = useState<string>('');
   
   const { data: subscribers = [], isLoading, error, refetch } = useNewsletterSubscriptions();
   const updateSubscriber = useUpdateNewsletterSubscription();
+  const deleteSubscriber = useDeleteNewsletterSubscription();
   const { toast } = useToast();
 
   console.log('📊 Subscribers data:', subscribers);
@@ -149,6 +154,28 @@ const Subscribers = () => {
       toast({
         title: "Error",
         description: "Failed to update subscriber status",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeleteSubscriber = async () => {
+    if (!selectedSubscriberId) return;
+    
+    try {
+      await deleteSubscriber.mutateAsync(selectedSubscriberId);
+      toast({
+        title: "Subscriber Deleted",
+        description: "The subscriber has been removed successfully.",
+        variant: "destructive"
+      });
+      setShowDeleteModal(false);
+      setSelectedSubscriberId(null);
+      setSelectedSubscriberEmail('');
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete subscriber.",
         variant: "destructive"
       });
     }
@@ -374,14 +401,28 @@ const Subscribers = () => {
                           )}
                         </TableCell>
                         <TableCell>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => toggleSubscriberStatus(subscriber.id, subscriber.is_active)}
-                            disabled={updateSubscriber.isPending}
-                          >
-                            {subscriber.is_active === false ? 'Activate' : 'Deactivate'}
-                          </Button>
+                          <div className="flex items-center space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => toggleSubscriberStatus(subscriber.id, subscriber.is_active)}
+                              disabled={updateSubscriber.isPending}
+                            >
+                              {subscriber.is_active === false ? 'Activate' : 'Deactivate'}
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => {
+                                setSelectedSubscriberId(subscriber.id);
+                                setSelectedSubscriberEmail(subscriber.email);
+                                setShowDeleteModal(true);
+                              }}
+                              className="border-red-300 text-red-600 hover:bg-red-50"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -427,6 +468,16 @@ const Subscribers = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        open={showDeleteModal}
+        onOpenChange={setShowDeleteModal}
+        onConfirm={handleDeleteSubscriber}
+        title="Delete Subscriber"
+        description="Are you sure you want to delete this subscriber? This action cannot be undone."
+        itemName={selectedSubscriberEmail}
+      />
     </div>
   );
 };
