@@ -12,6 +12,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAllBookings } from '@/hooks/useAllBookings';
 import { supabase } from '@/integrations/supabase/client';
 import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
+import { ViewAllBookingModal } from '@/components/modals/ViewAllBookingModal';
+import { EditAllBookingModal } from '@/components/modals/EditAllBookingModal';
 
 const AllBookings = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -21,6 +23,9 @@ const AllBookings = () => {
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
   const [selectedBookingName, setSelectedBookingName] = useState<string>('');
   const [selectedBookingSource, setSelectedBookingSource] = useState<string>('');
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -67,17 +72,13 @@ const AllBookings = () => {
   });
 
   const handleViewBooking = (booking: any) => {
-    toast({
-      title: "View Booking",
-      description: `Viewing ${booking.source === 'meeting_request' ? 'Meeting Request' : 'VVIP Service'} for ${booking.full_name}`,
-    });
+    setSelectedBooking(booking);
+    setViewModalOpen(true);
   };
 
   const handleEditBooking = (booking: any) => {
-    toast({
-      title: "Edit Booking",
-      description: `Edit functionality would be implemented for ${booking.full_name}`,
-    });
+    setSelectedBooking(booking);
+    setEditModalOpen(true);
   };
 
   const handleDeleteBooking = async () => {
@@ -378,6 +379,21 @@ const AllBookings = () => {
         title="Delete Booking"
         description="Are you sure you want to delete this booking? This action cannot be undone."
         itemName={selectedBookingName}
+      />
+
+      {/* View Booking Modal */}
+      <ViewAllBookingModal
+        open={viewModalOpen}
+        onOpenChange={setViewModalOpen}
+        booking={selectedBooking}
+      />
+
+      {/* Edit Booking Modal */}
+      <EditAllBookingModal
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        booking={selectedBooking}
+        onBookingUpdated={refetch}
       />
     </div>
   );

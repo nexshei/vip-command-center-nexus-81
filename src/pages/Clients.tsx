@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Plus, Search, Filter, Edit, Trash2, Phone, Mail, MapPin } from 'lucide-react';
+import { Plus, Search, Filter, Edit, Trash2, Phone, Mail, MapPin, Eye } from 'lucide-react';
 import { useClients, useDeleteClient, Client } from '@/hooks/useClients';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,8 @@ import { AddClientModal } from '@/components/modals/AddClientModal';
 import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
 import { ClientEmailComposer } from '@/components/email/ClientEmailComposer';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { ViewClientModal } from '@/components/modals/ViewClientModal';
+import { EditClientModal } from '@/components/modals/EditClientModal';
 import {
   Table,
   TableBody,
@@ -28,6 +30,9 @@ const Clients = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   const [clientToEmail, setClientToEmail] = useState<Client | null>(null);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   
   const { data: clients = [], isLoading, error } = useClients();
   const deleteClientMutation = useDeleteClient();
@@ -63,6 +68,16 @@ const Clients = () => {
   const handleEmailClient = (client: Client) => {
     setClientToEmail(client);
     setEmailDialogOpen(true);
+  };
+
+  const handleViewClient = (client: Client) => {
+    setSelectedClient(client);
+    setViewModalOpen(true);
+  };
+
+  const handleEditClient = (client: Client) => {
+    setSelectedClient(client);
+    setEditModalOpen(true);
   };
 
   const getStatusColor = (status: string) => {
@@ -201,12 +216,28 @@ const Clients = () => {
                         <Button 
                           variant="ghost" 
                           size="sm"
+                          onClick={() => handleViewClient(client)}
+                          className="text-blue-600 hover:text-blue-700"
+                          title="View Client"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
                           onClick={() => handleEmailClient(client)}
                           className="text-vip-gold hover:text-vip-gold/80"
+                          title="Send Email"
                         >
                           <Mail className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="sm">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleEditClient(client)}
+                          className="text-gray-600 hover:text-gray-700"
+                          title="Edit Client"
+                        >
                           <Edit className="w-4 h-4" />
                         </Button>
                         <Button
@@ -217,8 +248,10 @@ const Clients = () => {
                             setSelectedClientName(client.full_name);
                             setShowDeleteModal(true);
                           }}
+                          className="text-red-500 hover:text-red-600"
+                          title="Delete Client"
                         >
-                          <Trash2 className="w-4 h-4 text-red-500" />
+                          <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
                     </TableCell>
@@ -259,6 +292,20 @@ const Clients = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* View Client Modal */}
+      <ViewClientModal
+        open={viewModalOpen}
+        onOpenChange={setViewModalOpen}
+        client={selectedClient}
+      />
+
+      {/* Edit Client Modal */}
+      <EditClientModal
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        client={selectedClient}
+      />
     </div>
   );
 };
