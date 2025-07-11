@@ -306,16 +306,17 @@ const ContactSubmissions = () => {
                           <Eye className="w-4 h-4" />
                         </Button>
                         <Button 
-                          variant="ghost" 
+                          variant="outline" 
                           size="sm"
                           onClick={() => {
                             setSelectedSubmissionId(submission.id);
                             setSelectedSubmissionName(submission.full_name);
                             setShowDeleteModal(true);
                           }}
-                          className="text-red-600 hover:bg-red-50"
+                          className="border-red-500 text-red-600 hover:bg-red-50 hover:border-red-600"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-4 h-4 mr-1" />
+                          Delete
                         </Button>
                       </div>
                     </TableCell>
