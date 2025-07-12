@@ -322,7 +322,11 @@ const AllBookings = () => {
                         <div className="flex space-x-1">
                           <Button 
                             type="button"
-                            onClick={() => handleViewBooking(booking)}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleViewBooking(booking);
+                            }}
                             variant="outline" 
                             size="sm"
                             className="border-blue-200 text-blue-600 hover:bg-blue-50"
@@ -331,7 +335,11 @@ const AllBookings = () => {
                           </Button>
                           <Button 
                             type="button"
-                            onClick={() => handleEditBooking(booking)}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleEditBooking(booking);
+                            }}
                             variant="outline" 
                             size="sm"
                             className="border-gray-200 text-gray-600 hover:bg-gray-50"
