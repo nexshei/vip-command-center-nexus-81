@@ -321,6 +321,7 @@ const AllBookings = () => {
                       <TableCell>
                         <div className="flex space-x-1">
                           <Button 
+                            type="button"
                             onClick={() => handleViewBooking(booking)}
                             variant="outline" 
                             size="sm"
@@ -329,6 +330,7 @@ const AllBookings = () => {
                             <Eye className="h-3 w-3" />
                           </Button>
                           <Button 
+                            type="button"
                             onClick={() => handleEditBooking(booking)}
                             variant="outline" 
                             size="sm"
