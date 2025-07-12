@@ -321,32 +321,6 @@ const AllBookings = () => {
                       <TableCell>
                         <div className="flex space-x-1">
                           <Button 
-                            type="button"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              handleViewBooking(booking);
-                            }}
-                            variant="outline" 
-                            size="sm"
-                            className="border-blue-200 text-blue-600 hover:bg-blue-50"
-                          >
-                            <Eye className="h-3 w-3" />
-                          </Button>
-                          <Button 
-                            type="button"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              handleEditBooking(booking);
-                            }}
-                            variant="outline" 
-                            size="sm"
-                            className="border-gray-200 text-gray-600 hover:bg-gray-50"
-                          >
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                          <Button 
                             onClick={() => {
                               setSelectedBookingId(booking.id);
                               setSelectedBookingName(booking.full_name);
