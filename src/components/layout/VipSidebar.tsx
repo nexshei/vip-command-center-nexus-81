@@ -133,20 +133,18 @@ export function VipSidebar() {
                         `group flex items-center space-x-4 px-4 py-3.5 rounded-xl transition-all duration-300 ease-in-out relative overflow-hidden ${
                           isActive
                             ? 'bg-gradient-to-r from-vip-gold via-vip-gold-light to-vip-gold text-black font-semibold shadow-lg shadow-vip-gold/20 border border-vip-gold/30'
-                            : 'text-gray-300 hover:text-white hover:bg-gradient-to-r hover:from-gray-800/50 hover:to-gray-700/50 font-medium border border-transparent hover:border-gray-600/30 hover:shadow-lg'
+                            : 'text-white bg-gradient-to-r from-gray-800/50 to-gray-700/50 font-medium border border-gray-600/30 shadow-lg'
                         }`
                       }
                     >
-                      {/* Background Gradient Effect */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       
                       {/* Icon with Enhanced Styling */}
-                      <div className={`relative z-10 flex items-center justify-center w-5 h-5 ${isActive(item.url) ? 'text-black' : 'text-vip-gold group-hover:text-vip-gold-light'} transition-colors duration-300`}>
+                      <div className={`relative z-10 flex items-center justify-center w-5 h-5 ${isActive(item.url) ? 'text-black' : 'text-vip-gold'} transition-colors duration-300`}>
                         <item.icon className="w-5 h-5" />
                       </div>
                       
                       {/* Text with Better Typography */}
-                      <span className={`relative z-10 font-medium text-sm tracking-wide ${isActive(item.url) ? 'text-black' : 'group-hover:text-white'} transition-colors duration-300`}>
+                      <span className={`relative z-10 font-medium text-sm tracking-wide ${isActive(item.url) ? 'text-black' : 'text-white'} transition-colors duration-300`}>
                         {item.title}
                       </span>
                       
