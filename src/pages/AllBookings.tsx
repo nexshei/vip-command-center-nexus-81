@@ -72,11 +72,13 @@ const AllBookings = () => {
   });
 
   const handleViewBooking = (booking: any) => {
+    console.log('handleViewBooking called', booking);
     setSelectedBooking(booking);
     setViewModalOpen(true);
   };
 
   const handleEditBooking = (booking: any) => {
+    console.log('handleEditBooking called', booking);
     setSelectedBooking(booking);
     setEditModalOpen(true);
   };
