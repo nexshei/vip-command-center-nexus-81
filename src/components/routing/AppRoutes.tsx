@@ -7,6 +7,7 @@ import Clients from '@/pages/Clients';
 import AllBookings from '@/pages/AllBookings';
 import ItemBookings from '@/pages/ItemBookings';
 import ContactMessages from '@/pages/ContactMessages';
+import ContactSubmissions from '@/pages/ContactSubmissions';
 import Careers from '@/pages/Careers';
 import Staff from '@/pages/Staff';
 import Inventory from '@/pages/Inventory';
@@ -47,6 +48,11 @@ export const AppRoutes = () => {
       <Route path="/contact-messages" element={
         <ProtectedRoute>
           <ContactMessages />
+        </ProtectedRoute>
+      } />
+      <Route path="/contact-submissions" element={
+        <ProtectedRoute>
+          <ContactSubmissions />
         </ProtectedRoute>
       } />
       <Route path="/careers" element={
