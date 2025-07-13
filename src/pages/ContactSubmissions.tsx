@@ -302,18 +302,20 @@ const ContactSubmissions = () => {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleViewMessage(submission)}
+                          className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
                         >
-                          <Eye className="w-4 h-4" />
+                          <Eye className="w-4 h-4 mr-1" />
+                          View
                         </Button>
                         <Button 
-                          variant="outline" 
+                          variant="ghost" 
                           size="sm"
                           onClick={() => {
                             setSelectedSubmissionId(submission.id);
                             setSelectedSubmissionName(submission.full_name);
                             setShowDeleteModal(true);
                           }}
-                          className="border-red-500 text-red-600 hover:bg-red-50 hover:border-red-600"
+                          className="text-red-600 hover:text-red-800 hover:bg-red-50"
                         >
                           <Trash2 className="w-4 h-4 mr-1" />
                           Delete
