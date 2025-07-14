@@ -6,14 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Search, Calendar, Eye, Edit, Trash2, Plus, Filter, RefreshCw } from 'lucide-react';
+import { Search, Calendar, Trash2, Filter, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useAllBookings } from '@/hooks/useAllBookings';
 import { supabase } from '@/integrations/supabase/client';
 import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
-import { ViewAllBookingModal } from '@/components/modals/ViewAllBookingModal';
-import { EditAllBookingModal } from '@/components/modals/EditAllBookingModal';
+import { NewBookingModal } from '@/components/modals/NewBookingModal';
 
 const AllBookings = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -23,9 +22,6 @@ const AllBookings = () => {
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
   const [selectedBookingName, setSelectedBookingName] = useState<string>('');
   const [selectedBookingSource, setSelectedBookingSource] = useState<string>('');
-  const [viewModalOpen, setViewModalOpen] = useState(false);
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -71,17 +67,6 @@ const AllBookings = () => {
     return matchesSearch && matchesSource && matchesStatus;
   });
 
-  const handleViewBooking = (booking: any) => {
-    console.log('handleViewBooking called', booking);
-    setSelectedBooking(booking);
-    setViewModalOpen(true);
-  };
-
-  const handleEditBooking = (booking: any) => {
-    console.log('handleEditBooking called', booking);
-    setSelectedBooking(booking);
-    setEditModalOpen(true);
-  };
 
   const handleDeleteBooking = async () => {
     if (!selectedBookingId || !selectedBookingSource) return;
@@ -154,13 +139,7 @@ const AllBookings = () => {
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
-          <Button 
-            onClick={() => navigate('/create-booking')} 
-            className="bg-blue-600 text-white hover:bg-blue-700"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            New Booking
-          </Button>
+          <NewBookingModal onBookingCreated={refetch} />
         </div>
       </div>
 
@@ -320,49 +299,21 @@ const AllBookings = () => {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-sm text-gray-600">{createdDate.date}</TableCell>
-                      <TableCell>
-                        <div className="flex space-x-1">
-                          <Button 
-                            type="button"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              handleViewBooking(booking);
-                            }}
-                            variant="outline" 
-                            size="sm"
-                            className="border-blue-200 text-blue-600 hover:bg-blue-50"
-                          >
-                            <Eye className="h-3 w-3" />
-                          </Button>
-                          <Button 
-                            type="button"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              handleEditBooking(booking);
-                            }}
-                            variant="outline" 
-                            size="sm"
-                            className="border-gray-200 text-gray-600 hover:bg-gray-50"
-                          >
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                          <Button 
-                            onClick={() => {
-                              setSelectedBookingId(booking.id);
-                              setSelectedBookingName(booking.full_name);
-                              setSelectedBookingSource(booking.source);
-                              setShowDeleteModal(true);
-                            }}
-                            variant="outline" 
-                            size="sm"
-                            className="border-red-300 text-red-600 hover:bg-red-50"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </TableCell>
+                       <TableCell>
+                         <Button 
+                           onClick={() => {
+                             setSelectedBookingId(booking.id);
+                             setSelectedBookingName(booking.full_name);
+                             setSelectedBookingSource(booking.source);
+                             setShowDeleteModal(true);
+                           }}
+                           variant="outline" 
+                           size="sm"
+                           className="border-red-300 text-red-600 hover:bg-red-50"
+                         >
+                           <Trash2 className="h-3 w-3" />
+                         </Button>
+                       </TableCell>
                     </TableRow>
                   );
                 })}
@@ -393,20 +344,6 @@ const AllBookings = () => {
         itemName={selectedBookingName}
       />
 
-      {/* View Booking Modal */}
-      <ViewAllBookingModal
-        open={viewModalOpen}
-        onOpenChange={setViewModalOpen}
-        booking={selectedBooking}
-      />
-
-      {/* Edit Booking Modal */}
-      <EditAllBookingModal
-        open={editModalOpen}
-        onOpenChange={setEditModalOpen}
-        booking={selectedBooking}
-        onBookingUpdated={refetch}
-      />
     </div>
   );
 };

@@ -7,23 +7,32 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Plus, DollarSign } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
-export const NewBookingModal = () => {
+interface NewBookingModalProps {
+  onBookingCreated?: () => void;
+}
+
+export const NewBookingModal = ({ onBookingCreated }: NewBookingModalProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [clientName, setClientName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [eventType, setEventType] = useState('');
   const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
+  const [location, setLocation] = useState('');
   const [notes, setNotes] = useState('');
   const [serviceCharge, setServiceCharge] = useState('');
   const { toast } = useToast();
 
   const resetFormAndClose = () => {
     setClientName('');
+    setEmail('');
+    setPhone('');
     setEventType('');
     setDate('');
-    setTime('');
+    setLocation('');
     setNotes('');
     setServiceCharge('');
     setIsOpen(false);
@@ -43,20 +52,35 @@ export const NewBookingModal = () => {
     setIsLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Create a VVIP service request
+      const { error } = await supabase
+        .from('vvip_service_requests')
+        .insert({
+          full_name: clientName,
+          email: email,
+          phone: phone,
+          event_type: eventType as any,
+          event_date: date,
+          location: location,
+          requirements: notes,
+          estimated_cost: parseFloat(serviceCharge) || null,
+          status: 'pending'
+        });
+
+      if (error) throw error;
 
       toast({
-        title: "Event Created Successfully",
-        description: `VVIP event for ${clientName} has been scheduled and is pending approval.`,
+        title: "Booking Created Successfully",
+        description: `VVIP service booking for ${clientName} has been created and is pending approval.`,
       });
 
+      onBookingCreated?.();
       resetFormAndClose();
     } catch (error: any) {
-      console.error('Error creating event:', error);
+      console.error('Error creating booking:', error);
       toast({
-        title: "Failed to Create Event",
-        description: error.message || "An error occurred while creating the event.",
+        title: "Failed to Create Booking",
+        description: error.message || "An error occurred while creating the booking.",
         variant: "destructive"
       });
     } finally {
@@ -67,119 +91,127 @@ export const NewBookingModal = () => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-vip-gold text-black hover:bg-vip-gold-light">
+        <Button className="bg-blue-600 text-white hover:bg-blue-700">
           <Plus className="h-4 w-4 mr-2" />
-          Add New Event
+          New Booking
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px] vip-glass border-vip-gold/20">
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className="text-vip-black text-xl font-semibold">Create New VVIP Event</DialogTitle>
+          <DialogTitle className="text-xl font-semibold">Create New Booking</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6 mt-4">
           <div className="space-y-2">
-            <Label htmlFor="clientName" className="text-sm font-medium text-vip-black">Client Name *</Label>
+            <Label htmlFor="clientName" className="text-sm font-medium">Client Name *</Label>
             <Input
               id="clientName"
               value={clientName}
               onChange={(e) => setClientName(e.target.value)}
               placeholder="Enter client name"
               required
-              className="w-full border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="eventType" className="text-sm font-medium text-vip-black">Event Type *</Label>
+            <Label htmlFor="email" className="text-sm font-medium">Email *</Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter email address"
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="phone" className="text-sm font-medium">Phone *</Label>
+            <Input
+              id="phone"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="Enter phone number"
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="eventType" className="text-sm font-medium">Event Type *</Label>
             <Select value={eventType} onValueChange={setEventType} required>
-              <SelectTrigger className="w-full border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black">
+              <SelectTrigger>
                 <SelectValue placeholder="Select event type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="diplomatic-meeting">Diplomatic Meeting</SelectItem>
-                <SelectItem value="corporate-event">Corporate Event</SelectItem>
-                <SelectItem value="government-protocol">Government Protocol</SelectItem>
-                <SelectItem value="state-reception">State Reception</SelectItem>
-                <SelectItem value="business-summit">Business Summit</SelectItem>
-                <SelectItem value="cultural-exchange">Cultural Exchange</SelectItem>
-                <SelectItem value="charity-gala">Charity Gala</SelectItem>
-                <SelectItem value="award-ceremony">Award Ceremony</SelectItem>
-                <SelectItem value="executive-retreat">Executive Retreat</SelectItem>
-                <SelectItem value="international-conference">International Conference</SelectItem>
+                <SelectItem value="corporate">Corporate</SelectItem>
+                <SelectItem value="wedding">Wedding</SelectItem>
+                <SelectItem value="diplomatic">Diplomatic</SelectItem>
+                <SelectItem value="private">Private</SelectItem>
+                <SelectItem value="government">Government</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="date" className="text-sm font-medium text-vip-black">Date *</Label>
+              <Label htmlFor="date" className="text-sm font-medium">Event Date</Label>
               <Input
                 id="date"
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                required
-                className="w-full border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="time" className="text-sm font-medium text-vip-black">Time *</Label>
+              <Label htmlFor="location" className="text-sm font-medium">Location</Label>
               <Input
-                id="time"
-                type="time"
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-                required
-                className="w-full border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
+                id="location"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                placeholder="Enter event location"
               />
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="serviceCharge" className="text-sm font-medium text-vip-black flex items-center">
+            <Label htmlFor="serviceCharge" className="text-sm font-medium flex items-center">
               <DollarSign className="h-4 w-4 mr-1" />
-              Service Charge (KSH) *
+              Estimated Cost (KSH)
             </Label>
             <Input
               id="serviceCharge"
               type="number"
               value={serviceCharge}
               onChange={(e) => setServiceCharge(e.target.value)}
-              placeholder="Enter service charge amount"
-              required
-              min="1"
-              className="w-full border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
+              placeholder="Enter estimated cost"
+              min="0"
             />
             {serviceCharge && (
-              <p className="text-sm text-vip-gold">
+              <p className="text-sm text-gray-600">
                 Formatted: {formatCurrency(parseFloat(serviceCharge) || 0)}
               </p>
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="notes" className="text-sm font-medium text-vip-black">Notes</Label>
+            <Label htmlFor="notes" className="text-sm font-medium">Requirements</Label>
             <Textarea
               id="notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Additional notes or requirements"
+              placeholder="Additional requirements or notes"
               rows={3}
-              className="w-full border-vip-gold/30 focus:border-vip-gold bg-white/80 text-vip-black placeholder:text-vip-gold/50"
             />
           </div>
-          <div className="flex justify-end gap-3 pt-6 border-t border-vip-gold/20">
+          <div className="flex justify-end gap-3 pt-6 border-t">
             <Button 
               type="button" 
               variant="outline" 
               onClick={resetFormAndClose} 
               disabled={isLoading}
-              className="px-6 border-vip-gold/30 text-vip-gold hover:bg-vip-gold-light hover:text-black"
             >
               Cancel
             </Button>
             <Button 
               type="submit" 
               disabled={isLoading}
-              className="px-6 bg-vip-gold text-black hover:bg-vip-gold-light"
+              className="bg-blue-600 text-white hover:bg-blue-700"
             >
-              {isLoading ? 'Creating...' : 'Create Event'}
+              {isLoading ? 'Creating...' : 'Create Booking'}
             </Button>
           </div>
         </form>
