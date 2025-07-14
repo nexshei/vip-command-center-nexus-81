@@ -6,22 +6,27 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Search, Calendar, Trash2, Filter, RefreshCw } from 'lucide-react';
+import { Search, Calendar, Trash2, Filter, RefreshCw, Eye, Edit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useAllBookings } from '@/hooks/useAllBookings';
 import { supabase } from '@/integrations/supabase/client';
 import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
 import { NewBookingModal } from '@/components/modals/NewBookingModal';
+import { ViewAllBookingModal } from '@/components/modals/ViewAllBookingModal';
+import { EditAllBookingModal } from '@/components/modals/EditAllBookingModal';
 
 const AllBookings = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sourceFilter, setSourceFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
   const [selectedBookingName, setSelectedBookingName] = useState<string>('');
   const [selectedBookingSource, setSelectedBookingSource] = useState<string>('');
+  const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -300,19 +305,43 @@ const AllBookings = () => {
                       </TableCell>
                       <TableCell className="text-sm text-gray-600">{createdDate.date}</TableCell>
                        <TableCell>
-                         <Button 
-                           onClick={() => {
-                             setSelectedBookingId(booking.id);
-                             setSelectedBookingName(booking.full_name);
-                             setSelectedBookingSource(booking.source);
-                             setShowDeleteModal(true);
-                           }}
-                           variant="outline" 
-                           size="sm"
-                           className="border-red-300 text-red-600 hover:bg-red-50"
-                         >
-                           <Trash2 className="h-3 w-3" />
-                         </Button>
+                         <div className="flex gap-2">
+                           <Button 
+                             onClick={() => {
+                               setSelectedBooking(booking);
+                               setShowViewModal(true);
+                             }}
+                             variant="outline" 
+                             size="sm"
+                             className="border-blue-300 text-blue-600 hover:bg-blue-50"
+                           >
+                             <Eye className="h-3 w-3" />
+                           </Button>
+                           <Button 
+                             onClick={() => {
+                               setSelectedBooking(booking);
+                               setShowEditModal(true);
+                             }}
+                             variant="outline" 
+                             size="sm"
+                             className="border-green-300 text-green-600 hover:bg-green-50"
+                           >
+                             <Edit className="h-3 w-3" />
+                           </Button>
+                           <Button 
+                             onClick={() => {
+                               setSelectedBookingId(booking.id);
+                               setSelectedBookingName(booking.full_name);
+                               setSelectedBookingSource(booking.source);
+                               setShowDeleteModal(true);
+                             }}
+                             variant="outline" 
+                             size="sm"
+                             className="border-red-300 text-red-600 hover:bg-red-50"
+                           >
+                             <Trash2 className="h-3 w-3" />
+                           </Button>
+                         </div>
                        </TableCell>
                     </TableRow>
                   );
@@ -333,6 +362,24 @@ const AllBookings = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* View Booking Modal */}
+      <ViewAllBookingModal
+        open={showViewModal}
+        onOpenChange={setShowViewModal}
+        booking={selectedBooking}
+      />
+
+      {/* Edit Booking Modal */}
+      <EditAllBookingModal
+        open={showEditModal}
+        onOpenChange={setShowEditModal}
+        booking={selectedBooking}
+        onBookingUpdated={() => {
+          refetch();
+          setShowEditModal(false);
+        }}
+      />
 
       {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
