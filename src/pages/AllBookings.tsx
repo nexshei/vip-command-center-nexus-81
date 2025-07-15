@@ -41,6 +41,7 @@ const AllBookings = () => {
     switch (status?.toLowerCase()) {
       case 'pending': return 'bg-yellow-500 text-white';
       case 'approved': return 'bg-green-500 text-white';
+      case 'rejected': return 'bg-red-500 text-white';
       case 'in_progress': return 'bg-blue-500 text-white';
       case 'completed': return 'bg-gray-500 text-white';
       case 'cancelled': return 'bg-red-500 text-white';
@@ -94,6 +95,30 @@ const AllBookings = () => {
       toast({
         title: "Error",
         description: "Failed to delete booking.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleStatusUpdate = async (bookingId: string, newStatus: string, source: string) => {
+    try {
+      const table = source === 'meeting_request' ? 'meeting_requests' : 'vvip_service_requests';
+      const { error } = await supabase
+        .from(table)
+        .update({ status: newStatus as any })
+        .eq('id', bookingId);
+
+      if (error) throw error;
+
+      refetch();
+      toast({
+        title: "Status Updated",
+        description: `Booking status has been updated to ${newStatus}.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update booking status.",
         variant: "destructive"
       });
     }
@@ -225,6 +250,7 @@ const AllBookings = () => {
                 <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="approved">Approved</SelectItem>
+                <SelectItem value="rejected">Rejected</SelectItem>
                 <SelectItem value="in_progress">In Progress</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
                 <SelectItem value="cancelled">Cancelled</SelectItem>
@@ -294,9 +320,22 @@ const AllBookings = () => {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge className={getStatusColor(booking.status)}>
-                          {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-                        </Badge>
+                        <Select
+                          value={booking.status}
+                          onValueChange={(newStatus) => handleStatusUpdate(booking.id, newStatus, booking.source)}
+                        >
+                          <SelectTrigger className={`w-32 h-8 text-xs ${getStatusColor(booking.status)}`}>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white border-gray-200 z-50">
+                            <SelectItem value="pending">Pending</SelectItem>
+                            <SelectItem value="approved">Approved</SelectItem>
+                            <SelectItem value="rejected">Rejected</SelectItem>
+                            <SelectItem value="in_progress">In Progress</SelectItem>
+                            <SelectItem value="completed">Completed</SelectItem>
+                            <SelectItem value="cancelled">Cancelled</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </TableCell>
                       <TableCell className="text-sm text-gray-600">{createdDate.date}</TableCell>
                        <TableCell>
