@@ -76,8 +76,12 @@ const ContactSubmissions = () => {
         return 'bg-yellow-100 text-yellow-800';
       case 'reviewing':
         return 'bg-blue-100 text-blue-800';
+      case 'reviewed':
+        return 'bg-purple-100 text-purple-800';
       case 'completed':
         return 'bg-green-100 text-green-800';
+      case 'resolved':
+        return 'bg-emerald-100 text-emerald-800';
       case 'cancelled':
         return 'bg-red-100 text-red-800';
       default:
@@ -225,6 +229,8 @@ const ContactSubmissions = () => {
                 <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="reviewing">Reviewing</SelectItem>
+                <SelectItem value="reviewed">Reviewed</SelectItem>
+                <SelectItem value="resolved">Resolved</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
                 <SelectItem value="cancelled">Cancelled</SelectItem>
               </SelectContent>
@@ -291,36 +297,27 @@ const ContactSubmissions = () => {
                         <SelectContent>
                           <SelectItem value="pending">Pending</SelectItem>
                           <SelectItem value="reviewing">Reviewing</SelectItem>
+                          <SelectItem value="reviewed">Reviewed</SelectItem>
+                          <SelectItem value="resolved">Resolved</SelectItem>
                           <SelectItem value="completed">Completed</SelectItem>
                           <SelectItem value="cancelled">Cancelled</SelectItem>
                         </SelectContent>
                       </Select>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleViewMessage(submission)}
-                          className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
-                        >
-                          <Eye className="w-4 h-4 mr-1" />
-                          View
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => {
-                            setSelectedSubmissionId(submission.id);
-                            setSelectedSubmissionName(submission.full_name);
-                            setShowDeleteModal(true);
-                          }}
-                          className="text-red-600 hover:text-red-800 hover:bg-red-50"
-                        >
-                          <Trash2 className="w-4 h-4 mr-1" />
-                          Delete
-                        </Button>
-                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => {
+                          setSelectedSubmissionId(submission.id);
+                          setSelectedSubmissionName(submission.full_name);
+                          setShowDeleteModal(true);
+                        }}
+                        className="text-red-600 hover:text-red-800 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        Delete
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
