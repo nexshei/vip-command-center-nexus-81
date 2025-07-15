@@ -324,8 +324,12 @@ const AllBookings = () => {
                           value={booking.status}
                           onValueChange={(newStatus) => handleStatusUpdate(booking.id, newStatus, booking.source)}
                         >
-                          <SelectTrigger className={`w-32 h-8 text-xs ${getStatusColor(booking.status)}`}>
-                            <SelectValue />
+                          <SelectTrigger className="w-36 h-9 border border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500">
+                            <SelectValue>
+                              <Badge className={`${getStatusColor(booking.status)} text-xs`}>
+                                {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                              </Badge>
+                            </SelectValue>
                           </SelectTrigger>
                           <SelectContent className="bg-white border-gray-200 z-50">
                             <SelectItem value="pending">Pending</SelectItem>
