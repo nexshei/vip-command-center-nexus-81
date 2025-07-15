@@ -610,6 +610,7 @@ export type Database = {
         | "in_progress"
         | "completed"
         | "cancelled"
+        | "rejected"
       service_type:
         | "full_protocol"
         | "event_management"
@@ -760,6 +761,7 @@ export const Constants = {
         "in_progress",
         "completed",
         "cancelled",
+        "rejected",
       ],
       service_type: [
         "full_protocol",
