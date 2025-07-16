@@ -148,245 +148,246 @@ const AllBookings = () => {
   }
 
   return (
-    <div className="space-y-6 p-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-serif font-bold text-gray-900">All Bookings</h1>
-          <p className="text-gray-600 mt-2">Manage meeting requests and VVIP service bookings</p>
-        </div>
-        <div className="flex gap-2">
-          <Button 
-            onClick={() => refetch()} 
-            variant="outline"
-            className="border-gray-300 text-gray-600 hover:bg-gray-50"
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
-          </Button>
-          <NewBookingModal onBookingCreated={refetch} />
-        </div>
-      </div>
-
-      {/* Summary Stats */}
-      <div className="grid gap-6 md:grid-cols-4">
-        <Card className="bg-white border border-gray-200">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">Total Bookings</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-gray-900">{totalBookings}</div>
-            <p className="text-xs text-gray-500">All requests</p>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-white border border-gray-200">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">Pending</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{pendingBookings}</div>
-            <p className="text-xs text-yellow-500">Awaiting response</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white border border-gray-200">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">This Week</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{thisWeekBookings}</div>
-            <p className="text-xs text-green-500">New requests</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white border border-gray-200">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">Upcoming Events</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{upcomingEvents}</div>
-            <p className="text-xs text-blue-500">Scheduled ahead</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Search & Filters */}
-      <Card className="bg-white border border-gray-200">
-        <CardHeader>
-          <CardTitle className="flex items-center text-gray-900">
-            <Filter className="h-5 w-5 mr-2 text-blue-600" />
-            Search & Filter Bookings
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search by name, email, or event type..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 border-gray-300 focus:border-blue-500 bg-white text-gray-900"
-              />
-            </div>
-            
-            <Select value={sourceFilter} onValueChange={setSourceFilter}>
-              <SelectTrigger className="border-gray-300 focus:border-blue-500 bg-white text-gray-900">
-                <SelectValue placeholder="Filter by source" />
-              </SelectTrigger>
-              <SelectContent className="bg-white border-gray-200 z-50">
-                <SelectItem value="all">All Sources</SelectItem>
-                <SelectItem value="meeting_request">Meeting Requests</SelectItem>
-                <SelectItem value="vvip_service">VVIP Services</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="border-gray-300 focus:border-blue-500 bg-white text-gray-900">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent className="bg-white border-gray-200 z-50">
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="approved">Approved</SelectItem>
-                <SelectItem value="rejected">Rejected</SelectItem>
-                <SelectItem value="in_progress">In Progress</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
-              </SelectContent>
-            </Select>
-
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-serif font-bold text-vip-gold">All Bookings</h1>
+            <p className="text-vip-gold/60 mt-2">Manage meeting requests and VVIP service bookings</p>
+          </div>
+          <div className="flex gap-2">
             <Button 
-              variant="outline" 
-              onClick={() => { setSearchTerm(''); setSourceFilter('all'); setStatusFilter('all'); }} 
-              className="border-gray-300 text-gray-600 hover:bg-gray-50"
+              onClick={() => refetch()} 
+              variant="outline"
+              className="text-vip-gold border-vip-gold/30 hover:bg-vip-gold/10"
             >
-              Clear Filters
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
             </Button>
+            <NewBookingModal onBookingCreated={refetch} />
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Bookings Table */}
-      <Card className="bg-white border border-gray-200">
-        <CardHeader>
-          <CardTitle className="flex items-center text-gray-900">
-            <Calendar className="h-5 w-5 mr-2 text-blue-600" />
-            All Bookings ({filteredBookings.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Client Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Event Type</TableHead>
-                  <TableHead>Event Date</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Source</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredBookings.map((booking) => {
-                  const eventDate = formatDateTime(booking.event_date || '');
-                  const createdDate = formatDateTime(booking.created_at);
-                  
-                  return (
-                    <TableRow key={`${booking.source}-${booking.id}`}>
-                      <TableCell className="font-medium">{booking.full_name}</TableCell>
-                      <TableCell className="text-sm">{booking.email}</TableCell>
-                      <TableCell className="text-sm">{booking.phone}</TableCell>
-                      <TableCell>
-                        {booking.event_type ? (
-                          <Badge variant="outline" className="border-blue-200 text-blue-600">
-                            {booking.event_type}
-                          </Badge>
-                        ) : (
-                          <span className="text-gray-400">Not specified</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-sm">{eventDate.date}</TableCell>
-                      <TableCell className="text-sm">{booking.location || 'Not specified'}</TableCell>
-                      <TableCell>
-                        <Badge className={getSourceBadgeColor(booking.source)}>
-                          {booking.source === 'meeting_request' ? 'Meeting' : 'VVIP Service'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Select
-                          value={booking.status}
-                          onValueChange={(newStatus) => handleStatusUpdate(booking.id, newStatus, booking.source)}
-                        >
-                          <SelectTrigger className="w-36 h-9 border border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500">
-                            <SelectValue>
-                              <Badge className={`${getStatusColor(booking.status)} text-xs`}>
-                                {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-                              </Badge>
-                            </SelectValue>
-                          </SelectTrigger>
-                          <SelectContent className="bg-white border-gray-200 z-50">
-                            <SelectItem value="pending">Pending</SelectItem>
-                            <SelectItem value="approved">Approved</SelectItem>
-                            <SelectItem value="rejected">Rejected</SelectItem>
-                            <SelectItem value="in_progress">In Progress</SelectItem>
-                            <SelectItem value="completed">Completed</SelectItem>
-                            <SelectItem value="cancelled">Cancelled</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell className="text-sm text-gray-600">{createdDate.date}</TableCell>
-                       <TableCell>
-                         <Button 
-                           onClick={() => {
-                             setSelectedBookingId(booking.id);
-                             setSelectedBookingName(booking.full_name);
-                             setSelectedBookingSource(booking.source);
-                             setShowDeleteModal(true);
-                           }}
-                           variant="outline" 
-                           size="sm"
-                           className="border-red-300 text-red-600 hover:bg-red-50"
-                         >
-                           <Trash2 className="h-3 w-3" />
-                         </Button>
-                       </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
-          {filteredBookings.length === 0 && (
-            <div className="text-center py-8">
-              <p className="text-gray-500">No bookings found.</p>
-              <p className="text-sm text-gray-400 mt-2">
-                {searchTerm || sourceFilter !== 'all' || statusFilter !== 'all' 
-                  ? 'Try adjusting your search criteria.' 
-                  : 'Create your first booking to get started.'
-                }
-              </p>
+        {/* Summary Stats */}
+        <div className="grid gap-6 md:grid-cols-4">
+          <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-gray-400">Total Bookings</CardTitle>
+          </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">{totalBookings}</div>
+              <p className="text-xs text-gray-400">All requests</p>
+            </CardContent>
+        </Card>
+          
+          <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-gray-400">Pending</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-yellow-400">{pendingBookings}</div>
+              <p className="text-xs text-yellow-300">Awaiting response</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-gray-400">This Week</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-400">{thisWeekBookings}</div>
+              <p className="text-xs text-green-300">New requests</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-gray-400">Upcoming Events</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-400">{upcomingEvents}</div>
+              <p className="text-xs text-blue-300">Scheduled ahead</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Search & Filters */}
+        <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center text-gray-300">
+              <Filter className="h-5 w-5 mr-2 text-vip-gold" />
+              Search & Filter Bookings
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search by name, email, or event type..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400"
+                />
+              </div>
+              
+              <Select value={sourceFilter} onValueChange={setSourceFilter}>
+                <SelectTrigger className="bg-vip-gold/20 border-vip-gold/50 text-vip-gold hover:bg-vip-gold/30">
+                  <SelectValue placeholder="Filter by source" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-800 border-vip-gold/30 backdrop-blur-sm">
+                  <SelectItem value="all" className="text-white hover:bg-vip-gold/20">All Sources</SelectItem>
+                  <SelectItem value="meeting_request" className="text-white hover:bg-vip-gold/20">Meeting Requests</SelectItem>
+                  <SelectItem value="vvip_service" className="text-white hover:bg-vip-gold/20">VVIP Services</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="bg-vip-gold/20 border-vip-gold/50 text-vip-gold hover:bg-vip-gold/30">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-800 border-vip-gold/30 backdrop-blur-sm">
+                  <SelectItem value="all" className="text-white hover:bg-vip-gold/20">All Status</SelectItem>
+                  <SelectItem value="pending" className="text-white hover:bg-vip-gold/20">Pending</SelectItem>
+                  <SelectItem value="approved" className="text-white hover:bg-vip-gold/20">Approved</SelectItem>
+                  <SelectItem value="rejected" className="text-white hover:bg-vip-gold/20">Rejected</SelectItem>
+                  <SelectItem value="in_progress" className="text-white hover:bg-vip-gold/20">In Progress</SelectItem>
+                  <SelectItem value="completed" className="text-white hover:bg-vip-gold/20">Completed</SelectItem>
+                  <SelectItem value="cancelled" className="text-white hover:bg-vip-gold/20">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Button 
+                variant="outline" 
+                onClick={() => { setSearchTerm(''); setSourceFilter('all'); setStatusFilter('all'); }} 
+                className="text-vip-gold border-vip-gold/30 hover:bg-vip-gold/10"
+              >
+                Clear Filters
+              </Button>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* Delete Confirmation Modal */}
-      <DeleteConfirmationModal
-        open={showDeleteModal}
-        onOpenChange={setShowDeleteModal}
-        onConfirm={handleDeleteBooking}
-        title="Delete Booking"
-        description="Are you sure you want to delete this booking? This action cannot be undone."
-        itemName={selectedBookingName}
-      />
+        {/* Bookings Table */}
+        <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center text-gray-300">
+              <Calendar className="h-5 w-5 mr-2 text-vip-gold" />
+              All Bookings ({filteredBookings.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-gray-700">
+                    <TableHead className="text-gray-400">Client Name</TableHead>
+                    <TableHead className="text-gray-400">Email</TableHead>
+                    <TableHead className="text-gray-400">Phone</TableHead>
+                    <TableHead className="text-gray-400">Event Type</TableHead>
+                    <TableHead className="text-gray-400">Event Date</TableHead>
+                    <TableHead className="text-gray-400">Location</TableHead>
+                    <TableHead className="text-gray-400">Source</TableHead>
+                    <TableHead className="text-gray-400">Status</TableHead>
+                    <TableHead className="text-gray-400">Created</TableHead>
+                    <TableHead className="text-gray-400">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredBookings.map((booking) => {
+                    const eventDate = formatDateTime(booking.event_date || '');
+                    const createdDate = formatDateTime(booking.created_at);
+                    
+                    return (
+                      <TableRow key={`${booking.source}-${booking.id}`} className="border-gray-700 hover:bg-gray-800/50">
+                        <TableCell className="font-medium text-white">{booking.full_name}</TableCell>
+                        <TableCell className="text-sm text-gray-300">{booking.email}</TableCell>
+                        <TableCell className="text-sm text-gray-300">{booking.phone}</TableCell>
+                        <TableCell>
+                          {booking.event_type ? (
+                            <Badge variant="outline" className="border-vip-gold/30 text-vip-gold">
+                              {booking.event_type}
+                            </Badge>
+                          ) : (
+                            <span className="text-gray-400">Not specified</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-sm text-gray-300">{eventDate.date}</TableCell>
+                        <TableCell className="text-sm text-gray-300">{booking.location || 'Not specified'}</TableCell>
+                        <TableCell>
+                          <Badge className="bg-vip-gold/20 text-vip-gold border-vip-gold/30">
+                            {booking.source === 'meeting_request' ? 'Meeting' : 'VVIP Service'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Select
+                            value={booking.status}
+                            onValueChange={(newStatus) => handleStatusUpdate(booking.id, newStatus, booking.source)}
+                          >
+                            <SelectTrigger className="w-36 h-9 bg-gray-800/50 border-gray-600 text-white hover:bg-gray-700/50">
+                              <SelectValue>
+                                <Badge className={`${getStatusColor(booking.status)} text-xs`}>
+                                  {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                                </Badge>
+                              </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent className="bg-gray-800 border-gray-600 backdrop-blur-sm">
+                              <SelectItem value="pending" className="text-white hover:bg-vip-gold/20">Pending</SelectItem>
+                              <SelectItem value="approved" className="text-white hover:bg-vip-gold/20">Approved</SelectItem>
+                              <SelectItem value="rejected" className="text-white hover:bg-vip-gold/20">Rejected</SelectItem>
+                              <SelectItem value="in_progress" className="text-white hover:bg-vip-gold/20">In Progress</SelectItem>
+                              <SelectItem value="completed" className="text-white hover:bg-vip-gold/20">Completed</SelectItem>
+                              <SelectItem value="cancelled" className="text-white hover:bg-vip-gold/20">Cancelled</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell className="text-sm text-gray-400">{createdDate.date}</TableCell>
+                        <TableCell>
+                          <Button 
+                            onClick={() => {
+                              setSelectedBookingId(booking.id);
+                              setSelectedBookingName(booking.full_name);
+                              setSelectedBookingSource(booking.source);
+                              setShowDeleteModal(true);
+                            }}
+                            variant="outline" 
+                            size="sm"
+                            className="border-red-600/30 text-red-400 hover:bg-red-600/10"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+            {filteredBookings.length === 0 && (
+              <div className="text-center py-8">
+                <p className="text-gray-400">No bookings found.</p>
+                <p className="text-sm text-gray-500 mt-2">
+                  {searchTerm || sourceFilter !== 'all' || statusFilter !== 'all' 
+                    ? 'Try adjusting your search criteria.' 
+                    : 'Create your first booking to get started.'
+                  }
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
+        {/* Delete Confirmation Modal */}
+        <DeleteConfirmationModal
+          open={showDeleteModal}
+          onOpenChange={setShowDeleteModal}
+          onConfirm={handleDeleteBooking}
+          title="Delete Booking"
+          description="Are you sure you want to delete this booking? This action cannot be undone."
+          itemName={selectedBookingName}
+        />
+      </div>
     </div>
   );
 };

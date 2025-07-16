@@ -156,13 +156,14 @@ const ContactMessages = () => {
   }
 
   return (
-    <div className="space-y-6 p-6 max-w-7xl mx-auto">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-serif font-bold text-vip-black">Contact Messages</h1>
-          <p className="text-vip-gold/80 mt-2">Manage and respond to contact submissions</p>
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-serif font-bold text-vip-gold">Contact Messages</h1>
+            <p className="text-vip-gold/60 mt-2">Manage and respond to contact submissions</p>
+          </div>
         </div>
-      </div>
 
       {/* Summary Stats */}
       <div className="grid gap-6 md:grid-cols-4">
@@ -384,6 +385,7 @@ const ContactMessages = () => {
         description="Are you sure you want to delete this contact submission? This action cannot be undone."
         itemName={selectedSubmissionName}
       />
+      </div>
     </div>
   );
 };

@@ -100,14 +100,15 @@ const Staff = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-serif font-bold text-black">Staff Members</h1>
-          <p className="text-black/60 mt-1">Manage your team and personnel</p>
-        </div>
-        <Button
-          onClick={() => {
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-serif font-bold text-vip-gold">Staff Members</h1>
+            <p className="text-vip-gold/60 mt-1">Manage your team and personnel</p>
+          </div>
+          <Button
+            onClick={() => {
             setEditingStaff(null);
             setIsAddModalOpen(true);
           }}
@@ -276,6 +277,7 @@ const Staff = () => {
         description="Are you sure you want to delete this staff member? This action cannot be undone."
         itemName={selectedStaffName}
       />
+      </div>
     </div>
   );
 };
