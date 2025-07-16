@@ -611,6 +611,8 @@ export type Database = {
         | "completed"
         | "cancelled"
         | "rejected"
+        | "resolved"
+        | "reviewed"
       service_type:
         | "full_protocol"
         | "event_management"
@@ -762,6 +764,8 @@ export const Constants = {
         "completed",
         "cancelled",
         "rejected",
+        "resolved",
+        "reviewed",
       ],
       service_type: [
         "full_protocol",
