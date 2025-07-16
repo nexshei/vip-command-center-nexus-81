@@ -5,6 +5,9 @@ import { ProtectedRoute } from './ProtectedRoute';
 import Dashboard from '@/pages/Dashboard';
 import Clients from '@/pages/Clients';
 import AllBookings from '@/pages/AllBookings';
+import Bookings from '@/pages/Bookings';
+import CreateBooking from '@/pages/CreateBooking';
+import GenerateQuote from '@/pages/GenerateQuote';
 import ItemBookings from '@/pages/ItemBookings';
 import ContactMessages from '@/pages/ContactMessages';
 import ContactSubmissions from '@/pages/ContactSubmissions';
@@ -33,6 +36,21 @@ export const AppRoutes = () => {
       <Route path="/clients" element={
         <ProtectedRoute>
           <Clients />
+        </ProtectedRoute>
+      } />
+      <Route path="/bookings" element={
+        <ProtectedRoute>
+          <Bookings />
+        </ProtectedRoute>
+      } />
+      <Route path="/create-booking" element={
+        <ProtectedRoute>
+          <CreateBooking />
+        </ProtectedRoute>
+      } />
+      <Route path="/generate-quote" element={
+        <ProtectedRoute>
+          <GenerateQuote />
         </ProtectedRoute>
       } />
       <Route path="/all-bookings" element={

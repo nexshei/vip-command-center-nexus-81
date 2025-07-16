@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Plus, 
   Calendar, 
@@ -65,7 +66,7 @@ const QuickActions = () => {
       title: "Export Data",
       description: "Download reports",
       icon: Download,
-      action: () => {
+      action: async () => {
         if (!hasAccess(['super_admin', 'admin'])) {
           toast({
             title: "Access Restricted",
@@ -74,18 +75,45 @@ const QuickActions = () => {
           });
           return;
         }
-        const csvContent = "data:text/csv;charset=utf-8,Date,Revenue,Bookings,Clients\n2024-01,KSH 8900000,24,156\n2024-02,KSH 9200000,28,162";
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "vvip_analytics.csv");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        toast({
-          title: "Export Complete",
-          description: "Report downloaded successfully.",
-        });
+        
+        try {
+          // Fetch real data from various tables for export
+          const [clients, contactSubmissions, meetingRequests, vvipRequests, applications] = await Promise.all([
+            supabase.from('clients').select('*'),
+            supabase.from('contact_submissions').select('*'),
+            supabase.from('meeting_requests').select('*'),
+            supabase.from('vvip_service_requests').select('*'),
+            supabase.from('career_applications').select('*')
+          ]);
+
+          // Create comprehensive CSV data
+          const currentDate = new Date().toISOString().split('T')[0];
+          const csvContent = `data:text/csv;charset=utf-8,Report Type,Total Count,Status Breakdown,Date Generated
+Clients,${clients.data?.length || 0},"Active: ${clients.data?.filter(c => c.status === 'active').length || 0}",${currentDate}
+Contact Submissions,${contactSubmissions.data?.length || 0},"Pending: ${contactSubmissions.data?.filter(s => s.status === 'pending').length || 0} | Resolved: ${contactSubmissions.data?.filter(s => s.status === 'resolved').length || 0}",${currentDate}
+Meeting Requests,${meetingRequests.data?.length || 0},"Pending: ${meetingRequests.data?.filter(m => m.status === 'pending').length || 0} | Approved: ${meetingRequests.data?.filter(m => m.status === 'approved').length || 0}",${currentDate}
+VVIP Service Requests,${vvipRequests.data?.length || 0},"Pending: ${vvipRequests.data?.filter(v => v.status === 'pending').length || 0} | In Progress: ${vvipRequests.data?.filter(v => v.status === 'in_progress').length || 0}",${currentDate}
+Career Applications,${applications.data?.length || 0},"Pending: ${applications.data?.filter(a => a.status === 'pending').length || 0} | Approved: ${applications.data?.filter(a => a.status === 'approved').length || 0}",${currentDate}`;
+
+          const encodedUri = encodeURI(csvContent);
+          const link = document.createElement("a");
+          link.setAttribute("href", encodedUri);
+          link.setAttribute("download", `vvip_comprehensive_report_${currentDate}.csv`);
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          toast({
+            title: "Export Complete",
+            description: "Comprehensive report downloaded successfully.",
+          });
+        } catch (error) {
+          toast({
+            title: "Export Failed",
+            description: "Failed to generate report. Please try again.",
+            variant: "destructive"
+          });
+        }
       },
       primary: false,
       allowedRoles: ['super_admin', 'admin'] // No data export for protocol admin
