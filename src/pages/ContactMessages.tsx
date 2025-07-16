@@ -9,8 +9,9 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Search, Mail, Calendar, User, MessageSquare } from 'lucide-react';
+import { Search, Mail, Calendar, User, MessageSquare, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
 
 interface ContactSubmission {
   id: string;
@@ -29,6 +30,9 @@ const ContactMessages = () => {
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedSubmission, setSelectedSubmission] = useState<ContactSubmission | null>(null);
   const [adminNotes, setAdminNotes] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedSubmissionId, setSelectedSubmissionId] = useState<string | null>(null);
+  const [selectedSubmissionName, setSelectedSubmissionName] = useState<string>('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -82,8 +86,10 @@ const ContactMessages = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'reviewed': return 'bg-blue-100 text-blue-800';
-      case 'resolved': return 'bg-green-100 text-green-800';
+      case 'reviewing': return 'bg-blue-100 text-blue-800';
+      case 'reviewed': return 'bg-purple-100 text-purple-800';
+      case 'resolved': return 'bg-emerald-100 text-emerald-800';
+      case 'completed': return 'bg-green-100 text-green-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -101,6 +107,35 @@ const ContactMessages = () => {
       });
       setSelectedSubmission(null);
       setAdminNotes('');
+    }
+  };
+
+  const handleDeleteSubmission = async () => {
+    if (!selectedSubmissionId) return;
+    
+    try {
+      const { error } = await supabase
+        .from('contact_submissions')
+        .delete()
+        .eq('id', selectedSubmissionId);
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ['contact-submissions'] });
+      toast({
+        title: "Submission Deleted",
+        description: "The contact submission has been removed successfully.",
+        variant: "destructive"
+      });
+      setShowDeleteModal(false);
+      setSelectedSubmissionId(null);
+      setSelectedSubmissionName('');
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete submission.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -194,8 +229,10 @@ const ContactMessages = () => {
               <SelectContent>
                 <SelectItem value="all">All Statuses</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="reviewing">Reviewing</SelectItem>
                 <SelectItem value="reviewed">Reviewed</SelectItem>
                 <SelectItem value="resolved">Resolved</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -229,38 +266,41 @@ const ContactMessages = () => {
                   <TableCell>{submission.email}</TableCell>
                   <TableCell>{submission.subject || 'No subject'}</TableCell>
                   <TableCell>
-                    <Badge className={getStatusColor(submission.status)}>
-                      {submission.status}
-                    </Badge>
+                    <Select
+                      value={submission.status}
+                      onValueChange={(value) => handleStatusUpdate(submission, value)}
+                    >
+                      <SelectTrigger className="w-36 h-9 border border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500">
+                        <SelectValue>
+                          <Badge className={`${getStatusColor(submission.status)} text-xs`}>
+                            {submission.status.charAt(0).toUpperCase() + submission.status.slice(1)}
+                          </Badge>
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="reviewing">Reviewing</SelectItem>
+                        <SelectItem value="reviewed">Reviewed</SelectItem>
+                        <SelectItem value="resolved">Resolved</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </TableCell>
                   <TableCell>{new Date(submission.created_at).toLocaleDateString()}</TableCell>
                   <TableCell>
-                    <div className="flex gap-2">
-                      <Select
-                        value={submission.status}
-                        onValueChange={(value) => handleStatusUpdate(submission, value)}
-                      >
-                        <SelectTrigger className="w-32 h-8 text-xs">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="pending">Pending</SelectItem>
-                          <SelectItem value="reviewed">Reviewed</SelectItem>
-                          <SelectItem value="resolved">Resolved</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setSelectedSubmission(submission);
-                          setAdminNotes(submission.admin_notes || '');
-                        }}
-                        className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
-                      >
-                        View
-                      </Button>
-                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => {
+                        setSelectedSubmissionId(submission.id);
+                        setSelectedSubmissionName(submission.full_name);
+                        setShowDeleteModal(true);
+                      }}
+                      className="text-red-600 hover:text-red-800 hover:bg-red-50"
+                    >
+                      <Trash2 className="w-4 h-4 mr-1" />
+                      Delete
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -334,6 +374,16 @@ const ContactMessages = () => {
           </Card>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        open={showDeleteModal}
+        onOpenChange={setShowDeleteModal}
+        onConfirm={handleDeleteSubmission}
+        title="Delete Contact Submission"
+        description="Are you sure you want to delete this contact submission? This action cannot be undone."
+        itemName={selectedSubmissionName}
+      />
     </div>
   );
 };
