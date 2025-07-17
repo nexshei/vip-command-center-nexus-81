@@ -212,7 +212,7 @@ const Inventory = () => {
         </Card>
       </div>
 
-      <Card className="vip-glass border-vip-gold/20">
+      <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
         <CardHeader>
           <div className="flex items-center space-x-4">
             <div className="relative flex-1">
@@ -221,10 +221,10 @@ const Inventory = () => {
                 placeholder="Search inventory..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400"
               />
             </div>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="text-vip-gold border-vip-gold/30 hover:bg-vip-gold/10">
               <Filter className="w-4 h-4 mr-2" />
               Filter
             </Button>
@@ -244,25 +244,25 @@ const Inventory = () => {
           ) : (
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Item</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Quantity</TableHead>
-                  <TableHead>Unit Price</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Condition</TableHead>
-                  <TableHead>Last Checked</TableHead>
-                  <TableHead>Actions</TableHead>
+                <TableRow className="border-gray-700">
+                  <TableHead className="text-gray-400">Item</TableHead>
+                  <TableHead className="text-gray-400">Category</TableHead>
+                  <TableHead className="text-gray-400">Quantity</TableHead>
+                  <TableHead className="text-gray-400">Unit Price</TableHead>
+                  <TableHead className="text-gray-400">Location</TableHead>
+                  <TableHead className="text-gray-400">Condition</TableHead>
+                  <TableHead className="text-gray-400">Last Checked</TableHead>
+                  <TableHead className="text-gray-400">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredInventory.map((item) => (
-                  <TableRow key={item.id}>
+                  <TableRow key={item.id} className="border-gray-700 hover:bg-gray-800/50">
                     <TableCell>
                       <div>
-                        <p className="font-medium">{item.name}</p>
+                        <p className="font-medium text-white">{item.name}</p>
                         {item.supplier && (
-                          <p className="text-sm text-gray-500">Supplier: {item.supplier}</p>
+                          <p className="text-sm text-gray-300">Supplier: {item.supplier}</p>
                         )}
                       </div>
                     </TableCell>
@@ -276,15 +276,15 @@ const Inventory = () => {
                         {item.quantity || 0}
                       </span>
                     </TableCell>
-                    <TableCell>{formatPrice(item.unit_price)}</TableCell>
+                    <TableCell className="text-gray-300">{formatPrice(item.unit_price)}</TableCell>
                     <TableCell>
                       {item.location ? (
-                        <div className="flex items-center">
+                        <div className="flex items-center text-gray-300">
                           <MapPin className="w-3 h-3 mr-1" />
                           {item.location}
                         </div>
                       ) : (
-                        'N/A'
+                        <span className="text-gray-400">N/A</span>
                       )}
                     </TableCell>
                     <TableCell>
@@ -294,12 +294,12 @@ const Inventory = () => {
                     </TableCell>
                     <TableCell>
                       {item.last_checked ? (
-                        <div className="flex items-center">
+                        <div className="flex items-center text-gray-300">
                           <Calendar className="w-3 h-3 mr-1" />
                           {new Date(item.last_checked).toLocaleDateString()}
                         </div>
                       ) : (
-                        'Never'
+                        <span className="text-gray-400">Never</span>
                       )}
                     </TableCell>
                     <TableCell>

@@ -300,10 +300,10 @@ const Subscribers = () => {
       </div>
 
       {/* Main Content */}
-      <Card className="vip-glass border-vip-gold/20">
+      <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-xl font-serif">Subscriber Management</CardTitle>
+            <CardTitle className="text-xl font-serif text-gray-300">Subscriber Management</CardTitle>
             <div className="flex items-center space-x-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -311,17 +311,17 @@ const Subscribers = () => {
                   placeholder="Search by email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 w-64"
+                  className="pl-10 w-64 bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400"
                 />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-40">
+                <SelectTrigger className="w-40 bg-vip-gold/20 border-vip-gold/50 text-vip-gold hover:bg-vip-gold/30">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Subscribers</SelectItem>
-                  <SelectItem value="active">Active Only</SelectItem>
-                  <SelectItem value="inactive">Unsubscribed</SelectItem>
+                <SelectContent className="bg-gray-800 border-vip-gold/30 backdrop-blur-sm">
+                  <SelectItem value="all" className="text-white hover:bg-vip-gold/20">All Subscribers</SelectItem>
+                  <SelectItem value="active" className="text-white hover:bg-vip-gold/20">Active Only</SelectItem>
+                  <SelectItem value="inactive" className="text-white hover:bg-vip-gold/20">Unsubscribed</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -349,24 +349,24 @@ const Subscribers = () => {
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead>Email Address</TableHead>
-                      <TableHead>Source</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Subscribed Date</TableHead>
-                      <TableHead>Unsubscribed Date</TableHead>
-                      <TableHead>Actions</TableHead>
+                    <TableRow className="border-gray-700">
+                      <TableHead className="text-gray-400">Email Address</TableHead>
+                      <TableHead className="text-gray-400">Source</TableHead>
+                      <TableHead className="text-gray-400">Status</TableHead>
+                      <TableHead className="text-gray-400">Subscribed Date</TableHead>
+                      <TableHead className="text-gray-400">Unsubscribed Date</TableHead>
+                      <TableHead className="text-gray-400">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {paginatedSubscribers.map((subscriber) => (
-                      <TableRow key={subscriber.id} className="hover:bg-gray-50">
+                      <TableRow key={subscriber.id} className="border-gray-700 hover:bg-gray-800/50">
                         <TableCell>
                           <div className="flex items-center">
                             <Mail className="w-4 h-4 mr-2 text-gray-400" />
                             <div>
-                              <p className="font-medium">{subscriber.email}</p>
-                              <p className="text-xs text-gray-500">ID: {subscriber.id.slice(0, 8)}...</p>
+                              <p className="font-medium text-white">{subscriber.email}</p>
+                              <p className="text-xs text-gray-400">ID: {subscriber.id.slice(0, 8)}...</p>
                             </div>
                           </div>
                         </TableCell>
@@ -384,7 +384,7 @@ const Subscribers = () => {
                           {subscriber.subscribed_at ? (
                             <div className="flex items-center">
                               <Calendar className="w-3 h-3 mr-1 text-gray-400" />
-                              <span className="text-sm">{formatDate(subscriber.subscribed_at)}</span>
+                              <span className="text-sm text-gray-300">{formatDate(subscriber.subscribed_at)}</span>
                             </div>
                           ) : (
                             <span className="text-gray-400">N/A</span>
@@ -394,7 +394,7 @@ const Subscribers = () => {
                           {subscriber.unsubscribed_at ? (
                             <div className="flex items-center">
                               <Calendar className="w-3 h-3 mr-1 text-gray-400" />
-                              <span className="text-sm">{formatDate(subscriber.unsubscribed_at)}</span>
+                              <span className="text-sm text-gray-300">{formatDate(subscriber.unsubscribed_at)}</span>
                             </div>
                           ) : (
                             <span className="text-gray-400">N/A</span>

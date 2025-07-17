@@ -131,7 +131,7 @@ const Clients = () => {
         </Button>
       </div>
 
-      <Card className="vip-glass border-vip-gold/20">
+      <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
         <CardHeader>
           <div className="flex items-center space-x-4">
             <div className="relative flex-1">
@@ -140,10 +140,10 @@ const Clients = () => {
                 placeholder="Search clients..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400"
               />
             </div>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="text-vip-gold border-vip-gold/30 hover:bg-vip-gold/10">
               <Filter className="w-4 h-4 mr-2" />
               Filter
             </Button>
@@ -163,23 +163,23 @@ const Clients = () => {
           ) : (
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead>Company</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
+                <TableRow className="border-gray-700">
+                  <TableHead className="text-gray-400">Name</TableHead>
+                  <TableHead className="text-gray-400">Contact</TableHead>
+                  <TableHead className="text-gray-400">Company</TableHead>
+                  <TableHead className="text-gray-400">Type</TableHead>
+                  <TableHead className="text-gray-400">Status</TableHead>
+                  <TableHead className="text-gray-400">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredClients.map((client) => (
-                  <TableRow key={client.id}>
+                  <TableRow key={client.id} className="border-gray-700 hover:bg-gray-800/50">
                     <TableCell>
                       <div>
-                        <p className="font-medium">{client.full_name}</p>
+                        <p className="font-medium text-white">{client.full_name}</p>
                         {client.address && (
-                          <p className="text-sm text-gray-500 flex items-center mt-1">
+                          <p className="text-sm text-gray-300 flex items-center mt-1">
                             <MapPin className="w-3 h-3 mr-1" />
                             {client.address}
                           </p>
@@ -188,19 +188,19 @@ const Clients = () => {
                     </TableCell>
                     <TableCell>
                       <div className="space-y-1">
-                        <p className="text-sm flex items-center">
+                        <p className="text-sm text-gray-300 flex items-center">
                           <Mail className="w-3 h-3 mr-1" />
                           {client.email}
                         </p>
                         {client.phone && (
-                          <p className="text-sm flex items-center">
+                          <p className="text-sm text-gray-300 flex items-center">
                             <Phone className="w-3 h-3 mr-1" />
                             {client.phone}
                           </p>
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>{client.company || 'N/A'}</TableCell>
+                    <TableCell className="text-gray-300">{client.company || 'N/A'}</TableCell>
                     <TableCell>
                       <Badge variant="outline" className="capitalize">
                         {client.client_type || 'Individual'}
