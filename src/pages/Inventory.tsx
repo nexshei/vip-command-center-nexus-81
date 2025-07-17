@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Search, Filter, Edit, Trash2, Package, MapPin, Calendar } from 'lucide-react';
+import { Plus, Search, Filter, Edit, Trash2, Package, MapPin, Calendar, RefreshCw } from 'lucide-react';
 import { useInventory, useDeleteInventoryItem } from '@/hooks/useInventory';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -134,16 +134,29 @@ const Inventory = () => {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-vip-black">Inventory Management</h1>
-          <p className="text-vip-gold/60 mt-1">Track and manage your event inventory</p>
+          <h1 className="text-3xl font-serif font-bold text-white">Inventory Management</h1>
+          <p className="text-white/60 mt-1">Track and manage your event inventory</p>
         </div>
-        <Button
-          onClick={() => setIsAddModalOpen(true)}
-          className="bg-vip-gold hover:bg-vip-gold/80 text-black"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Item
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            onClick={() => { 
+              refetch(); 
+              toast({ title: "Refreshed", description: "Inventory data has been refreshed" }); 
+            }} 
+            variant="outline"
+            className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
+          <Button
+            onClick={() => setIsAddModalOpen(true)}
+            className="bg-vip-gold hover:bg-vip-gold/80 text-black"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Item
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">

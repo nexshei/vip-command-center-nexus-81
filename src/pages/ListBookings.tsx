@@ -119,7 +119,10 @@ const ListBookings = () => {
         </div>
         <div className="flex gap-2">
           <Button 
-            onClick={() => refetch()} 
+            onClick={() => { 
+              refetch(); 
+              toast({ title: "Refreshed", description: "Meeting requests data has been refreshed" }); 
+            }} 
             variant="outline"
             className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
           >

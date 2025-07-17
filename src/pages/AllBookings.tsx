@@ -158,7 +158,10 @@ const AllBookings = () => {
           </div>
           <div className="flex gap-2">
             <Button 
-              onClick={() => refetch()} 
+              onClick={() => { 
+                refetch(); 
+                toast({ title: "Refreshed", description: "Bookings data has been refreshed" }); 
+              }} 
               variant="outline"
               className="text-vip-gold border-vip-gold/30 hover:bg-vip-gold/10"
             >

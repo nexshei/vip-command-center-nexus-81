@@ -119,8 +119,8 @@ const Clients = () => {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-black">Clients</h1>
-          <p className="text-black/60 mt-1">Manage your VIP client relationships</p>
+          <h1 className="text-3xl font-serif font-bold text-white">Clients</h1>
+          <p className="text-white/60 mt-1">Manage your VIP client relationships</p>
         </div>
         <Button
           onClick={() => setIsAddModalOpen(true)}

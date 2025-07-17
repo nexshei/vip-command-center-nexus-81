@@ -236,8 +236,8 @@ const Subscribers = () => {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-vip-black">Subscribers</h1>
-          <p className="text-vip-gold/60 mt-1">Manage your newsletter subscriber base</p>
+          <h1 className="text-3xl font-serif font-bold text-white">Subscribers</h1>
+          <p className="text-white/60 mt-1">Manage your newsletter subscriber base</p>
         </div>
         <div className="flex gap-2">
           <Button onClick={handleRefresh} variant="outline">

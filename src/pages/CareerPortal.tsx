@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { JobOpeningModalTrigger } from '@/components/modals/JobOpeningModal';
 import { EditJobModal } from '@/components/modals/EditJobModal';
@@ -125,10 +127,24 @@ const CareerPortal = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-vip-black">Career Portal Management</h1>
-          <p className="text-vip-gold/80 mt-2">Manage job openings and track recruitment pipeline</p>
+          <h1 className="text-3xl font-serif font-bold text-white">Career Portal Management</h1>
+          <p className="text-white/60 mt-2">Manage job openings and track recruitment pipeline</p>
         </div>
-        <JobOpeningModalTrigger onJobAdded={handleJobAdded} />
+        <div className="flex gap-2">
+          <Button 
+            onClick={() => { 
+              refetchJobs(); 
+              refetchApplications(); 
+              toast({ title: "Refreshed", description: "Career data has been refreshed" }); 
+            }} 
+            variant="outline"
+            className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
+          <JobOpeningModalTrigger onJobAdded={handleJobAdded} />
+        </div>
       </div>
 
       {/* Summary Stats */}

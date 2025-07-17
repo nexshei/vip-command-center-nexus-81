@@ -20,11 +20,13 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useQuotes } from '@/hooks/useQuotes';
+import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 const ListQuotes = () => {
   const navigate = useNavigate();
   const { quotes, isLoading, refetch, deleteQuote } = useQuotes();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
@@ -96,8 +98,11 @@ const ListQuotes = () => {
               <Plus className="h-4 w-4 mr-2" />
               Generate New Quote
             </Button>
-            <Button
-              onClick={refetch}
+            <Button 
+              onClick={() => { 
+                refetch(); 
+                toast({ title: "Refreshed", description: "Quotes data has been refreshed" }); 
+              }}
               variant="outline"
               size="sm"
             >
