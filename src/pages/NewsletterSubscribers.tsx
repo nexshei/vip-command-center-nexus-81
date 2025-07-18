@@ -201,8 +201,8 @@ const NewsletterSubscribers = () => {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-vip-black">Newsletter Subscribers</h1>
-          <p className="text-vip-gold/60 mt-1">Manage your newsletter subscriber base</p>
+          <h1 className="text-3xl font-serif font-bold text-white">Newsletter Subscribers</h1>
+          <p className="text-white/60 mt-1">Manage your newsletter subscriber base</p>
         </div>
         <div className="flex gap-2">
           <Button onClick={handleAddTestSubscription} variant="outline" disabled={addTestSubscription.isPending}>
@@ -227,8 +227,8 @@ const NewsletterSubscribers = () => {
             <div className="flex items-center">
               <Mail className="h-8 w-8 text-vip-gold" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Subscribers</p>
-                <p className="text-2xl font-bold">{subscriptions.length}</p>
+                <p className="text-sm font-medium text-white/70">Total Subscribers</p>
+                <p className="text-2xl font-bold text-white">{subscriptions.length}</p>
               </div>
             </div>
           </CardContent>
@@ -238,8 +238,8 @@ const NewsletterSubscribers = () => {
             <div className="flex items-center">
               <UserPlus className="h-8 w-8 text-green-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Active Subscribers</p>
-                <p className="text-2xl font-bold">{activeCount}</p>
+                <p className="text-sm font-medium text-white/70">Active Subscribers</p>
+                <p className="text-2xl font-bold text-white">{activeCount}</p>
               </div>
             </div>
           </CardContent>
@@ -249,8 +249,8 @@ const NewsletterSubscribers = () => {
             <div className="flex items-center">
               <Mail className="h-8 w-8 text-red-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Unsubscribed</p>
-                <p className="text-2xl font-bold">{inactiveCount}</p>
+                <p className="text-sm font-medium text-white/70">Unsubscribed</p>
+                <p className="text-2xl font-bold text-white">{inactiveCount}</p>
               </div>
             </div>
           </CardContent>
@@ -260,8 +260,8 @@ const NewsletterSubscribers = () => {
             <div className="flex items-center">
               <Calendar className="h-8 w-8 text-blue-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">This Month</p>
-                <p className="text-2xl font-bold">{thisMonthCount}</p>
+                <p className="text-sm font-medium text-white/70">This Month</p>
+                <p className="text-2xl font-bold text-white">{thisMonthCount}</p>
               </div>
             </div>
           </CardContent>
@@ -272,7 +272,7 @@ const NewsletterSubscribers = () => {
       <Card className="vip-glass border-vip-gold/20">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-xl font-serif">Newsletter Subscription Management</CardTitle>
+            <CardTitle className="text-xl font-serif text-white">Newsletter Subscription Management</CardTitle>
             <div className="flex items-center space-x-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -280,11 +280,11 @@ const NewsletterSubscribers = () => {
                   placeholder="Search by email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 w-64"
+                  className="pl-10 w-64 bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400"
                 />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-40">
+                <SelectTrigger className="w-40 bg-gray-800/50 border-gray-600 text-white">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -322,23 +322,23 @@ const NewsletterSubscribers = () => {
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead>Email Address</TableHead>
-                      <TableHead>Source</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Subscribed Date</TableHead>
-                      <TableHead>Unsubscribed Date</TableHead>
+                    <TableRow className="border-gray-700">
+                      <TableHead className="text-gray-400">Email Address</TableHead>
+                      <TableHead className="text-gray-400">Source</TableHead>
+                      <TableHead className="text-gray-400">Status</TableHead>
+                      <TableHead className="text-gray-400">Subscribed Date</TableHead>
+                      <TableHead className="text-gray-400">Unsubscribed Date</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {paginatedSubscriptions.map((subscription) => (
-                      <TableRow key={subscription.id} className="hover:bg-gray-50">
+                      <TableRow key={subscription.id} className="border-gray-700 hover:bg-gray-800/50">
                         <TableCell>
                           <div className="flex items-center">
                             <Mail className="w-4 h-4 mr-2 text-gray-400" />
                             <div>
-                              <p className="font-medium">{subscription.email}</p>
-                              <p className="text-xs text-gray-500">ID: {subscription.id.slice(0, 8)}...</p>
+                              <p className="font-medium text-white">{subscription.email}</p>
+                              <p className="text-xs text-gray-300">ID: {subscription.id.slice(0, 8)}...</p>
                             </div>
                           </div>
                         </TableCell>
@@ -356,7 +356,7 @@ const NewsletterSubscribers = () => {
                           {subscription.subscribed_at ? (
                             <div className="flex items-center">
                               <Calendar className="w-3 h-3 mr-1 text-gray-400" />
-                              <span className="text-sm">{formatDate(subscription.subscribed_at)}</span>
+                              <span className="text-sm text-gray-300">{formatDate(subscription.subscribed_at)}</span>
                             </div>
                           ) : (
                             <span className="text-gray-400">N/A</span>
@@ -366,7 +366,7 @@ const NewsletterSubscribers = () => {
                           {subscription.unsubscribed_at ? (
                             <div className="flex items-center">
                               <Calendar className="w-3 h-3 mr-1 text-gray-400" />
-                              <span className="text-sm">{formatDate(subscription.unsubscribed_at)}</span>
+                              <span className="text-sm text-gray-300">{formatDate(subscription.unsubscribed_at)}</span>
                             </div>
                           ) : (
                             <span className="text-gray-400">N/A</span>

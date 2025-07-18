@@ -165,8 +165,8 @@ const Inventory = () => {
             <div className="flex items-center">
               <Package className="h-8 w-8 text-vip-gold" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Items</p>
-                <p className="text-2xl font-bold">{inventory.length}</p>
+                <p className="text-sm font-medium text-white/70">Total Items</p>
+                <p className="text-2xl font-bold text-white">{inventory.length}</p>
               </div>
             </div>
           </CardContent>
@@ -176,8 +176,8 @@ const Inventory = () => {
             <div className="flex items-center">
               <Package className="h-8 w-8 text-green-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">In Stock</p>
-                <p className="text-2xl font-bold">
+                <p className="text-sm font-medium text-white/70">In Stock</p>
+                <p className="text-2xl font-bold text-white">
                   {inventory.filter(item => (item.quantity || 0) > 0).length}
                 </p>
               </div>
@@ -189,8 +189,8 @@ const Inventory = () => {
             <div className="flex items-center">
               <Package className="h-8 w-8 text-red-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Out of Stock</p>
-                <p className="text-2xl font-bold">
+                <p className="text-sm font-medium text-white/70">Out of Stock</p>
+                <p className="text-2xl font-bold text-white">
                   {inventory.filter(item => (item.quantity || 0) === 0).length}
                 </p>
               </div>
@@ -202,8 +202,8 @@ const Inventory = () => {
             <div className="flex items-center">
               <Package className="h-8 w-8 text-yellow-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Low Stock</p>
-                <p className="text-2xl font-bold">
+                <p className="text-sm font-medium text-white/70">Low Stock</p>
+                <p className="text-2xl font-bold text-white">
                   {inventory.filter(item => (item.quantity || 0) > 0 && (item.quantity || 0) < 10).length}
                 </p>
               </div>
