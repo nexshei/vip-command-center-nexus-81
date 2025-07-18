@@ -85,12 +85,12 @@ const ContactMessages = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'reviewing': return 'bg-blue-100 text-blue-800';
-      case 'reviewed': return 'bg-purple-100 text-purple-800';
-      case 'resolved': return 'bg-emerald-100 text-emerald-800';
-      case 'completed': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'pending': return 'bg-yellow-100/20 text-yellow-300 border-yellow-400/30';
+      case 'reviewing': return 'bg-blue-100/20 text-blue-300 border-blue-400/30';
+      case 'reviewed': return 'bg-purple-100/20 text-purple-300 border-purple-400/30';
+      case 'resolved': return 'bg-emerald-100/20 text-emerald-300 border-emerald-400/30';
+      case 'completed': return 'bg-green-100/20 text-green-300 border-green-400/30';
+      default: return 'bg-gray-100/20 text-gray-300 border-gray-400/30';
     }
   };
 
@@ -172,7 +172,7 @@ const ContactMessages = () => {
             <CardTitle className="text-sm font-medium text-vip-gold/80">Total Messages</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-black">{submissions.length}</div>
+            <div className="text-2xl font-bold text-vip-gold">{submissions.length}</div>
           </CardContent>
         </Card>
         
@@ -181,7 +181,7 @@ const ContactMessages = () => {
             <CardTitle className="text-sm font-medium text-vip-gold/80">Pending</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-black">
+            <div className="text-2xl font-bold text-vip-gold">
               {submissions.filter(s => s.status === 'pending').length}
             </div>
           </CardContent>
@@ -192,7 +192,7 @@ const ContactMessages = () => {
             <CardTitle className="text-sm font-medium text-vip-gold/80">Reviewed</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-black">
+            <div className="text-2xl font-bold text-vip-gold">
               {submissions.filter(s => s.status === 'reviewed').length}
             </div>
           </CardContent>
@@ -203,7 +203,7 @@ const ContactMessages = () => {
             <CardTitle className="text-sm font-medium text-vip-gold/80">Resolved</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-black">
+            <div className="text-2xl font-bold text-vip-gold">
               {submissions.filter(s => s.status === 'resolved').length}
             </div>
           </CardContent>
@@ -243,7 +243,7 @@ const ContactMessages = () => {
       {/* Messages Table */}
       <Card className="vip-glass border-vip-gold/20">
         <CardHeader>
-          <CardTitle className="flex items-center text-vip-black">
+          <CardTitle className="flex items-center text-vip-gold">
             <MessageSquare className="h-5 w-5 mr-2 text-vip-gold" />
             Contact Submissions ({filteredSubmissions.length})
           </CardTitle>
@@ -251,21 +251,21 @@ const ContactMessages = () => {
         <CardContent>
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Subject</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Actions</TableHead>
+              <TableRow className="border-vip-gold/20">
+                <TableHead className="text-vip-gold font-medium">Name</TableHead>
+                <TableHead className="text-vip-gold font-medium">Email</TableHead>
+                <TableHead className="text-vip-gold font-medium">Subject</TableHead>
+                <TableHead className="text-vip-gold font-medium">Status</TableHead>
+                <TableHead className="text-vip-gold font-medium">Date</TableHead>
+                <TableHead className="text-vip-gold font-medium">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredSubmissions.map((submission) => (
-                <TableRow key={submission.id}>
-                  <TableCell className="font-medium">{submission.full_name}</TableCell>
-                  <TableCell>{submission.email}</TableCell>
-                  <TableCell>{submission.subject || 'No subject'}</TableCell>
+                <TableRow key={submission.id} className="border-vip-gold/10 hover:bg-vip-gold/5">
+                  <TableCell className="font-medium text-white">{submission.full_name}</TableCell>
+                  <TableCell className="text-vip-gold/80">{submission.email}</TableCell>
+                  <TableCell className="text-vip-gold/80">{submission.subject || 'No subject'}</TableCell>
                   <TableCell>
                     <Select
                       value={submission.status}
@@ -287,7 +287,7 @@ const ContactMessages = () => {
                       </SelectContent>
                     </Select>
                   </TableCell>
-                  <TableCell>{new Date(submission.created_at).toLocaleDateString()}</TableCell>
+                  <TableCell className="text-vip-gold/80">{new Date(submission.created_at).toLocaleDateString()}</TableCell>
                   <TableCell>
                     <Button 
                       variant="ghost" 
@@ -297,7 +297,7 @@ const ContactMessages = () => {
                         setSelectedSubmissionName(submission.full_name);
                         setShowDeleteModal(true);
                       }}
-                      className="text-red-600 hover:text-red-800 hover:bg-red-50"
+                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
                     >
                       <Trash2 className="w-4 h-4 mr-1" />
                       Delete
@@ -315,39 +315,39 @@ const ContactMessages = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <Card className="max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto vip-glass border-vip-gold/20">
             <CardHeader>
-              <CardTitle className="text-vip-black">Message Details</CardTitle>
+              <CardTitle className="text-vip-gold">Message Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-vip-black">Name</label>
-                  <p className="text-vip-gold/80">{selectedSubmission.full_name}</p>
+                  <label className="text-sm font-medium text-vip-gold">Name</label>
+                  <p className="text-white">{selectedSubmission.full_name}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-vip-black">Email</label>
-                  <p className="text-vip-gold/80">{selectedSubmission.email}</p>
+                  <label className="text-sm font-medium text-vip-gold">Email</label>
+                  <p className="text-white">{selectedSubmission.email}</p>
                 </div>
               </div>
               
               <div>
-                <label className="text-sm font-medium text-vip-black">Subject</label>
-                <p className="text-vip-gold/80">{selectedSubmission.subject || 'No subject'}</p>
+                <label className="text-sm font-medium text-vip-gold">Subject</label>
+                <p className="text-white">{selectedSubmission.subject || 'No subject'}</p>
               </div>
               
               <div>
-                <label className="text-sm font-medium text-vip-black">Message</label>
-                <div className="p-3 bg-white/50 rounded border border-vip-gold/20">
-                  <p className="text-vip-black whitespace-pre-wrap">{selectedSubmission.message}</p>
+                <label className="text-sm font-medium text-vip-gold">Message</label>
+                <div className="p-3 bg-vip-gold/10 rounded border border-vip-gold/20">
+                  <p className="text-white whitespace-pre-wrap">{selectedSubmission.message}</p>
                 </div>
               </div>
               
               <div>
-                <label className="text-sm font-medium text-vip-black">Admin Notes</label>
+                <label className="text-sm font-medium text-vip-gold">Admin Notes</label>
                 <Textarea
                   value={adminNotes}
                   onChange={(e) => setAdminNotes(e.target.value)}
                   placeholder="Add your notes here..."
-                  className="mt-1 border-vip-gold/30"
+                  className="mt-1 border-vip-gold/30 bg-vip-gold/5 text-white placeholder:text-vip-gold/50"
                   rows={3}
                 />
               </div>
@@ -365,7 +365,7 @@ const ContactMessages = () => {
                 </Button>
                 <Button
                   onClick={handleSaveNotes}
-                  className="bg-vip-gold text-white hover:bg-vip-gold-dark"
+                  className="bg-vip-gold text-black hover:bg-vip-gold/80"
                   disabled={updateStatusMutation.isPending}
                 >
                   {updateStatusMutation.isPending ? 'Saving...' : 'Save Notes'}

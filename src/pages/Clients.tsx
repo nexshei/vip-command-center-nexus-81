@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Plus, Search, Filter, Edit, Trash2, Phone, Mail, MapPin, Eye } from 'lucide-react';
+import { Plus, Search, Filter, Edit, Trash2, Phone, Mail, MapPin, Eye, RefreshCw } from 'lucide-react';
 import { useClients, useDeleteClient, Client } from '@/hooks/useClients';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,7 +34,7 @@ const Clients = () => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   
-  const { data: clients = [], isLoading, error } = useClients();
+  const { data: clients = [], isLoading, error, refetch } = useClients();
   const deleteClientMutation = useDeleteClient();
   const { toast } = useToast();
 
@@ -116,20 +116,37 @@ const Clients = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-serif font-bold text-white">Clients</h1>
-          <p className="text-white/60 mt-1">Manage your VIP client relationships</p>
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-serif font-bold text-vip-gold mb-2">Client Management</h1>
+            <p className="text-vip-gold/60">Exceptional management of your exclusive VIP client relationships</p>
+          </div>
+          <div className="flex gap-3">
+            <Button
+              onClick={() => {
+                refetch();
+                toast({
+                  title: "Refreshed",
+                  description: "Client data has been refreshed successfully.",
+                });
+              }}
+              variant="outline"
+              className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10 transition-all duration-200"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Refresh
+            </Button>
+            <Button
+              onClick={() => setIsAddModalOpen(true)}
+              className="bg-vip-gold hover:bg-vip-gold/80 text-black transition-all duration-200"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Client
+            </Button>
+          </div>
         </div>
-        <Button
-          onClick={() => setIsAddModalOpen(true)}
-          className="bg-vip-gold hover:bg-vip-gold/80 text-black"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Client
-        </Button>
-      </div>
 
       <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
         <CardHeader>
@@ -306,6 +323,7 @@ const Clients = () => {
         onOpenChange={setEditModalOpen}
         client={selectedClient}
       />
+      </div>
     </div>
   );
 };

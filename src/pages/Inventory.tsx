@@ -131,24 +131,25 @@ const Inventory = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-serif font-bold text-white">Inventory Management</h1>
-          <p className="text-white/60 mt-1">Track and manage your event inventory</p>
-        </div>
-        <div className="flex gap-2">
-          <Button 
-            onClick={() => { 
-              refetch(); 
-              toast({ title: "Refreshed", description: "Inventory data has been refreshed" }); 
-            }} 
-            variant="outline"
-            className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10"
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
-          </Button>
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-serif font-bold text-vip-gold mb-2">Inventory Management</h1>
+            <p className="text-vip-gold/60">Professional tracking and management of your premium event inventory</p>
+          </div>
+          <div className="flex gap-3">
+            <Button 
+              onClick={() => { 
+                refetch(); 
+                toast({ title: "Refreshed", description: "Inventory data has been refreshed successfully" }); 
+              }} 
+              variant="outline"
+              className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10 transition-all duration-200"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
           <Button
             onClick={() => setIsAddModalOpen(true)}
             className="bg-vip-gold hover:bg-vip-gold/80 text-black"
@@ -353,6 +354,7 @@ const Inventory = () => {
         description="Are you sure you want to delete this inventory item? This action cannot be undone."
         itemName={selectedItemName}
       />
+      </div>
     </div>
   );
 };

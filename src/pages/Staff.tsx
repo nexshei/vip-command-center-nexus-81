@@ -67,13 +67,13 @@ const Staff = () => {
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'active':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100/20 text-green-300 border-green-400/30';
       case 'inactive':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100/20 text-red-300 border-red-400/30';
       case 'on_leave':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-100/20 text-yellow-300 border-yellow-400/30';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100/20 text-gray-300 border-gray-400/30';
     }
   };
 
@@ -154,59 +154,59 @@ const Staff = () => {
           ) : (
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Staff Member</TableHead>
-                  <TableHead>Position</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead>Department</TableHead>
-                  <TableHead>Hire Date</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
+                <TableRow className="border-vip-gold/20">
+                  <TableHead className="text-vip-gold font-medium">Staff Member</TableHead>
+                  <TableHead className="text-vip-gold font-medium">Position</TableHead>
+                  <TableHead className="text-vip-gold font-medium">Contact</TableHead>
+                  <TableHead className="text-vip-gold font-medium">Department</TableHead>
+                  <TableHead className="text-vip-gold font-medium">Hire Date</TableHead>
+                  <TableHead className="text-vip-gold font-medium">Status</TableHead>
+                  <TableHead className="text-vip-gold font-medium">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredStaff.map((member) => (
-                  <TableRow key={member.id}>
+                  <TableRow key={member.id} className="border-vip-gold/10 hover:bg-vip-gold/5">
                     <TableCell>
                       <div className="flex items-center space-x-3">
                         <Avatar>
                           <AvatarImage src={member.profile_image_url || ''} />
-                          <AvatarFallback>
+                          <AvatarFallback className="bg-vip-gold/20 text-vip-gold">
                             {member.full_name.split(' ').map(n => n[0]).join('')}
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="font-medium">{member.full_name}</p>
-                          <p className="text-sm text-gray-500">{member.email}</p>
+                          <p className="font-medium text-white">{member.full_name}</p>
+                          <p className="text-sm text-vip-gold/60">{member.email}</p>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <p className="font-medium">{member.position}</p>
+                      <p className="font-medium text-vip-gold">{member.position}</p>
                     </TableCell>
                     <TableCell>
                       <div className="space-y-1">
-                        <p className="text-sm flex items-center">
-                          <Mail className="w-3 h-3 mr-1" />
+                        <p className="text-sm flex items-center text-vip-gold/80">
+                          <Mail className="w-3 h-3 mr-1 text-vip-gold" />
                           {member.email}
                         </p>
                         {member.phone && (
-                          <p className="text-sm flex items-center">
-                            <Phone className="w-3 h-3 mr-1" />
+                          <p className="text-sm flex items-center text-vip-gold/80">
+                            <Phone className="w-3 h-3 mr-1 text-vip-gold" />
                             {member.phone}
                           </p>
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>{member.department || 'N/A'}</TableCell>
+                    <TableCell className="text-vip-gold/80">{member.department || 'N/A'}</TableCell>
                     <TableCell>
                       {member.hire_date ? (
-                        <div className="flex items-center">
-                          <Calendar className="w-3 h-3 mr-1" />
+                        <div className="flex items-center text-vip-gold/80">
+                          <Calendar className="w-3 h-3 mr-1 text-vip-gold" />
                           {new Date(member.hire_date).toLocaleDateString()}
                         </div>
                       ) : (
-                        'N/A'
+                        <span className="text-vip-gold/60">N/A</span>
                       )}
                     </TableCell>
                     <TableCell>
@@ -222,6 +222,7 @@ const Staff = () => {
                               onClick={() => {
                                 window.open(`mailto:${member.email}`, '_blank');
                               }}
+                              className="text-vip-gold hover:bg-vip-gold/10"
                             >
                               <Mail className="w-4 h-4" />
                             </Button>
@@ -229,6 +230,7 @@ const Staff = () => {
                               variant="ghost" 
                               size="sm"
                               onClick={() => handleEditStaff(member)}
+                              className="text-vip-gold hover:bg-vip-gold/10"
                             >
                               <Eye className="w-4 h-4" />
                             </Button>
@@ -236,6 +238,7 @@ const Staff = () => {
                               variant="ghost" 
                               size="sm"
                               onClick={() => handleEditStaff(member)}
+                              className="text-vip-gold hover:bg-vip-gold/10"
                             >
                               <Edit className="w-4 h-4" />
                             </Button>
@@ -247,8 +250,9 @@ const Staff = () => {
                                 setSelectedStaffName(member.full_name);
                                 setShowDeleteModal(true);
                               }}
+                              className="text-red-400 hover:bg-red-500/10"
                             >
-                              <Trash2 className="w-4 h-4 text-red-500" />
+                              <Trash2 className="w-4 h-4" />
                             </Button>
                           </div>
                         </TableCell>

@@ -148,32 +148,32 @@ const Careers = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-100/20 text-yellow-300 border-yellow-400/30';
       case 'reviewing':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-100/20 text-blue-300 border-blue-400/30';
       case 'approved':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100/20 text-green-300 border-green-400/30';
       case 'in_progress':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-purple-100/20 text-purple-300 border-purple-400/30';
       case 'completed':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100/20 text-green-300 border-green-400/30';
       case 'cancelled':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100/20 text-red-300 border-red-400/30';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100/20 text-gray-300 border-gray-400/30';
     }
   };
 
   const getJobStatusColor = (status: string) => {
     switch (status) {
       case 'active':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100/20 text-green-300 border-green-400/30';
       case 'closed':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100/20 text-red-300 border-red-400/30';
       case 'draft':
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100/20 text-gray-300 border-gray-400/30';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100/20 text-gray-300 border-gray-400/30';
     }
   };
 
@@ -215,81 +215,82 @@ const Careers = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-serif font-bold text-vip-black">Career Management</h1>
-          <p className="text-vip-gold/60 mt-1">Manage job postings and applications</p>
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-serif font-bold text-vip-gold">Career Management</h1>
+            <p className="text-vip-gold/60 mt-1">Manage job postings and applications</p>
+          </div>
+          <JobOpeningModalTrigger onJobAdded={handleJobAdded} />
         </div>
-        <JobOpeningModalTrigger onJobAdded={handleJobAdded} />
-      </div>
 
-      {/* Enhanced Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
-          <CardContent className="p-4">
-            <div className="flex items-center">
-              <Briefcase className="h-8 w-8 text-blue-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-blue-800">Total Jobs</p>
-                <p className="text-2xl font-bold text-blue-900">{jobs.length}</p>
+        {/* Enhanced Statistics */}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <Card className="vip-glass border-vip-gold/20">
+            <CardContent className="p-4">
+              <div className="flex items-center">
+                <Briefcase className="h-8 w-8 text-vip-gold" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-vip-gold/80">Total Jobs</p>
+                  <p className="text-2xl font-bold text-vip-gold">{jobs.length}</p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
-          <CardContent className="p-4">
-            <div className="flex items-center">
-              <TrendingUp className="h-8 w-8 text-green-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-green-800">Active Jobs</p>
-                <p className="text-2xl font-bold text-green-900">{jobs.filter(j => j.status === 'active').length}</p>
+            </CardContent>
+          </Card>
+          
+          <Card className="vip-glass border-vip-gold/20">
+            <CardContent className="p-4">
+              <div className="flex items-center">
+                <TrendingUp className="h-8 w-8 text-green-400" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-green-300">Active Jobs</p>
+                  <p className="text-2xl font-bold text-green-400">{jobs.filter(j => j.status === 'active').length}</p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
-          <CardContent className="p-4">
-            <div className="flex items-center">
-              <Users className="h-8 w-8 text-purple-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-purple-800">Applications</p>
-                <p className="text-2xl font-bold text-purple-900">{applications.length}</p>
+          <Card className="vip-glass border-vip-gold/20">
+            <CardContent className="p-4">
+              <div className="flex items-center">
+                <Users className="h-8 w-8 text-purple-400" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-purple-300">Applications</p>
+                  <p className="text-2xl font-bold text-purple-400">{applications.length}</p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200">
-          <CardContent className="p-4">
-            <div className="flex items-center">
-              <Clock className="h-8 w-8 text-yellow-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-yellow-800">Pending</p>
-                <p className="text-2xl font-bold text-yellow-900">
-                  {applications.filter(a => a.status === 'pending').length}
-                </p>
+          <Card className="vip-glass border-vip-gold/20">
+            <CardContent className="p-4">
+              <div className="flex items-center">
+                <Clock className="h-8 w-8 text-yellow-400" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-yellow-300">Pending</p>
+                  <p className="text-2xl font-bold text-yellow-400">
+                    {applications.filter(a => a.status === 'pending').length}
+                  </p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200">
-          <CardContent className="p-4">
-            <div className="flex items-center">
-              <Award className="h-8 w-8 text-emerald-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-emerald-800">Hired</p>
-                <p className="text-2xl font-bold text-emerald-900">
-                  {applications.filter(a => a.status === 'approved').length}
-                </p>
+          <Card className="vip-glass border-vip-gold/20">
+            <CardContent className="p-4">
+              <div className="flex items-center">
+                <Award className="h-8 w-8 text-emerald-400" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-emerald-300">Hired</p>
+                  <p className="text-2xl font-bold text-emerald-400">
+                    {applications.filter(a => a.status === 'approved').length}
+                  </p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-2">
@@ -338,52 +339,52 @@ const Careers = () => {
               ) : (
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead>Candidate</TableHead>
-                      <TableHead>Position</TableHead>
-                      <TableHead>Contact</TableHead>
-                      <TableHead>Applied Date</TableHead>
-                      <TableHead>Interview Date</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Actions</TableHead>
+                    <TableRow className="border-vip-gold/20">
+                      <TableHead className="text-vip-gold font-medium">Candidate</TableHead>
+                      <TableHead className="text-vip-gold font-medium">Position</TableHead>
+                      <TableHead className="text-vip-gold font-medium">Contact</TableHead>
+                      <TableHead className="text-vip-gold font-medium">Applied Date</TableHead>
+                      <TableHead className="text-vip-gold font-medium">Interview Date</TableHead>
+                      <TableHead className="text-vip-gold font-medium">Status</TableHead>
+                      <TableHead className="text-vip-gold font-medium">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredApplications.map((application) => (
-                      <TableRow key={application.id}>
+                      <TableRow key={application.id} className="border-vip-gold/10 hover:bg-vip-gold/5">
                         <TableCell>
                           <div className="flex items-center space-x-2">
-                            <User className="w-4 h-4" />
-                            <p className="font-medium">{application.full_name}</p>
+                            <User className="w-4 h-4 text-vip-gold" />
+                            <p className="font-medium text-white">{application.full_name}</p>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline">
+                          <Badge variant="outline" className="border-vip-gold/30 text-vip-gold">
                             {application.position || 'Not Specified'}
                           </Badge>
                         </TableCell>
                         <TableCell>
                           <div className="space-y-1">
-                            <p className="text-sm">{application.email}</p>
+                            <p className="text-sm text-vip-gold/80">{application.email}</p>
                             {application.phone && (
-                              <p className="text-sm text-gray-500">{application.phone}</p>
+                              <p className="text-sm text-vip-gold/60">{application.phone}</p>
                             )}
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center">
-                            <Calendar className="w-3 h-3 mr-1" />
+                          <div className="flex items-center text-vip-gold/80">
+                            <Calendar className="w-3 h-3 mr-1 text-vip-gold" />
                             {new Date(application.created_at).toLocaleDateString()}
                           </div>
                         </TableCell>
                         <TableCell>
                           {application.interview_date ? (
-                            <div className="flex items-center">
-                              <Calendar className="w-3 h-3 mr-1" />
+                            <div className="flex items-center text-vip-gold/80">
+                              <Calendar className="w-3 h-3 mr-1 text-vip-gold" />
                               {new Date(application.interview_date).toLocaleDateString()}
                             </div>
                           ) : (
-                            'Not Scheduled'
+                            <span className="text-vip-gold/60">Not Scheduled</span>
                           )}
                         </TableCell>
                         <TableCell>
@@ -397,6 +398,7 @@ const Careers = () => {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleViewApplication(application)}
+                              className="text-vip-gold hover:bg-vip-gold/10"
                             >
                               <Eye className="w-4 h-4" />
                             </Button>
@@ -404,6 +406,7 @@ const Careers = () => {
                               variant="ghost" 
                               size="sm"
                               onClick={() => handleEditApplication(application)}
+                              className="text-vip-gold hover:bg-vip-gold/10"
                             >
                               <Edit className="w-4 h-4" />
                             </Button>
@@ -415,7 +418,7 @@ const Careers = () => {
                                 setSelectedApplicationName(application.full_name);
                                 setShowDeleteModal(true);
                               }}
-                              className="text-red-600 hover:bg-red-50"
+                              className="text-red-400 hover:bg-red-500/10"
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>
@@ -690,6 +693,7 @@ const Careers = () => {
         description="Are you sure you want to delete this job posting? This action cannot be undone and will remove it from the website."
         itemName={selectedJobTitle}
       />
+      </div>
     </div>
   );
 };
