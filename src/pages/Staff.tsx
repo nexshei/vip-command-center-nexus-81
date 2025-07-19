@@ -119,25 +119,25 @@ const Staff = () => {
         </Button>
       </div>
 
-      <Card className="vip-glass border-vip-gold/20">
+      <Card className="vip-glass border-vip-gold/20 bg-black/40">
         <CardHeader>
           <div className="flex items-center space-x-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-vip-gold/60 w-4 h-4" />
               <Input
                 placeholder="Search staff..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 bg-black/20 border-vip-gold/20 text-vip-gold placeholder:text-vip-gold/40"
               />
             </div>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10">
               <Filter className="w-4 h-4 mr-2" />
               Filter
             </Button>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="bg-black/20">
           {filteredStaff.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-500">No staff members found</p>
