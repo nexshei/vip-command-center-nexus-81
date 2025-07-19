@@ -167,43 +167,43 @@ const ContactMessages = () => {
 
       {/* Summary Stats */}
       <div className="grid gap-6 md:grid-cols-4">
-        <Card className="vip-glass border-vip-gold/20">
+        <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">Total Messages</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-400">Total Messages</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-gold">{submissions.length}</div>
+            <div className="text-2xl font-bold text-white">{submissions.length}</div>
           </CardContent>
         </Card>
         
-        <Card className="vip-glass border-vip-gold/20">
+        <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">Pending</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-400">Pending</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-gold">
+            <div className="text-2xl font-bold text-yellow-400">
               {submissions.filter(s => s.status === 'pending').length}
             </div>
           </CardContent>
         </Card>
 
-        <Card className="vip-glass border-vip-gold/20">
+        <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">Reviewed</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-400">Reviewed</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-gold">
+            <div className="text-2xl font-bold text-purple-400">
               {submissions.filter(s => s.status === 'reviewed').length}
             </div>
           </CardContent>
         </Card>
 
-        <Card className="vip-glass border-vip-gold/20">
+        <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-vip-gold/80">Resolved</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-400">Resolved</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vip-gold">
+            <div className="text-2xl font-bold text-green-400">
               {submissions.filter(s => s.status === 'resolved').length}
             </div>
           </CardContent>
@@ -241,9 +241,9 @@ const ContactMessages = () => {
       </Card>
 
       {/* Messages Table */}
-      <Card className="vip-glass border-vip-gold/20">
+      <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
         <CardHeader>
-          <CardTitle className="flex items-center text-vip-gold">
+          <CardTitle className="flex items-center text-gray-300">
             <MessageSquare className="h-5 w-5 mr-2 text-vip-gold" />
             Contact Submissions ({filteredSubmissions.length})
           </CardTitle>
@@ -251,53 +251,53 @@ const ContactMessages = () => {
         <CardContent>
           <Table>
             <TableHeader>
-              <TableRow className="border-vip-gold/20">
-                <TableHead className="text-vip-gold font-medium">Name</TableHead>
-                <TableHead className="text-vip-gold font-medium">Email</TableHead>
-                <TableHead className="text-vip-gold font-medium">Subject</TableHead>
-                <TableHead className="text-vip-gold font-medium">Status</TableHead>
-                <TableHead className="text-vip-gold font-medium">Date</TableHead>
-                <TableHead className="text-vip-gold font-medium">Actions</TableHead>
+              <TableRow className="border-gray-700">
+                <TableHead className="text-gray-400">Name</TableHead>
+                <TableHead className="text-gray-400">Email</TableHead>
+                <TableHead className="text-gray-400">Subject</TableHead>
+                <TableHead className="text-gray-400">Status</TableHead>
+                <TableHead className="text-gray-400">Date</TableHead>
+                <TableHead className="text-gray-400">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredSubmissions.map((submission) => (
-                <TableRow key={submission.id} className="border-vip-gold/10 hover:bg-vip-gold/5">
+                <TableRow key={submission.id} className="border-gray-700 hover:bg-gray-800/50">
                   <TableCell className="font-medium text-white">{submission.full_name}</TableCell>
-                  <TableCell className="text-vip-gold/80">{submission.email}</TableCell>
-                  <TableCell className="text-vip-gold/80">{submission.subject || 'No subject'}</TableCell>
+                  <TableCell className="text-gray-300">{submission.email}</TableCell>
+                  <TableCell className="text-gray-300">{submission.subject || 'No subject'}</TableCell>
                   <TableCell>
                     <Select
                       value={submission.status}
                       onValueChange={(value) => handleStatusUpdate(submission, value)}
                     >
-                      <SelectTrigger className="w-36 h-9 border border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500">
+                      <SelectTrigger className="w-36 h-9 bg-gray-800/50 border-gray-600 text-white hover:bg-gray-700/50">
                         <SelectValue>
                           <Badge className={`${getStatusColor(submission.status)} text-xs`}>
                             {submission.status.charAt(0).toUpperCase() + submission.status.slice(1)}
                           </Badge>
                         </SelectValue>
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="reviewing">Reviewing</SelectItem>
-                        <SelectItem value="reviewed">Reviewed</SelectItem>
-                        <SelectItem value="resolved">Resolved</SelectItem>
-                        <SelectItem value="completed">Completed</SelectItem>
+                      <SelectContent className="bg-gray-800 border-gray-600 backdrop-blur-sm">
+                        <SelectItem value="pending" className="text-white hover:bg-vip-gold/20">Pending</SelectItem>
+                        <SelectItem value="reviewing" className="text-white hover:bg-vip-gold/20">Reviewing</SelectItem>
+                        <SelectItem value="reviewed" className="text-white hover:bg-vip-gold/20">Reviewed</SelectItem>
+                        <SelectItem value="resolved" className="text-white hover:bg-vip-gold/20">Resolved</SelectItem>
+                        <SelectItem value="completed" className="text-white hover:bg-vip-gold/20">Completed</SelectItem>
                       </SelectContent>
                     </Select>
                   </TableCell>
-                  <TableCell className="text-vip-gold/80">{new Date(submission.created_at).toLocaleDateString()}</TableCell>
+                  <TableCell className="text-gray-300">{new Date(submission.created_at).toLocaleDateString()}</TableCell>
                   <TableCell>
                     <Button 
-                      variant="ghost" 
+                      variant="outline" 
                       size="sm"
                       onClick={() => {
                         setSelectedSubmissionId(submission.id);
                         setSelectedSubmissionName(submission.full_name);
                         setShowDeleteModal(true);
                       }}
-                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                      className="border-red-600/30 text-red-400 hover:bg-red-600/10"
                     >
                       <Trash2 className="w-4 h-4 mr-1" />
                       Delete
