@@ -224,16 +224,16 @@ const ContactMessages = () => {
               />
             </div>
             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-              <SelectTrigger className="w-48 text-vip-gold border-vip-gold/30 hover:bg-vip-gold/10">
-                <SelectValue placeholder="Filter by status" />
+              <SelectTrigger className="w-48 bg-gray-800/80 border-gray-600 text-white hover:bg-gray-700/80 focus:border-vip-gold/50 shadow-lg backdrop-blur-sm">
+                <SelectValue placeholder="Filter by status" className="text-white" />
               </SelectTrigger>
-              <SelectContent className="bg-gray-800 border-vip-gold/30 backdrop-blur-sm">
-                <SelectItem value="all" className="text-white hover:bg-vip-gold/20">All Statuses</SelectItem>
-                <SelectItem value="pending" className="text-white hover:bg-vip-gold/20">Pending</SelectItem>
-                <SelectItem value="reviewing" className="text-white hover:bg-vip-gold/20">Reviewing</SelectItem>
-                <SelectItem value="reviewed" className="text-white hover:bg-vip-gold/20">Reviewed</SelectItem>
-                <SelectItem value="resolved" className="text-white hover:bg-vip-gold/20">Resolved</SelectItem>
-                <SelectItem value="completed" className="text-white hover:bg-vip-gold/20">Completed</SelectItem>
+              <SelectContent className="bg-gray-800/95 border-gray-600 backdrop-blur-sm shadow-xl z-50">
+                <SelectItem value="all" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">All Statuses</SelectItem>
+                <SelectItem value="pending" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">Pending</SelectItem>
+                <SelectItem value="reviewing" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">Reviewing</SelectItem>
+                <SelectItem value="reviewed" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">Reviewed</SelectItem>
+                <SelectItem value="resolved" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">Resolved</SelectItem>
+                <SelectItem value="completed" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">Completed</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -271,19 +271,29 @@ const ContactMessages = () => {
                       value={submission.status}
                       onValueChange={(value) => handleStatusUpdate(submission, value)}
                     >
-                      <SelectTrigger className="w-36 h-9 bg-gray-800/50 border-gray-600 text-white hover:bg-gray-700/50">
+                      <SelectTrigger className="w-36 h-9 bg-gray-800/80 border-gray-600 text-white hover:bg-gray-700/80 focus:border-vip-gold/50 shadow-md">
                         <SelectValue>
-                          <Badge className={`${getStatusColor(submission.status)} text-xs`}>
+                          <Badge className={`${getStatusColor(submission.status)} text-xs border-0`}>
                             {submission.status.charAt(0).toUpperCase() + submission.status.slice(1)}
                           </Badge>
                         </SelectValue>
                       </SelectTrigger>
-                      <SelectContent className="bg-gray-800 border-gray-600 backdrop-blur-sm">
-                        <SelectItem value="pending" className="text-white hover:bg-vip-gold/20">Pending</SelectItem>
-                        <SelectItem value="reviewing" className="text-white hover:bg-vip-gold/20">Reviewing</SelectItem>
-                        <SelectItem value="reviewed" className="text-white hover:bg-vip-gold/20">Reviewed</SelectItem>
-                        <SelectItem value="resolved" className="text-white hover:bg-vip-gold/20">Resolved</SelectItem>
-                        <SelectItem value="completed" className="text-white hover:bg-vip-gold/20">Completed</SelectItem>
+                      <SelectContent className="bg-gray-800/95 border-gray-600 backdrop-blur-sm shadow-xl z-50">
+                        <SelectItem value="pending" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">
+                          <Badge className="bg-yellow-100/20 text-yellow-300 border-0">Pending</Badge>
+                        </SelectItem>
+                        <SelectItem value="reviewing" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">
+                          <Badge className="bg-blue-100/20 text-blue-300 border-0">Reviewing</Badge>
+                        </SelectItem>
+                        <SelectItem value="reviewed" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">
+                          <Badge className="bg-purple-100/20 text-purple-300 border-0">Reviewed</Badge>
+                        </SelectItem>
+                        <SelectItem value="resolved" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">
+                          <Badge className="bg-emerald-100/20 text-emerald-300 border-0">Resolved</Badge>
+                        </SelectItem>
+                        <SelectItem value="completed" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">
+                          <Badge className="bg-green-100/20 text-green-300 border-0">Completed</Badge>
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </TableCell>
