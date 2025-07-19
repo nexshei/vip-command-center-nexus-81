@@ -305,28 +305,28 @@ const Careers = () => {
         </TabsList>
 
         <TabsContent value="applications">
-          <Card className="vip-glass border-vip-gold/20">
+          <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
             <CardHeader>
               <div className="flex items-center space-x-4">
                 <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
                     placeholder="Search applications..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400"
                   />
                 </div>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-40">
+                  <SelectTrigger className="w-40 text-vip-gold border-vip-gold/30 hover:bg-vip-gold/10">
                     <SelectValue placeholder="Filter by status" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="reviewing">Reviewing</SelectItem>
-                    <SelectItem value="approved">Approved</SelectItem>
-                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                  <SelectContent className="bg-gray-800 border-vip-gold/30 backdrop-blur-sm">
+                    <SelectItem value="all" className="text-white hover:bg-vip-gold/20">All Status</SelectItem>
+                    <SelectItem value="pending" className="text-white hover:bg-vip-gold/20">Pending</SelectItem>
+                    <SelectItem value="reviewing" className="text-white hover:bg-vip-gold/20">Reviewing</SelectItem>
+                    <SelectItem value="approved" className="text-white hover:bg-vip-gold/20">Approved</SelectItem>
+                    <SelectItem value="cancelled" className="text-white hover:bg-vip-gold/20">Cancelled</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
