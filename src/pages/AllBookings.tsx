@@ -328,31 +328,31 @@ const AllBookings = () => {
                             value={booking.status}
                             onValueChange={(newStatus) => handleStatusUpdate(booking.id, newStatus, booking.source)}
                           >
-                            <SelectTrigger className="w-36 h-9 bg-gray-800/80 border-gray-600 text-white hover:bg-gray-700/80 focus:border-vip-gold/50 shadow-md">
+                            <SelectTrigger className="w-40 h-10 bg-gray-800/90 border-gray-600 text-white hover:bg-gray-700/90 focus:border-vip-gold/50 shadow-lg backdrop-blur-sm">
                               <SelectValue>
-                                <Badge className={`${getStatusColor(booking.status)} text-xs border-0`}>
-                                  {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                                <Badge className={`${getStatusColor(booking.status)} text-xs font-semibold border-0 px-3 py-1 min-w-0`}>
+                                  {booking.status.replace('_', ' ').charAt(0).toUpperCase() + booking.status.replace('_', ' ').slice(1)}
                                 </Badge>
                               </SelectValue>
                             </SelectTrigger>
-                            <SelectContent className="bg-gray-800/95 border-gray-600 backdrop-blur-sm shadow-xl z-50">
-                              <SelectItem value="pending" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">
-                                <Badge className="bg-yellow-500 text-white border-0">Pending</Badge>
+                            <SelectContent className="bg-gray-800/95 border-gray-600 backdrop-blur-sm shadow-xl z-[60] min-w-[180px]">
+                              <SelectItem value="pending" className="text-white hover:bg-yellow-500/20 focus:bg-yellow-500/20 p-3">
+                                <Badge className="bg-yellow-500 text-white font-semibold border-0 px-3 py-1 shadow-md">Pending</Badge>
                               </SelectItem>
-                              <SelectItem value="approved" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">
-                                <Badge className="bg-green-500 text-white border-0">Approved</Badge>
+                              <SelectItem value="approved" className="text-white hover:bg-green-500/20 focus:bg-green-500/20 p-3">
+                                <Badge className="bg-green-500 text-white font-semibold border-0 px-3 py-1 shadow-md">Approved</Badge>
                               </SelectItem>
-                              <SelectItem value="rejected" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">
-                                <Badge className="bg-red-500 text-white border-0">Rejected</Badge>
+                              <SelectItem value="rejected" className="text-white hover:bg-red-500/20 focus:bg-red-500/20 p-3">
+                                <Badge className="bg-red-500 text-white font-semibold border-0 px-3 py-1 shadow-md">Rejected</Badge>
                               </SelectItem>
-                              <SelectItem value="in_progress" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">
-                                <Badge className="bg-blue-500 text-white border-0">In Progress</Badge>
+                              <SelectItem value="in_progress" className="text-white hover:bg-blue-500/20 focus:bg-blue-500/20 p-3">
+                                <Badge className="bg-blue-500 text-white font-semibold border-0 px-3 py-1 shadow-md">In Progress</Badge>
                               </SelectItem>
-                              <SelectItem value="completed" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">
-                                <Badge className="bg-gray-500 text-white border-0">Completed</Badge>
+                              <SelectItem value="completed" className="text-white hover:bg-gray-500/20 focus:bg-gray-500/20 p-3">
+                                <Badge className="bg-gray-600 text-white font-semibold border-0 px-3 py-1 shadow-md">Completed</Badge>
                               </SelectItem>
-                              <SelectItem value="cancelled" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">
-                                <Badge className="bg-red-500 text-white border-0">Cancelled</Badge>
+                              <SelectItem value="cancelled" className="text-white hover:bg-red-500/20 focus:bg-red-500/20 p-3">
+                                <Badge className="bg-red-600 text-white font-semibold border-0 px-3 py-1 shadow-md">Cancelled</Badge>
                               </SelectItem>
                             </SelectContent>
                           </Select>
