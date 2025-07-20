@@ -236,35 +236,35 @@ const AllBookings = () => {
               </div>
               
               <Select value={sourceFilter} onValueChange={setSourceFilter}>
-                <SelectTrigger className="bg-gray-800/80 border-gray-600 text-white hover:bg-gray-700/80 focus:border-vip-gold/50 shadow-lg backdrop-blur-sm">
-                  <SelectValue placeholder="Filter by source" className="text-white" />
+                <SelectTrigger className="bg-gray-800/90 border-gray-600 text-white hover:bg-gray-700/90 focus:border-vip-gold/50 shadow-lg backdrop-blur-sm font-medium">
+                  <SelectValue placeholder="Filter by source" className="text-white font-medium" />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800/95 border-gray-600 backdrop-blur-sm shadow-xl z-50">
-                  <SelectItem value="all" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">All Sources</SelectItem>
-                  <SelectItem value="meeting_request" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">Meeting Requests</SelectItem>
-                  <SelectItem value="vvip_service" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">VVIP Services</SelectItem>
+                <SelectContent className="bg-gray-800/95 border-gray-600 backdrop-blur-sm shadow-xl z-50 min-w-[200px]">
+                  <SelectItem value="all" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20 font-medium p-3">All Sources</SelectItem>
+                  <SelectItem value="meeting_request" className="text-white hover:bg-blue-500/20 focus:bg-blue-500/20 font-medium p-3">Meeting Requests</SelectItem>
+                  <SelectItem value="vvip_service" className="text-white hover:bg-purple-500/20 focus:bg-purple-500/20 font-medium p-3">VVIP Services</SelectItem>
                 </SelectContent>
               </Select>
 
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="bg-gray-800/80 border-gray-600 text-white hover:bg-gray-700/80 focus:border-vip-gold/50 shadow-lg backdrop-blur-sm">
-                  <SelectValue placeholder="Filter by status" className="text-white" />
+                <SelectTrigger className="bg-gray-800/90 border-gray-600 text-white hover:bg-gray-700/90 focus:border-vip-gold/50 shadow-lg backdrop-blur-sm font-medium">
+                  <SelectValue placeholder="Filter by status" className="text-white font-medium" />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800/95 border-gray-600 backdrop-blur-sm shadow-xl z-50">
-                  <SelectItem value="all" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">All Status</SelectItem>
-                  <SelectItem value="pending" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">Pending</SelectItem>
-                  <SelectItem value="approved" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">Approved</SelectItem>
-                  <SelectItem value="rejected" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">Rejected</SelectItem>
-                  <SelectItem value="in_progress" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">In Progress</SelectItem>
-                  <SelectItem value="completed" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">Completed</SelectItem>
-                  <SelectItem value="cancelled" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">Cancelled</SelectItem>
+                <SelectContent className="bg-gray-800/95 border-gray-600 backdrop-blur-sm shadow-xl z-50 min-w-[200px]">
+                  <SelectItem value="all" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20 font-medium p-3">All Status</SelectItem>
+                  <SelectItem value="pending" className="text-white hover:bg-yellow-500/20 focus:bg-yellow-500/20 font-medium p-3">Pending</SelectItem>
+                  <SelectItem value="approved" className="text-white hover:bg-green-500/20 focus:bg-green-500/20 font-medium p-3">Approved</SelectItem>
+                  <SelectItem value="rejected" className="text-white hover:bg-red-500/20 focus:bg-red-500/20 font-medium p-3">Rejected</SelectItem>
+                  <SelectItem value="in_progress" className="text-white hover:bg-blue-500/20 focus:bg-blue-500/20 font-medium p-3">In Progress</SelectItem>
+                  <SelectItem value="completed" className="text-white hover:bg-gray-500/20 focus:bg-gray-500/20 font-medium p-3">Completed</SelectItem>
+                  <SelectItem value="cancelled" className="text-white hover:bg-red-500/20 focus:bg-red-500/20 font-medium p-3">Cancelled</SelectItem>
                 </SelectContent>
               </Select>
 
               <Button 
                 variant="outline" 
                 onClick={() => { setSearchTerm(''); setSourceFilter('all'); setStatusFilter('all'); }} 
-                className="text-vip-gold border-vip-gold/30 hover:bg-vip-gold/10"
+                className="bg-gray-800/90 text-white border-gray-600 hover:bg-gray-700/90 hover:text-white focus:border-vip-gold/50 shadow-lg font-medium"
               >
                 Clear Filters
               </Button>
