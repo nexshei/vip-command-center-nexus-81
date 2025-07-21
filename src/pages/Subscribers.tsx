@@ -233,120 +233,128 @@ const Subscribers = () => {
   }).length;
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-serif font-bold text-white">Subscribers</h1>
-          <p className="text-white/60 mt-1">Manage your newsletter subscriber base</p>
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-serif font-bold text-vip-gold">Subscribers</h1>
+            <p className="text-vip-gold/60 mt-2">Manage your newsletter subscriber base</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <Badge variant="outline" className="text-green-500 border-green-500/30 bg-green-500/10">
+              <Mail className="h-3 w-3 mr-1" />
+              {subscribers.length} Total Subscribers
+            </Badge>
+            <Button onClick={handleRefresh} variant="outline" size="sm" className="text-vip-gold border-vip-gold/30 hover:bg-vip-gold/10">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
+            <Button onClick={exportSubscribers} variant="outline" size="sm" className="text-vip-gold border-vip-gold/30 hover:bg-vip-gold/10">
+              <Download className="h-4 w-4 mr-2" />
+              Export CSV
+            </Button>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Button onClick={handleRefresh} variant="outline">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
-          </Button>
-          <Button onClick={exportSubscribers} variant="outline">
-            <Download className="h-4 w-4 mr-2" />
-            Export CSV
-          </Button>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-gray-400">Total Subscribers</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">{subscribers.length}</div>
+              <p className="text-xs text-gray-400">All time</p>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-gray-400">Active Subscribers</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-400">{activeCount}</div>
+              <p className="text-xs text-green-300">Currently subscribed</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-gray-400">Unsubscribed</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-400">{inactiveCount}</div>
+              <p className="text-xs text-red-300">No longer active</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-gray-400">This Month</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-400">{thisMonthCount}</div>
+              <p className="text-xs text-blue-300">New subscribers</p>
+            </CardContent>
+          </Card>
         </div>
-      </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center">
-              <Mail className="h-8 w-8 text-vip-gold" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Subscribers</p>
-                <p className="text-2xl font-bold">{subscribers.length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center">
-              <UserPlus className="h-8 w-8 text-green-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Active Subscribers</p>
-                <p className="text-2xl font-bold">{activeCount}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center">
-              <Mail className="h-8 w-8 text-red-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Unsubscribed</p>
-                <p className="text-2xl font-bold">{inactiveCount}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center">
-              <Calendar className="h-8 w-8 text-blue-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">This Month</p>
-                <p className="text-2xl font-bold">{thisMonthCount}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Main Content */}
-      <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-xl font-serif text-gray-300">Subscriber Management</CardTitle>
-            <div className="flex items-center space-x-4">
-              <div className="relative">
+        {/* Filters */}
+        <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg text-gray-300">Search & Filter</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-4 items-center">
+              <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
                   placeholder="Search by email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 w-64 bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400"
+                  className="pl-10 bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400"
                 />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-40 bg-vip-gold/20 border-vip-gold/50 text-vip-gold hover:bg-vip-gold/30">
+                <SelectTrigger className="w-48 bg-vip-gold/20 border-vip-gold/50 text-vip-gold hover:bg-vip-gold/30 focus:ring-2 focus:ring-vip-gold/50">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent className="bg-gray-800 border-vip-gold/30 backdrop-blur-sm">
-                  <SelectItem value="all" className="text-white hover:bg-vip-gold/20">All Subscribers</SelectItem>
-                  <SelectItem value="active" className="text-white hover:bg-vip-gold/20">Active Only</SelectItem>
-                  <SelectItem value="inactive" className="text-white hover:bg-vip-gold/20">Unsubscribed</SelectItem>
+                  <SelectItem value="all" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">All Subscribers</SelectItem>
+                  <SelectItem value="active" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">Active Only</SelectItem>
+                  <SelectItem value="inactive" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">Unsubscribed</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {subscribers.length === 0 ? (
-            <div className="text-center py-12">
-              <Mail className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 text-lg mb-2">No subscribers found</p>
-              <p className="text-gray-400 text-sm">
-                Subscribers will appear here when users sign up for your newsletter
-              </p>
-            </div>
-          ) : filteredSubscribers.length === 0 ? (
-            <div className="text-center py-12">
-              <Mail className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 text-lg mb-2">No subscribers match your filters</p>
-              <p className="text-gray-400 text-sm">
-                Try adjusting your search or filter criteria
-              </p>
-            </div>
-          ) : (
-            <>
-              <div className="overflow-x-auto">
+          </CardContent>
+        </Card>
+
+        {/* Subscriber Table */}
+        <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="text-xl text-gray-300">Subscriber Management</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {subscribers.length === 0 ? (
+              <div className="text-center py-12">
+                <Mail className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-400 text-lg mb-2">No subscribers found</p>
+                <p className="text-gray-400 text-sm">
+                  Subscribers will appear here when users sign up for your newsletter
+                </p>
+              </div>
+            ) : filteredSubscribers.length === 0 ? (
+              <div className="text-center py-12">
+                <Mail className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-400 text-lg mb-2">No subscribers match your filters</p>
+                <p className="text-gray-400 text-sm">
+                  Try adjusting your search or filter criteria
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow className="border-gray-700">
@@ -371,7 +379,10 @@ const Subscribers = () => {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline" className="capitalize">
+                          <Badge 
+                            variant="outline" 
+                            className="capitalize border-vip-gold/30 text-vip-gold bg-vip-gold/10"
+                          >
                             {subscriber.source || 'website'}
                           </Badge>
                         </TableCell>
@@ -407,18 +418,19 @@ const Subscribers = () => {
                               size="sm"
                               onClick={() => toggleSubscriberStatus(subscriber.id, subscriber.is_active)}
                               disabled={updateSubscriber.isPending}
+                              className="text-vip-gold border-vip-gold/30 hover:bg-vip-gold/10"
                             >
                               {subscriber.is_active === false ? 'Activate' : 'Deactivate'}
                             </Button>
                             <Button 
-                              variant="outline" 
+                              variant="ghost" 
                               size="sm"
                               onClick={() => {
                                 setSelectedSubscriberId(subscriber.id);
                                 setSelectedSubscriberEmail(subscriber.email);
                                 setShowDeleteModal(true);
                               }}
-                              className="border-red-300 text-red-600 hover:bg-red-50"
+                              className="text-red-600 hover:bg-red-50"
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>
@@ -478,6 +490,7 @@ const Subscribers = () => {
         description="Are you sure you want to delete this subscriber? This action cannot be undone."
         itemName={selectedSubscriberEmail}
       />
+      </div>
     </div>
   );
 };
