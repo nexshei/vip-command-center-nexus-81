@@ -153,16 +153,21 @@ const AllBookings = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-serif font-bold text-vip-gold">All Bookings</h1>
-            <p className="text-vip-gold/60 mt-2">Manage meeting requests and VVIP service bookings</p>
+            <h1 className="text-3xl font-serif font-bold text-vip-gold">All Bookings Management</h1>
+            <p className="text-vip-gold/60 mt-2">Manage all booking requests from meeting requests and VVIP services</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-4">
+            <Badge variant="outline" className="text-green-500 border-green-500/30 bg-green-500/10">
+              <Calendar className="h-3 w-3 mr-1" />
+              {totalBookings} Total Bookings
+            </Badge>
             <Button 
               onClick={() => { 
                 refetch(); 
                 toast({ title: "Refreshed", description: "Bookings data has been refreshed" }); 
               }} 
               variant="outline"
+              size="sm"
               className="text-vip-gold border-vip-gold/30 hover:bg-vip-gold/10"
             >
               <RefreshCw className="h-4 w-4 mr-2" />
@@ -215,17 +220,14 @@ const AllBookings = () => {
           </Card>
         </div>
 
-        {/* Search & Filters */}
+        {/* Filters */}
         <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center text-gray-300">
-              <Filter className="h-5 w-5 mr-2 text-vip-gold" />
-              Search & Filter Bookings
-            </CardTitle>
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg text-gray-300">Filters & Search</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 md:grid-cols-4">
-              <div className="relative">
+            <div className="flex gap-4 items-center">
+              <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
                   placeholder="Search by name, email, or event type..."
@@ -236,38 +238,32 @@ const AllBookings = () => {
               </div>
               
               <Select value={sourceFilter} onValueChange={setSourceFilter}>
-                <SelectTrigger className="bg-gray-800 border-gray-600 text-white hover:bg-gray-700 focus:border-vip-gold">
-                  <SelectValue placeholder="Filter by source" className="text-white" />
+                <SelectTrigger className="w-48 bg-vip-gold/20 border-vip-gold/50 text-vip-gold hover:bg-vip-gold/30 focus:ring-2 focus:ring-vip-gold/50">
+                  <Filter className="h-4 w-4 mr-2 text-vip-gold" />
+                  <SelectValue placeholder="Filter by source" />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-600 text-white">
+                <SelectContent className="bg-gray-800 border-vip-gold/30 backdrop-blur-sm">
                   <SelectItem value="all" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">All Sources</SelectItem>
-                  <SelectItem value="meeting_request" className="text-white hover:bg-blue-500/20 focus:bg-blue-500/20">Meeting Requests</SelectItem>
-                  <SelectItem value="vvip_service" className="text-white hover:bg-purple-500/20 focus:bg-purple-500/20">VVIP Services</SelectItem>
+                  <SelectItem value="meeting_request" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">Meeting Requests</SelectItem>
+                  <SelectItem value="vvip_service" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">VVIP Services</SelectItem>
                 </SelectContent>
               </Select>
 
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="bg-gray-800 border-gray-600 text-white hover:bg-gray-700 focus:border-vip-gold">
-                  <SelectValue placeholder="Filter by status" className="text-white" />
+                <SelectTrigger className="w-48 bg-vip-gold/20 border-vip-gold/50 text-vip-gold hover:bg-vip-gold/30 focus:ring-2 focus:ring-vip-gold/50">
+                  <Filter className="h-4 w-4 mr-2 text-vip-gold" />
+                  <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-600 text-white">
+                <SelectContent className="bg-gray-800 border-vip-gold/30 backdrop-blur-sm">
                   <SelectItem value="all" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">All Status</SelectItem>
-                  <SelectItem value="pending" className="text-white hover:bg-yellow-500/20 focus:bg-yellow-500/20">Pending</SelectItem>
-                  <SelectItem value="approved" className="text-white hover:bg-green-500/20 focus:bg-green-500/20">Approved</SelectItem>
-                  <SelectItem value="rejected" className="text-white hover:bg-red-500/20 focus:bg-red-500/20">Rejected</SelectItem>
-                  <SelectItem value="in_progress" className="text-white hover:bg-blue-500/20 focus:bg-blue-500/20">In Progress</SelectItem>
-                  <SelectItem value="completed" className="text-white hover:bg-gray-500/20 focus:bg-gray-500/20">Completed</SelectItem>
-                  <SelectItem value="cancelled" className="text-white hover:bg-red-500/20 focus:bg-red-500/20">Cancelled</SelectItem>
+                  <SelectItem value="pending" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">Pending</SelectItem>
+                  <SelectItem value="approved" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">Approved</SelectItem>
+                  <SelectItem value="rejected" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">Rejected</SelectItem>
+                  <SelectItem value="in_progress" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">In Progress</SelectItem>
+                  <SelectItem value="completed" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">Completed</SelectItem>
+                  <SelectItem value="cancelled" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">Cancelled</SelectItem>
                 </SelectContent>
               </Select>
-
-              <Button 
-                variant="outline" 
-                onClick={() => { setSearchTerm(''); setSourceFilter('all'); setStatusFilter('all'); }} 
-                className="bg-gray-800 border-gray-600 text-white hover:bg-gray-700 hover:text-white"
-              >
-                Clear Filters
-              </Button>
             </div>
           </CardContent>
         </Card>
@@ -275,10 +271,7 @@ const AllBookings = () => {
         {/* Bookings Table */}
         <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle className="flex items-center text-gray-300">
-              <Calendar className="h-5 w-5 mr-2 text-vip-gold" />
-              All Bookings ({filteredBookings.length})
-            </CardTitle>
+            <CardTitle className="text-xl text-gray-300">All Booking Requests</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
