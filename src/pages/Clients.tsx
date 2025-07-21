@@ -118,12 +118,17 @@ const Clients = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white p-6">
       <div className="max-w-7xl mx-auto space-y-6">
-        <div className="flex justify-between items-center">
+        {/* Header */}
+        <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-serif font-bold text-vip-gold mb-2">Client Management</h1>
-            <p className="text-vip-gold/60">Exceptional management of your exclusive VIP client relationships</p>
+            <h1 className="text-3xl font-serif font-bold text-vip-gold">Client Management</h1>
+            <p className="text-vip-gold/60 mt-2">Exceptional management of your exclusive VIP client relationships</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex items-center gap-4">
+            <Badge variant="outline" className="text-green-500 border-green-500/30 bg-green-500/10">
+              <Plus className="h-3 w-3 mr-1" />
+              {filteredClients.length} Total Clients
+            </Badge>
             <Button
               onClick={() => {
                 refetch();
@@ -133,14 +138,17 @@ const Clients = () => {
                 });
               }}
               variant="outline"
-              className="border-vip-gold/30 text-vip-gold hover:bg-vip-gold/10 transition-all duration-200"
+              size="sm"
+              className="text-vip-gold border-vip-gold/30 hover:bg-vip-gold/10"
             >
               <RefreshCw className="w-4 h-4 mr-2" />
               Refresh
             </Button>
             <Button
               onClick={() => setIsAddModalOpen(true)}
-              className="bg-vip-gold hover:bg-vip-gold/80 text-black transition-all duration-200"
+              variant="outline"
+              size="sm"
+              className="text-vip-gold border-vip-gold/30 hover:bg-vip-gold/10"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Client
@@ -148,37 +156,49 @@ const Clients = () => {
           </div>
         </div>
 
+      {/* Filters */}
       <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
-        <CardHeader>
-          <div className="flex items-center space-x-4">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg text-gray-300">Search & Filter</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-4 items-center">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
-                placeholder="Search clients..."
+                placeholder="Search clients by name, email, or company..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400"
               />
             </div>
-            <Button variant="outline" size="sm" className="text-vip-gold border-vip-gold/30 hover:bg-vip-gold/10">
-              <Filter className="w-4 h-4 mr-2" />
+            <Button variant="outline" className="bg-vip-gold/20 border-vip-gold/50 text-vip-gold hover:bg-vip-gold/30 focus:ring-2 focus:ring-vip-gold/50">
+              <Filter className="w-4 h-4 mr-2 text-vip-gold" />
               Filter
             </Button>
           </div>
+        </CardContent>
+      </Card>
+      {/* Clients Table */}
+      <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle className="text-xl text-gray-300">Client Records</CardTitle>
         </CardHeader>
         <CardContent>
           {filteredClients.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500">No clients found</p>
+              <p className="text-gray-400">No clients found matching your criteria.</p>
               <Button
                 onClick={() => setIsAddModalOpen(true)}
-                className="mt-4 bg-vip-gold hover:bg-vip-gold/80 text-black"
+                variant="outline"
+                className="mt-4 text-vip-gold border-vip-gold/30 hover:bg-vip-gold/10"
               >
                 Add Your First Client
               </Button>
             </div>
           ) : (
-            <Table>
+            <div className="overflow-x-auto">
+              <Table>
               <TableHeader>
                 <TableRow className="border-gray-700">
                   <TableHead className="text-gray-400">Name</TableHead>
@@ -234,7 +254,7 @@ const Clients = () => {
                           variant="ghost" 
                           size="sm"
                           onClick={() => handleViewClient(client)}
-                          className="text-blue-600 hover:text-blue-700"
+                          className="text-vip-gold hover:bg-vip-gold/10"
                           title="View Client"
                         >
                           <Eye className="w-4 h-4" />
@@ -243,7 +263,7 @@ const Clients = () => {
                           variant="ghost" 
                           size="sm"
                           onClick={() => handleEmailClient(client)}
-                          className="text-vip-gold hover:text-vip-gold/80"
+                          className="text-vip-gold hover:bg-vip-gold/10"
                           title="Send Email"
                         >
                           <Mail className="w-4 h-4" />
@@ -252,7 +272,7 @@ const Clients = () => {
                           variant="ghost" 
                           size="sm"
                           onClick={() => handleEditClient(client)}
-                          className="text-gray-600 hover:text-gray-700"
+                          className="text-vip-gold hover:bg-vip-gold/10"
                           title="Edit Client"
                         >
                           <Edit className="w-4 h-4" />
@@ -265,7 +285,7 @@ const Clients = () => {
                             setSelectedClientName(client.full_name);
                             setShowDeleteModal(true);
                           }}
-                          className="text-red-500 hover:text-red-600"
+                          className="text-red-600 hover:bg-red-50"
                           title="Delete Client"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -275,7 +295,8 @@ const Clients = () => {
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>
