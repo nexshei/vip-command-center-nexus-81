@@ -229,11 +229,21 @@ const ContactMessages = () => {
               </SelectTrigger>
               <SelectContent className="bg-gray-800/95 border-gray-600 backdrop-blur-sm shadow-xl z-50">
                 <SelectItem value="all" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">All Statuses</SelectItem>
-                <SelectItem value="pending" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">Pending</SelectItem>
-                <SelectItem value="reviewing" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">Reviewing</SelectItem>
-                <SelectItem value="reviewed" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">Reviewed</SelectItem>
-                <SelectItem value="resolved" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">Resolved</SelectItem>
-                <SelectItem value="completed" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">Completed</SelectItem>
+                <SelectItem value="pending" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">
+                  <Badge className="bg-yellow-600 text-white border-0 font-medium">Pending</Badge>
+                </SelectItem>
+                <SelectItem value="reviewing" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">
+                  <Badge className="bg-blue-600 text-white border-0 font-medium">Reviewing</Badge>
+                </SelectItem>
+                <SelectItem value="reviewed" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">
+                  <Badge className="bg-purple-600 text-white border-0 font-medium">Reviewed</Badge>
+                </SelectItem>
+                <SelectItem value="resolved" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">
+                  <Badge className="bg-emerald-600 text-white border-0 font-medium">Resolved</Badge>
+                </SelectItem>
+                <SelectItem value="completed" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">
+                  <Badge className="bg-green-600 text-white border-0 font-medium">Completed</Badge>
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
