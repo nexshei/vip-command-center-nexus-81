@@ -1,11 +1,12 @@
 
 import React, { useState } from 'react';
-import { Plus, Search, Filter, Edit, Trash2, Phone, Mail, MapPin, Eye, RefreshCw } from 'lucide-react';
+import { Plus, Search, Filter, Edit, Trash2, Phone, Mail, MapPin, Eye, RefreshCw, X } from 'lucide-react';
 import { useClients, useDeleteClient, Client } from '@/hooks/useClients';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { AddClientModal } from '@/components/modals/AddClientModal';
 import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
@@ -24,6 +25,9 @@ import {
 
 const Clients = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [selectedClientName, setSelectedClientName] = useState<string>('');
@@ -38,11 +42,16 @@ const Clients = () => {
   const deleteClientMutation = useDeleteClient();
   const { toast } = useToast();
 
-  const filteredClients = clients.filter(client =>
-    client.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    client.company?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredClients = clients.filter(client => {
+    const matchesSearch = client.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.company?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesStatus = statusFilter === 'all' || client.status.toLowerCase() === statusFilter;
+    const matchesType = typeFilter === 'all' || (client.client_type || 'individual').toLowerCase() === typeFilter;
+    
+    return matchesSearch && matchesStatus && matchesType;
+  });
 
   const handleDeleteClient = async () => {
     if (!selectedClientId) return;
@@ -172,11 +181,61 @@ const Clients = () => {
                 className="pl-10 bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400"
               />
             </div>
-            <Button variant="outline" className="bg-vip-gold/20 border-vip-gold/50 text-vip-gold hover:bg-vip-gold/30 focus:ring-2 focus:ring-vip-gold/50">
+            <Button 
+              variant="outline" 
+              className="bg-vip-gold/20 border-vip-gold/50 text-vip-gold hover:bg-vip-gold/30 focus:ring-2 focus:ring-vip-gold/50"
+              onClick={() => setFilterOpen(!filterOpen)}
+            >
               <Filter className="w-4 h-4 mr-2 text-vip-gold" />
               Filter
             </Button>
           </div>
+          {filterOpen && (
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-800/30 rounded-lg border border-gray-600">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Status Filter</label>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="bg-gray-800/50 border-gray-600 text-white">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800/95 border-gray-600 backdrop-blur-sm shadow-xl">
+                    <SelectItem value="all" className="text-white hover:bg-vip-gold/20">All Statuses</SelectItem>
+                    <SelectItem value="active" className="text-white hover:bg-vip-gold/20">Active</SelectItem>
+                    <SelectItem value="inactive" className="text-white hover:bg-vip-gold/20">Inactive</SelectItem>
+                    <SelectItem value="pending" className="text-white hover:bg-vip-gold/20">Pending</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Type Filter</label>
+                <Select value={typeFilter} onValueChange={setTypeFilter}>
+                  <SelectTrigger className="bg-gray-800/50 border-gray-600 text-white">
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800/95 border-gray-600 backdrop-blur-sm shadow-xl">
+                    <SelectItem value="all" className="text-white hover:bg-vip-gold/20">All Types</SelectItem>
+                    <SelectItem value="individual" className="text-white hover:bg-vip-gold/20">Individual</SelectItem>
+                    <SelectItem value="corporate" className="text-white hover:bg-vip-gold/20">Corporate</SelectItem>
+                    <SelectItem value="vip" className="text-white hover:bg-vip-gold/20">VIP</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="md:col-span-2 flex justify-end">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setStatusFilter('all');
+                    setTypeFilter('all');
+                  }}
+                  className="text-gray-400 border-gray-600 hover:bg-gray-700"
+                >
+                  <X className="w-4 h-4 mr-2" />
+                  Clear Filters
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
       {/* Clients Table */}
@@ -239,7 +298,7 @@ const Clients = () => {
                     </TableCell>
                     <TableCell className="text-gray-300">{client.company || 'N/A'}</TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="capitalize">
+                      <Badge className="bg-vip-gold/20 text-vip-gold border-vip-gold/30 font-medium capitalize">
                         {client.client_type || 'Individual'}
                       </Badge>
                     </TableCell>
