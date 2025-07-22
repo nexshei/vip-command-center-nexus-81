@@ -267,8 +267,8 @@ const Inventory = () => {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="capitalize">
+                     <TableCell>
+                      <Badge variant="outline" className="capitalize border-vip-gold/30 text-vip-gold">
                         {item.category}
                       </Badge>
                     </TableCell>
@@ -289,7 +289,7 @@ const Inventory = () => {
                       )}
                     </TableCell>
                     <TableCell>
-                      <Badge className={getConditionColor(item.condition || 'good')}>
+                      <Badge className="bg-vip-gold/20 text-vip-gold border-vip-gold/30">
                         {item.condition || 'Good'}
                       </Badge>
                     </TableCell>
@@ -309,6 +309,7 @@ const Inventory = () => {
                           variant="ghost" 
                           size="sm"
                           onClick={() => handleEditItem(item)}
+                          className="text-vip-gold hover:bg-vip-gold/10"
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
@@ -320,8 +321,9 @@ const Inventory = () => {
                             setSelectedItemName(item.name);
                             setShowDeleteModal(true);
                           }}
+                          className="text-red-400 hover:bg-red-400/10"
                         >
-                          <Trash2 className="w-4 h-4 text-red-500" />
+                          <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
                     </TableCell>
