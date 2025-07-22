@@ -85,12 +85,12 @@ const ContactMessages = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-500/20 text-yellow-200 border-yellow-400/30 font-medium';
-      case 'reviewing': return 'bg-blue-500/20 text-blue-200 border-blue-400/30 font-medium';
-      case 'reviewed': return 'bg-purple-500/20 text-purple-200 border-purple-400/30 font-medium';
-      case 'resolved': return 'bg-emerald-500/20 text-emerald-200 border-emerald-400/30 font-medium';
-      case 'completed': return 'bg-green-500/20 text-green-200 border-green-400/30 font-medium';
-      default: return 'bg-gray-500/20 text-gray-200 border-gray-400/30 font-medium';
+      case 'pending': return 'bg-yellow-600 text-white border-0 font-medium';
+      case 'reviewing': return 'bg-blue-600 text-white border-0 font-medium';
+      case 'reviewed': return 'bg-purple-600 text-white border-0 font-medium';
+      case 'resolved': return 'bg-emerald-600 text-white border-0 font-medium';
+      case 'completed': return 'bg-green-600 text-white border-0 font-medium';
+      default: return 'bg-gray-600 text-white border-0 font-medium';
     }
   };
 
@@ -280,19 +280,19 @@ const ContactMessages = () => {
                       </SelectTrigger>
                       <SelectContent className="bg-gray-800/95 border-gray-600 backdrop-blur-sm shadow-xl z-50">
                         <SelectItem value="pending" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">
-                          <Badge className="bg-yellow-500/20 text-yellow-200 border-0 font-medium">Pending</Badge>
+                          <Badge className="bg-yellow-600 text-white border-0 font-medium">Pending</Badge>
                         </SelectItem>
                         <SelectItem value="reviewing" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">
-                          <Badge className="bg-blue-500/20 text-blue-200 border-0 font-medium">Reviewing</Badge>
+                          <Badge className="bg-blue-600 text-white border-0 font-medium">Reviewing</Badge>
                         </SelectItem>
                         <SelectItem value="reviewed" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">
-                          <Badge className="bg-purple-500/20 text-purple-200 border-0 font-medium">Reviewed</Badge>
+                          <Badge className="bg-purple-600 text-white border-0 font-medium">Reviewed</Badge>
                         </SelectItem>
                         <SelectItem value="resolved" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">
-                          <Badge className="bg-emerald-500/20 text-emerald-200 border-0 font-medium">Resolved</Badge>
+                          <Badge className="bg-emerald-600 text-white border-0 font-medium">Resolved</Badge>
                         </SelectItem>
                         <SelectItem value="completed" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">
-                          <Badge className="bg-green-500/20 text-green-200 border-0 font-medium">Completed</Badge>
+                          <Badge className="bg-green-600 text-white border-0 font-medium">Completed</Badge>
                         </SelectItem>
                       </SelectContent>
                     </Select>
