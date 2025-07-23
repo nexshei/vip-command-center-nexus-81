@@ -116,14 +116,14 @@ ${mockData.bookingTrends.map(item => `${item.date},${item.bookings},${item.reven
           </div>
           <div className="flex space-x-3">
             <Select value={dateRange} onValueChange={setDateRange}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-40 bg-gray-800 border-gray-600 text-white hover:bg-gray-700">
                 <SelectValue placeholder="Date Range" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="7">Last 7 days</SelectItem>
-                <SelectItem value="30">Last 30 days</SelectItem>
-                <SelectItem value="90">Last 90 days</SelectItem>
-                <SelectItem value="365">Last year</SelectItem>
+              <SelectContent className="bg-gray-800 border-gray-600 backdrop-blur-sm">
+                <SelectItem value="7" className="text-white hover:bg-gray-700 focus:bg-gray-700 focus:text-white">Last 7 days</SelectItem>
+                <SelectItem value="30" className="text-white hover:bg-gray-700 focus:bg-gray-700 focus:text-white">Last 30 days</SelectItem>
+                <SelectItem value="90" className="text-white hover:bg-gray-700 focus:bg-gray-700 focus:text-white">Last 90 days</SelectItem>
+                <SelectItem value="365" className="text-white hover:bg-gray-700 focus:bg-gray-700 focus:text-white">Last year</SelectItem>
               </SelectContent>
             </Select>
             <Button 

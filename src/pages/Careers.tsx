@@ -321,12 +321,12 @@ const Careers = () => {
                   <SelectTrigger className="w-40 text-vip-gold border-vip-gold/30 hover:bg-vip-gold/10">
                     <SelectValue placeholder="Filter by status" />
                   </SelectTrigger>
-                  <SelectContent className="bg-gray-800 border-vip-gold/30 backdrop-blur-sm">
-                    <SelectItem value="all" className="text-white hover:bg-vip-gold/20">All Status</SelectItem>
-                    <SelectItem value="pending" className="text-white hover:bg-vip-gold/20">Pending</SelectItem>
-                    <SelectItem value="reviewing" className="text-white hover:bg-vip-gold/20">Reviewing</SelectItem>
-                    <SelectItem value="approved" className="text-white hover:bg-vip-gold/20">Approved</SelectItem>
-                    <SelectItem value="cancelled" className="text-white hover:bg-vip-gold/20">Cancelled</SelectItem>
+                  <SelectContent className="bg-gray-800 border-gray-600 backdrop-blur-sm">
+                    <SelectItem value="all" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20 focus:text-white">All Status</SelectItem>
+                    <SelectItem value="pending" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20 focus:text-white">Pending</SelectItem>
+                    <SelectItem value="reviewing" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20 focus:text-white">Reviewing</SelectItem>
+                    <SelectItem value="approved" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20 focus:text-white">Approved</SelectItem>
+                    <SelectItem value="cancelled" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20 focus:text-white">Cancelled</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
