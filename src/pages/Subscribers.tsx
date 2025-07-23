@@ -62,9 +62,9 @@ const Subscribers = () => {
 
   const getStatusColor = (isActive: boolean | null) => {
     if (isActive === null || isActive === true) {
-      return 'bg-green-100 text-green-800';
+      return 'bg-green-500 text-white border-green-500';
     }
-    return 'bg-red-100 text-red-800';
+    return 'bg-red-500 text-white border-red-500';
   };
 
   const getStatusText = (isActive: boolean | null) => {
@@ -317,13 +317,13 @@ const Subscribers = () => {
                 />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-48 bg-vip-gold/20 border-vip-gold/50 text-vip-gold hover:bg-vip-gold/30 focus:ring-2 focus:ring-vip-gold/50">
+                <SelectTrigger className="w-48 bg-gray-800 border-gray-600 text-white hover:bg-gray-700 focus:ring-2 focus:ring-vip-gold/50">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-vip-gold/30 backdrop-blur-sm">
-                  <SelectItem value="all" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">All Subscribers</SelectItem>
-                  <SelectItem value="active" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">Active Only</SelectItem>
-                  <SelectItem value="inactive" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20">Unsubscribed</SelectItem>
+                <SelectContent className="bg-gray-800 border-gray-600 backdrop-blur-sm">
+                  <SelectItem value="all" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20 focus:text-white">All Subscribers</SelectItem>
+                  <SelectItem value="active" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20 focus:text-white">Active Only</SelectItem>
+                  <SelectItem value="inactive" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20 focus:text-white">Unsubscribed</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -418,7 +418,7 @@ const Subscribers = () => {
                               size="sm"
                               onClick={() => toggleSubscriberStatus(subscriber.id, subscriber.is_active)}
                               disabled={updateSubscriber.isPending}
-                              className="text-vip-gold border-vip-gold/30 hover:bg-vip-gold/10"
+                              className="text-white bg-vip-gold hover:bg-vip-gold/80 border-vip-gold"
                             >
                               {subscriber.is_active === false ? 'Activate' : 'Deactivate'}
                             </Button>
