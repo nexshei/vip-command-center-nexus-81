@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AddStaffModal } from '@/components/modals/AddStaffModal';
 import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -26,17 +27,27 @@ const Staff = () => {
   const [selectedStaffName, setSelectedStaffName] = useState<string>('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingStaff, setEditingStaff] = useState<any>(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [departmentFilter, setDepartmentFilter] = useState<string>('all');
   
   const { data: staff = [], isLoading, error } = useStaff();
   const deleteStaffMutation = useDeleteStaff();
   const { toast } = useToast();
 
-  const filteredStaff = staff.filter(member =>
-    member.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    member.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    member.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    member.department?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredStaff = staff.filter(member => {
+    const matchesSearch = member.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      member.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      member.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      member.department?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesStatus = statusFilter === 'all' || member.status === statusFilter;
+    const matchesDepartment = departmentFilter === 'all' || member.department === departmentFilter;
+    
+    return matchesSearch && matchesStatus && matchesDepartment;
+  });
+
+  const uniqueDepartments = [...new Set(staff.map(member => member.department).filter(Boolean))];
 
   const handleDeleteStaff = async () => {
     if (!selectedStaffId) return;
@@ -131,11 +142,50 @@ const Staff = () => {
                 className="pl-10 bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400"
               />
             </div>
-            <Button variant="outline" size="sm" className="text-vip-gold border-vip-gold/30 hover:bg-vip-gold/10">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="text-vip-gold border-vip-gold/30 hover:bg-vip-gold/10"
+              onClick={() => setShowFilters(!showFilters)}
+            >
               <Filter className="w-4 h-4 mr-2" />
               Filter
             </Button>
           </div>
+          {showFilters && (
+            <div className="flex gap-4 mt-4 pt-4 border-t border-gray-600">
+              <div className="flex-1">
+                <label className="text-sm text-vip-gold/80 mb-2 block">Status</label>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="bg-gray-800/50 border-gray-600 text-white">
+                    <SelectValue placeholder="Filter by status" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-600">
+                    <SelectItem value="all" className="text-white focus:bg-vip-gold/20 focus:text-vip-gold">All Statuses</SelectItem>
+                    <SelectItem value="active" className="text-white focus:bg-vip-gold/20 focus:text-vip-gold">Active</SelectItem>
+                    <SelectItem value="inactive" className="text-white focus:bg-vip-gold/20 focus:text-vip-gold">Inactive</SelectItem>
+                    <SelectItem value="on_leave" className="text-white focus:bg-vip-gold/20 focus:text-vip-gold">On Leave</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex-1">
+                <label className="text-sm text-vip-gold/80 mb-2 block">Department</label>
+                <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+                  <SelectTrigger className="bg-gray-800/50 border-gray-600 text-white">
+                    <SelectValue placeholder="Filter by department" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-600">
+                    <SelectItem value="all" className="text-white focus:bg-vip-gold/20 focus:text-vip-gold">All Departments</SelectItem>
+                    {uniqueDepartments.map((dept) => (
+                      <SelectItem key={dept} value={dept} className="text-white focus:bg-vip-gold/20 focus:text-vip-gold">
+                        {dept}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
         </CardHeader>
         <CardContent>
           {filteredStaff.length === 0 ? (

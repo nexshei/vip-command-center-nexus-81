@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AddItemModal } from '@/components/modals/AddItemModal';
 import { EditItemModal } from '@/components/modals/EditItemModal';
 import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -26,17 +27,28 @@ const Inventory = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [conditionFilter, setConditionFilter] = useState<string>('all');
   
   const { data: inventory = [], isLoading, error, refetch } = useInventory();
   const deleteItemMutation = useDeleteInventoryItem();
   const { toast } = useToast();
 
-  const filteredInventory = inventory.filter(item =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.supplier?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.location?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredInventory = inventory.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.supplier?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.location?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesCategory = categoryFilter === 'all' || item.category === categoryFilter;
+    const matchesCondition = conditionFilter === 'all' || item.condition === conditionFilter;
+    
+    return matchesSearch && matchesCategory && matchesCondition;
+  });
+
+  const uniqueCategories = [...new Set(inventory.map(item => item.category))];
+  const uniqueConditions = [...new Set(inventory.map(item => item.condition).filter(Boolean))];
 
   const handleDeleteItem = async () => {
     if (!selectedItemId) return;
@@ -225,11 +237,52 @@ const Inventory = () => {
                 className="pl-10 bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400"
               />
             </div>
-            <Button variant="outline" size="sm" className="text-vip-gold border-vip-gold/30 hover:bg-vip-gold/10">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="text-vip-gold border-vip-gold/30 hover:bg-vip-gold/10"
+              onClick={() => setShowFilters(!showFilters)}
+            >
               <Filter className="w-4 h-4 mr-2" />
               Filter
             </Button>
           </div>
+          {showFilters && (
+            <div className="flex gap-4 mt-4 pt-4 border-t border-gray-600">
+              <div className="flex-1">
+                <label className="text-sm text-vip-gold/80 mb-2 block">Category</label>
+                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                  <SelectTrigger className="bg-gray-800/50 border-gray-600 text-white">
+                    <SelectValue placeholder="Filter by category" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-600">
+                    <SelectItem value="all" className="text-white focus:bg-vip-gold/20 focus:text-vip-gold">All Categories</SelectItem>
+                    {uniqueCategories.map((category) => (
+                      <SelectItem key={category} value={category} className="text-white focus:bg-vip-gold/20 focus:text-vip-gold">
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex-1">
+                <label className="text-sm text-vip-gold/80 mb-2 block">Condition</label>
+                <Select value={conditionFilter} onValueChange={setConditionFilter}>
+                  <SelectTrigger className="bg-gray-800/50 border-gray-600 text-white">
+                    <SelectValue placeholder="Filter by condition" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-600">
+                    <SelectItem value="all" className="text-white focus:bg-vip-gold/20 focus:text-vip-gold">All Conditions</SelectItem>
+                    {uniqueConditions.map((condition) => (
+                      <SelectItem key={condition} value={condition} className="text-white focus:bg-vip-gold/20 focus:text-vip-gold">
+                        {condition}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
         </CardHeader>
         <CardContent>
           {filteredInventory.length === 0 ? (
