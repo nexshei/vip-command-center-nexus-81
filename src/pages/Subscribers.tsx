@@ -320,10 +320,10 @@ const Subscribers = () => {
                 <SelectTrigger className="w-48 bg-gray-800 border-gray-600 text-white hover:bg-gray-700 focus:ring-2 focus:ring-vip-gold/50">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-600 backdrop-blur-sm">
-                  <SelectItem value="all" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20 focus:text-white">All Subscribers</SelectItem>
-                  <SelectItem value="active" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20 focus:text-white">Active Only</SelectItem>
-                  <SelectItem value="inactive" className="text-white hover:bg-vip-gold/20 focus:bg-vip-gold/20 focus:text-white">Unsubscribed</SelectItem>
+                <SelectContent className="bg-gray-900 border-gray-700 backdrop-blur-sm shadow-xl z-50">
+                  <SelectItem value="all" className="text-white hover:bg-gray-700 focus:bg-gray-700 focus:text-white data-[highlighted]:bg-gray-700 data-[highlighted]:text-white">All Subscribers</SelectItem>
+                  <SelectItem value="active" className="text-white hover:bg-gray-700 focus:bg-gray-700 focus:text-white data-[highlighted]:bg-gray-700 data-[highlighted]:text-white">Active Only</SelectItem>
+                  <SelectItem value="inactive" className="text-white hover:bg-gray-700 focus:bg-gray-700 focus:text-white data-[highlighted]:bg-gray-700 data-[highlighted]:text-white">Unsubscribed</SelectItem>
                 </SelectContent>
               </Select>
             </div>
