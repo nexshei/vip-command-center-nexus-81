@@ -18,14 +18,14 @@ const SelectTrigger = React.forwardRef<
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      "flex h-10 w-full items-center justify-between rounded-md border border-vip-gold/50 bg-vip-gold px-3 py-2 text-sm text-black ring-offset-background placeholder:text-gray-700 hover:bg-vip-gold/90 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 transition-colors font-medium",
+      "flex h-10 w-full items-center justify-between rounded-md border border-vip-gold/50 bg-vip-gold px-3 py-2 text-sm text-black ring-offset-background placeholder:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 font-medium",
       className
     )}
     {...props}
   >
     {children}
     <SelectPrimitive.Icon asChild>
-      <ChevronDown className="h-4 w-4 opacity-70 text-black" />
+      <ChevronDown className="h-4 w-4 text-black" />
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
 ))
@@ -117,7 +117,7 @@ const SelectItem = React.forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm text-black outline-none hover:bg-gray-200 focus:bg-gray-200 focus:text-black data-[disabled]:pointer-events-none data-[disabled]:opacity-50 transition-colors",
+      "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm text-black outline-none focus:bg-vip-gold data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       className
     )}
     {...props}
