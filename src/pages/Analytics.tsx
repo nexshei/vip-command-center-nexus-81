@@ -13,9 +13,12 @@ import {
   BarChart3,
   Download,
   Filter,
-  RefreshCw
+  RefreshCw,
+  Trash2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
+import { supabase } from '@/integrations/supabase/client';
 import {
   LineChart,
   Line,
@@ -35,6 +38,8 @@ import {
 const Analytics = () => {
   const [dateRange, setDateRange] = useState('30');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
 
   // Mock data for analytics
@@ -96,6 +101,56 @@ ${mockData.bookingTrends.map(item => `${item.date},${item.bookings},${item.reven
     });
   };
 
+  const handleDeleteAnalytics = async () => {
+    setIsDeleting(true);
+    try {
+      // Delete data from all analytics-related tables
+      const promises = [
+        supabase.from('vvip_service_requests').delete().gte('id', '00000000-0000-0000-0000-000000000000'),
+        supabase.from('clients').delete().gte('id', '00000000-0000-0000-0000-000000000000'),
+        supabase.from('contact_submissions').delete().gte('id', '00000000-0000-0000-0000-000000000000'),
+        supabase.from('meeting_requests').delete().gte('id', '00000000-0000-0000-0000-000000000000'),
+        supabase.from('career_applications').delete().gte('id', '00000000-0000-0000-0000-000000000000'),
+        supabase.from('item_bookings').delete().gte('id', '00000000-0000-0000-0000-000000000000'),
+        supabase.from('email_notifications').delete().gte('id', '00000000-0000-0000-0000-000000000000'),
+      ];
+
+      const results = await Promise.allSettled(promises);
+      
+      // Check if any deletion failed
+      const failures = results.filter(result => result.status === 'rejected');
+      
+      if (failures.length > 0) {
+        console.error('Some deletions failed:', failures);
+        toast({
+          title: "Partial Success",
+          description: "Some analytics data was deleted, but some operations failed. Please check and try again.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Analytics Data Deleted",
+          description: "All analytics data has been successfully removed from the system.",
+        });
+      }
+      
+      // Refresh the page to show updated (empty) data
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+      
+    } catch (error) {
+      console.error('Error deleting analytics data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete analytics data. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-KE', {
       style: 'currency',
@@ -138,6 +193,14 @@ ${mockData.bookingTrends.map(item => `${item.date},${item.bookings},${item.reven
             <Button onClick={handleExport} className="flex items-center space-x-2">
               <Download className="h-4 w-4" />
               <span>Export Data</span>
+            </Button>
+            <Button 
+              onClick={() => setShowDeleteModal(true)} 
+              variant="destructive"
+              className="flex items-center space-x-2"
+            >
+              <Trash2 className="h-4 w-4" />
+              <span>Delete Analytics</span>
             </Button>
           </div>
         </div>
@@ -318,6 +381,16 @@ ${mockData.bookingTrends.map(item => `${item.date},${item.bookings},${item.reven
           </CardContent>
         </Card>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        open={showDeleteModal}
+        onOpenChange={setShowDeleteModal}
+        title="Delete Analytics Data"
+        description="Are you sure you want to delete all analytics data? This will permanently remove all service requests, client data, contact submissions, meeting requests, career applications, item bookings, and email notifications"
+        itemName="All Analytics Data"
+        onConfirm={handleDeleteAnalytics}
+      />
     </div>
   );
 };
