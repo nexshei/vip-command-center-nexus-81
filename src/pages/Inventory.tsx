@@ -173,50 +173,50 @@ const Inventory = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <Card>
+        <Card className="bg-white border-gray-200 shadow-lg">
           <CardContent className="p-4">
             <div className="flex items-center">
-              <Package className="h-8 w-8 text-vip-gold" />
+              <Package className="h-8 w-8 text-yellow-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-white/70">Total Items</p>
-                <p className="text-2xl font-bold text-white">{inventory.length}</p>
+                <p className="text-sm font-medium text-gray-600">Total Items</p>
+                <p className="text-2xl font-bold text-gray-900">{inventory.length}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-white border-gray-200 shadow-lg">
           <CardContent className="p-4">
             <div className="flex items-center">
               <Package className="h-8 w-8 text-green-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-white/70">In Stock</p>
-                <p className="text-2xl font-bold text-white">
+                <p className="text-sm font-medium text-gray-600">In Stock</p>
+                <p className="text-2xl font-bold text-gray-900">
                   {inventory.filter(item => (item.quantity || 0) > 0).length}
                 </p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-white border-gray-200 shadow-lg">
           <CardContent className="p-4">
             <div className="flex items-center">
               <Package className="h-8 w-8 text-red-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-white/70">Out of Stock</p>
-                <p className="text-2xl font-bold text-white">
+                <p className="text-sm font-medium text-gray-600">Out of Stock</p>
+                <p className="text-2xl font-bold text-gray-900">
                   {inventory.filter(item => (item.quantity || 0) === 0).length}
                 </p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-white border-gray-200 shadow-lg">
           <CardContent className="p-4">
             <div className="flex items-center">
               <Package className="h-8 w-8 text-yellow-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-white/70">Low Stock</p>
-                <p className="text-2xl font-bold text-white">
+                <p className="text-sm font-medium text-gray-600">Low Stock</p>
+                <p className="text-2xl font-bold text-gray-900">
                   {inventory.filter(item => (item.quantity || 0) > 0 && (item.quantity || 0) < 10).length}
                 </p>
               </div>
