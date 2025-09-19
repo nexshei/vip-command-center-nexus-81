@@ -2,6 +2,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { ProtectedRoute } from './ProtectedRoute';
+import Index from '@/pages/Index';
 import Dashboard from '@/pages/Dashboard';
 import Clients from '@/pages/Clients';
 import AllBookings from '@/pages/AllBookings';
@@ -23,11 +24,7 @@ import NotFound from '@/pages/NotFound';
 export const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={
-        <ProtectedRoute>
-          <Dashboard />
-        </ProtectedRoute>
-      } />
+      <Route path="/" element={<Index />} />
       <Route path="/dashboard" element={
         <ProtectedRoute>
           <Dashboard />
